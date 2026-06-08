@@ -1,21 +1,18 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  createTideState,
-  isAngleInSweep,
-  isTrickZoneSubmerged,
-  tideTrailingEdgeRadians,
-} from './features.js';
+import { createTideState, isTrickZoneSubmerged, tideTrailingEdgeRadians } from './features.js';
 import { CORAL_PARK_TRICK_ZONE_COUNT, createCoralParkSlice } from './maps.js';
 import {
   createTrickZoneAtAngle,
   createTrickZoneTideSyncState,
   pickRandomTrickType,
-  REEF_RING_DEPTHS,
+  REEF_RING_DEPTH_MAX,
+  REEF_RING_DEPTH_MIN,
   SUBMERGED_PURGE_ARC,
-  submergedArcSlotAngle,
   syncTrickZonesWithTide,
   TRICK_TYPE_TO_PREPARE_SLOT,
+  trickSlotAngle,
+  zonePolarAngle,
   zonePolarRadius,
 } from './trickZonePlacement.js';
 
@@ -36,10 +33,11 @@ describe('syncTrickZonesWithTide', () => {
     );
 
     expect(afterSync.some((zone) => zone.id === submerged!.id)).toBe(true);
-    expect(afterSync.length).toBe(arena.trickZones.length);
+    expect(afterSync.length).toBeGreaterThanOrEqual(arena.trickZones.length);
+    expect(afterSync.length).toBeLessThanOrEqual(CORAL_PARK_TRICK_ZONE_COUNT);
   });
 
-  it('purges long-submerged features and pre-seeds inside the submerged arc', () => {
+  it('purges long-submerged features and pre-seeds at slot angles', () => {
     const arena = createCoralParkSlice();
     let tide = createTideState(arena.tide!);
     let zones = arena.trickZones.map((zone) => ({ ...zone, center: { ...zone.center } }));
@@ -68,28 +66,57 @@ describe('syncTrickZonesWithTide', () => {
     void purgeTicks;
   });
 
-  it('pre-seeds at submerged arc angles when slots are empty', () => {
+  it('pre-seeds at slot angles when submerged', () => {
     const arena = createCoralParkSlice();
     const tide = createTideState(arena.tide!);
     const slot = 0;
-    const preseedAngle = submergedArcSlotAngle(slot, CORAL_PARK_TRICK_ZONE_COUNT, tide);
-
-    expect(isAngleInSweep(preseedAngle, tide.phaseRadians, tide.sweepRadians)).toBe(true);
+    const slotAngle = trickSlotAngle(slot, CORAL_PARK_TRICK_ZONE_COUNT);
 
     const spawned = createTrickZoneAtAngle(
       arena.map,
-      preseedAngle,
+      slotAngle,
       tide,
       'preseed-test',
       [],
+      0.62,
       () => 0.5,
       false,
-      REEF_RING_DEPTHS[slot],
       true,
     );
 
     expect(spawned).not.toBeNull();
     expect(isTrickZoneSubmerged(spawned!, tide)).toBe(true);
+  });
+
+  it('places active zones near evenly spaced slot angles', () => {
+    const arena = createCoralParkSlice();
+    const tide = createTideState(arena.tide!);
+    const syncState = createTrickZoneTideSyncState();
+    const zones = syncTrickZonesWithTide(
+      arena.trickZones,
+      tide,
+      arena.map,
+      syncState,
+      CORAL_PARK_TRICK_ZONE_COUNT,
+    );
+    const slotTolerance = ((Math.PI * 2) / CORAL_PARK_TRICK_ZONE_COUNT) * 0.35;
+
+    for (const zone of zones) {
+      const zoneAngle = zonePolarAngle(zone, tide);
+      const nearestSlot = Math.round(
+        ((zoneAngle - 0.22 + Math.PI * 2) % (Math.PI * 2)) /
+          ((Math.PI * 2) / CORAL_PARK_TRICK_ZONE_COUNT),
+      );
+      const slotAngle = trickSlotAngle(
+        nearestSlot % CORAL_PARK_TRICK_ZONE_COUNT,
+        CORAL_PARK_TRICK_ZONE_COUNT,
+      );
+      let diff = Math.abs(zoneAngle - slotAngle);
+      if (diff > Math.PI) {
+        diff = Math.PI * 2 - diff;
+      }
+      expect(diff).toBeLessThanOrEqual(slotTolerance);
+    }
   });
 });
 
@@ -105,15 +132,53 @@ describe('createTrickZoneAtAngle', () => {
       tide,
       'spawn-1',
       [],
+      0.88,
       () => 0.25,
       false,
-      REEF_RING_DEPTHS[2],
     );
 
     expect(zone).not.toBeNull();
     expect(zone!.prepareSlot).toBe(TRICK_TYPE_TO_PREPARE_SLOT[zone!.type]);
     expect(isTrickZoneSubmerged(zone!, tide)).toBe(false);
     expect(zonePolarRadius(zone!, tide)).toBeGreaterThan(30);
+  });
+
+  it('uses different ring depths across consecutive spawns', () => {
+    const arena = createCoralParkSlice();
+    const tide = createTideState(arena.tide!);
+    const spawnAngle = tideTrailingEdgeRadians(tide) + 0.35;
+    const depths = [0.3, 0.55, 0.8];
+    let randomIndex = 0;
+    const random = () => {
+      const value = depths[randomIndex % depths.length];
+      randomIndex += 1;
+      return value;
+    };
+
+    const first = createTrickZoneAtAngle(
+      arena.map,
+      spawnAngle,
+      tide,
+      'depth-1',
+      [],
+      REEF_RING_DEPTH_MIN + depths[0] * (REEF_RING_DEPTH_MAX - REEF_RING_DEPTH_MIN),
+      random,
+      false,
+    );
+    const second = createTrickZoneAtAngle(
+      arena.map,
+      spawnAngle + 0.5,
+      tide,
+      'depth-2',
+      first ? [first] : [],
+      REEF_RING_DEPTH_MIN + depths[1] * (REEF_RING_DEPTH_MAX - REEF_RING_DEPTH_MIN),
+      random,
+      false,
+    );
+
+    expect(first).not.toBeNull();
+    expect(second).not.toBeNull();
+    expect(zonePolarRadius(first!, tide)).not.toBeCloseTo(zonePolarRadius(second!, tide), 0);
   });
 });
 

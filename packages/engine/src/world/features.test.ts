@@ -17,6 +17,7 @@ import { createCoralParkSlice } from './maps.js';
 import {
   createTrickZoneAtAngle,
   createTrickZoneTideSyncState,
+  SUBMERGED_CONFIRM_TICKS,
   syncTrickZonesWithTide,
 } from './trickZonePlacement.js';
 
@@ -113,6 +114,51 @@ describe('syncTrickZonesWithTide', () => {
     expect(zones.length).toBe(arena.trickZones.length);
   });
 
+  it('does not fade in zones that were never submerged', () => {
+    const arena = createCoralParkSlice();
+    const tideState = createTideState(arena.tide!);
+    const exposed = arena.trickZones.filter((zone) => !isTrickZoneSubmerged(zone, tideState));
+    expect(exposed.length).toBeGreaterThan(0);
+
+    const syncState = createTrickZoneTideSyncState();
+    const zones = syncTrickZonesWithTide(exposed, tideState, arena.map, syncState, exposed.length);
+
+    for (const zone of zones) {
+      expect(zone.emergedRenderTicks).toBeUndefined();
+      expect(trickZoneVisualAlpha(zone)).toBe(1);
+    }
+  });
+
+  it('fades in after confirmed submersion then stays opaque while exposed', () => {
+    const arena = createCoralParkSlice();
+    const tideState = createTideState(arena.tide!);
+    const submerged = arena.trickZones.find((zone) => isTrickZoneSubmerged(zone, tideState));
+    expect(submerged).toBeDefined();
+
+    const syncState = createTrickZoneTideSyncState();
+    for (let i = 0; i < SUBMERGED_CONFIRM_TICKS; i += 1) {
+      syncTrickZonesWithTide([submerged!], tideState, arena.map, syncState, 1);
+    }
+
+    const dryTide = {
+      ...tideState,
+      phaseRadians: tideState.phaseRadians + tideState.sweepRadians + 1,
+    };
+    let zones = syncTrickZonesWithTide([submerged!], dryTide, arena.map, syncState, 1);
+    expect(zones[0].emergedRenderTicks).toBe(1);
+    expect(trickZoneVisualAlpha(zones[0])).toBeGreaterThan(TRICK_SUBMERGED_ALPHA);
+
+    for (let tick = 0; tick < TRICK_SUBMERGE_FADE_TICKS; tick += 1) {
+      zones = syncTrickZonesWithTide(zones, dryTide, arena.map, syncState, 1);
+    }
+
+    expect(zones[0].emergedRenderTicks).toBeUndefined();
+    expect(trickZoneVisualAlpha(zones[0])).toBe(1);
+
+    zones = syncTrickZonesWithTide(zones, dryTide, arena.map, syncState, 1);
+    expect(trickZoneVisualAlpha(zones[0])).toBe(1);
+  });
+
   it('keeps exposed reef features active after tide cycles', () => {
     const arena = createCoralParkSlice();
     let tideState = createTideState(arena.tide!);
@@ -155,8 +201,10 @@ describe('createTrickZoneAtAngle', () => {
       spawnAngle,
       tideState,
       'test-spawn',
-      arena.trickZones,
+      [],
+      0.62,
       () => 0.5,
+      false,
     );
 
     expect(zone).not.toBeNull();

@@ -20,10 +20,12 @@ import {
   clockwiseTangent,
   CORAL_PARK_TRICK_ZONE_RADIUS,
   isFarEnoughFromZones,
-  REEF_RING_DEPTHS,
+  randomRingDepth,
   reefCenterAtAngle,
+  RING_DEPTH_SPAWN_ATTEMPTS,
   TRICK_FEATURE_TYPES,
   TRICK_TYPE_TO_PREPARE_SLOT,
+  trickSlotAngle,
 } from './trickZonePlacement.js';
 
 export {
@@ -50,13 +52,18 @@ export const CORAL_PARK_TRICK_ZONE_COUNT = 15;
 
 function buildTrickZones(map: WorldMap): TrickZone[] {
   const zones: TrickZone[] = [];
-  const angleStep = (Math.PI * 2) / CORAL_PARK_TRICK_ZONE_COUNT;
 
   for (let i = 0; i < CORAL_PARK_TRICK_ZONE_COUNT; i += 1) {
-    const positionAngle = i * angleStep + 0.22;
-    const ringT = REEF_RING_DEPTHS[i % REEF_RING_DEPTHS.length];
-    const center = reefCenterAtAngle(map, positionAngle, ringT);
-    if (!center || !isFarEnoughFromZones(center, zones)) {
+    const positionAngle = trickSlotAngle(i, CORAL_PARK_TRICK_ZONE_COUNT);
+    let center: { x: number; y: number } | null = null;
+    for (let attempt = 0; attempt < RING_DEPTH_SPAWN_ATTEMPTS; attempt += 1) {
+      const candidate = reefCenterAtAngle(map, positionAngle, randomRingDepth());
+      if (candidate && isFarEnoughFromZones(candidate, zones)) {
+        center = candidate;
+        break;
+      }
+    }
+    if (!center) {
       continue;
     }
 
