@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ura Ura Surfing Simulator</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div class="osrs-scale-shell" id="osrs-scale-shell">
+        <div class="osrs-scale-wrap" id="osrs-scale-wrap">
+          <div class="osrs-client" id="osrs-client">
+            <div class="osrs-window-top"></div>
+            <div class="osrs-client-grid">
+              <div class="osrs-viewport-wrap">
+                <div id="game-root"></div>
+              </div>
+              <div id="chatbox-root"></div>
+              <aside class="osrs-sidebar">
+                <div class="osrs-minimap" id="minimap-root">
+                  <div class="osrs-minimap-inner" id="minimap-canvas"></div>
+                </div>
+                <div class="osrs-tab-strip" id="tab-strip"></div>
+                <div class="osrs-interface-panel">
+                  <div id="side-panel"></div>
+                </div>
+              </aside>
+            </div>
+            <div id="shop-panel" class="osrs-shop-panel hidden"></div>
+          </div>
+        </div>
+      </div>
+      <div id="debug-panel" class="debug-panel"></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

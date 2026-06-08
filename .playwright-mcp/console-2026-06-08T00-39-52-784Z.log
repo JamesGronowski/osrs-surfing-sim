@@ -1,0 +1,111 @@
+[   55976ms] [ERROR] TypeError: Cannot read properties of undefined (reading 'style')
+    at applyIntegerScale (http://127.0.0.1:5173/src/ui/scaleLayout.ts?t=1780879248538:12:9)
+    at OsrsClient.mount (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879248538:61:7)
+    at http://127.0.0.1:5173/src/main.ts?t=1780879248538:2:12 @ http://127.0.0.1:5173/src/main.ts?t=1780879248538:2
+[   56162ms] [ERROR] TypeError: Cannot read properties of undefined (reading 'style')
+    at applyIntegerScale (http://127.0.0.1:5173/src/ui/scaleLayout.ts?t=1780879248538:12:9)
+    at OsrsClient.mount (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879248538:61:7)
+    at http://127.0.0.1:5173/src/main.ts?t=1780879248538:2:12 @ http://127.0.0.1:5173/src/main.ts?t=1780879248538:2
+[   56576ms] [ERROR] TypeError: Cannot read properties of undefined (reading 'style')
+    at applyIntegerScale (http://127.0.0.1:5173/src/ui/scaleLayout.ts?t=1780879248538:12:9)
+    at OsrsClient.mount (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879248538:61:7)
+    at http://127.0.0.1:5173/src/main.ts?t=1780879248538:2:12 @ http://127.0.0.1:5173/src/main.ts?t=1780879248538:2
+[  124475ms] TypeError: zones is not iterable
+    at PixiRenderer.drawTrickZones (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:189:24)
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:98:10)
+    at OsrsClient.tick (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:188:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:182:45
+[  125073ms] TypeError: zones is not iterable
+    at PixiRenderer.drawTrickZones (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:189:24)
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:98:10)
+    at OsrsClient.tick (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:188:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:182:45
+[  125674ms] TypeError: zones is not iterable
+    at PixiRenderer.drawTrickZones (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:189:24)
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:98:10)
+    at OsrsClient.tick (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:188:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:182:45
+[  126274ms] TypeError: zones is not iterable
+    at PixiRenderer.drawTrickZones (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:189:24)
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:98:10)
+    at OsrsClient.tick (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:188:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:182:45
+[  126875ms] TypeError: zones is not iterable
+    at PixiRenderer.drawTrickZones (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:189:24)
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:98:10)
+    at OsrsClient.tick (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:188:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:182:45
+[  127472ms] TypeError: zones is not iterable
+    at PixiRenderer.drawTrickZones (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:189:24)
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:98:10)
+    at OsrsClient.tick (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:188:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:182:45
+[  128074ms] TypeError: zones is not iterable
+    at PixiRenderer.drawTrickZones (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:189:24)
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:98:10)
+    at OsrsClient.tick (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:188:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:182:45
+[  128674ms] TypeError: zones is not iterable
+    at PixiRenderer.drawTrickZones (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:189:24)
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:98:10)
+    at OsrsClient.tick (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:188:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:182:45
+[  129274ms] TypeError: zones is not iterable
+    at PixiRenderer.drawTrickZones (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:189:24)
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:98:10)
+    at OsrsClient.tick (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:188:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:182:45
+[  129874ms] TypeError: zones is not iterable
+    at PixiRenderer.drawTrickZones (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:189:24)
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:98:10)
+    at OsrsClient.tick (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:188:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:182:45
+[  130474ms] TypeError: zones is not iterable
+    at PixiRenderer.drawTrickZones (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:189:24)
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:98:10)
+    at OsrsClient.tick (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:188:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:182:45
+[  131072ms] TypeError: zones is not iterable
+    at PixiRenderer.drawTrickZones (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:189:24)
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879316508:98:10)
+    at OsrsClient.tick (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:188:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879316508:182:45
+[  131153ms] The requested module '/@fs/Users/jamesg/Projects/osrs-surfing-sim/packages/engine/dist/index.js?t=1780879259051' does not provide an export named 'isPointInTideSweep'
+[  131499ms] The requested module '/@fs/Users/jamesg/Projects/osrs-surfing-sim/packages/engine/dist/index.js?t=1780879259051' does not provide an export named 'isPointInTideSweep'
+[  144070ms] The requested module '/@fs/Users/jamesg/Projects/osrs-surfing-sim/packages/engine/dist/index.js?t=1780879259051' does not provide an export named 'isPointInTideSweep'
+[  721710ms] TypeError: this.drawWalkClick is not a function
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879913758:103:10)
+    at OsrsClient.tick (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879913758:145:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879913758:139:45
+[  722305ms] TypeError: this.drawWalkClick is not a function
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879913758:103:10)
+    at OsrsClient.tick (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879913758:145:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879913758:139:45
+[  722904ms] TypeError: this.drawWalkClick is not a function
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879913758:103:10)
+    at OsrsClient.tick (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879913758:145:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879913758:139:45
+[  723505ms] TypeError: this.drawWalkClick is not a function
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879913758:103:10)
+    at OsrsClient.tick (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879913758:145:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879913758:139:45
+[  724104ms] TypeError: this.drawWalkClick is not a function
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879913758:103:10)
+    at OsrsClient.tick (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879913758:145:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879913758:139:45
+[  724705ms] TypeError: this.drawWalkClick is not a function
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879913758:103:10)
+    at OsrsClient.tick (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879913758:145:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879913758:139:45
+[  725306ms] TypeError: this.drawWalkClick is not a function
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879913758:103:10)
+    at OsrsClient.tick (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879913758:145:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879913758:139:45
+[  725908ms] TypeError: this.drawWalkClick is not a function
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879913758:103:10)
+    at OsrsClient.tick (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879913758:145:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879913758:139:45
+[  726505ms] TypeError: this.drawWalkClick is not a function
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879913758:103:10)
+    at OsrsClient.tick (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879913758:145:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879913758:139:45

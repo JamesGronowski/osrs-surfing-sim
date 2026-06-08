@@ -1,0 +1,64 @@
+- generic [ref=e2]:
+  - generic [ref=e6]:
+    - generic [ref=e10]:
+      - generic [ref=e11]:
+        - text: Welcome to Ura Ura Swell.
+        - text: Loaded Coral Park.
+        - text: Click your surfboard on the beach to mount it.
+        - text: Talk to Kaulu on the island for a surfing tutorial.
+        - text: Paddle out through the gap in the reef ring.
+      - generic [ref=e12]:
+        - button "Test" [ref=e13] [cursor=pointer]
+        - button "Park" [ref=e14] [cursor=pointer]
+    - complementary [ref=e15]:
+      - generic [ref=e19]:
+        - button "Combat" [disabled] [ref=e20]:
+          - img "Combat" [ref=e21]
+        - button "Stats" [disabled] [ref=e22]:
+          - img "Stats" [ref=e23]
+        - button "Sailing" [disabled] [ref=e24]:
+          - img "Sailing" [ref=e25]
+        - button "Inventory" [disabled] [ref=e26]:
+          - img "Inventory" [ref=e27]
+        - button "Prayer" [disabled] [ref=e28]:
+          - img "Prayer" [ref=e29]
+        - button "Magic" [disabled] [ref=e30]:
+          - img "Magic" [ref=e31]
+      - generic [ref=e34]:
+        - generic [ref=e36]: Ura Ura Board
+        - generic [ref=e38]: Combo
+        - generic [ref=e39]:
+          - button "Stats" [ref=e40] [cursor=pointer]:
+            - img "Stats" [ref=e41]
+          - button "Movement" [ref=e42] [cursor=pointer]:
+            - img "Movement" [ref=e43]
+          - button "Rewards" [ref=e44] [cursor=pointer]:
+            - img "Rewards" [ref=e45]
+        - generic [ref=e46]:
+          - paragraph [ref=e47]: Navigation
+          - generic [ref=e48]:
+            - button "Lie down" [ref=e49] [cursor=pointer]:
+              - img "Lie down" [ref=e50]
+            - button "Faster" [ref=e51] [cursor=pointer]:
+              - img "Faster" [ref=e52]
+            - button "Trick" [ref=e53] [cursor=pointer]:
+              - img "Trick" [ref=e54]
+            - button [disabled] [ref=e55] [cursor=pointer]
+            - button "Paddle" [ref=e56] [cursor=pointer]:
+              - img "Paddle" [ref=e57]
+            - button "Slower" [ref=e58] [cursor=pointer]:
+              - img "Slower" [ref=e59]
+            - button "Stop" [ref=e60] [cursor=pointer]:
+              - img "Stop" [ref=e61]
+          - generic [ref=e62]:
+            - button "Paddle Paddle" [ref=e63] [cursor=pointer]:
+              - img "Paddle" [ref=e64]
+              - generic [ref=e65]: Paddle
+            - button "Ride Ride" [ref=e66] [cursor=pointer]:
+              - img "Ride" [ref=e67]
+              - generic [ref=e68]: Ride
+          - paragraph [ref=e69]: Click ocean to set heading. White arrow follows cursor.
+  - generic:
+    - generic:
+      - strong: Debug
+      - text: "[1/2/3] tune turn/paddle/ride"

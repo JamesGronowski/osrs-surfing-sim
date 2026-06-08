@@ -2,9 +2,9 @@
 
 ## Overview
 
-A trick-based surfing minigame built on the new sailing engine, inspired by *Tony Hawk's Pro Skater*, *Cool Boarders*, and similar arcade sports games. Players time the tides to reach a Polynesian-themed island, craft surfboards, and ride coral reefs as a local water spirit pushes waves beneath them — performing combos for **Coral Tokens** and unique rewards.
+A trick-based surfing minigame built on the new sailing engine, inspired by _Tony Hawk's Pro Skater_, _Cool Boarders_, and similar arcade sports games. Players time the tides to reach a Polynesian-themed island, craft surfboards, and ride coral reefs as a local water spirit pushes waves beneath them — performing combos for **Coral Tokens** and unique rewards.
 
-**Minigame name:** Ura Ura Swell *(open to alternatives)*
+**Minigame name:** Ura Ura Swell _(open to alternatives)_
 
 ---
 
@@ -18,7 +18,7 @@ A trick-based surfing minigame built on the new sailing engine, inspired by *Ton
 
 ## The Island — Ura Ura
 
-Named after the Polynesian word *ura* (red/pink), matching the island's water spirit and coral palette. Fits alongside existing island naming (e.g. Bora Bora).
+Named after the Polynesian word _ura_ (red/pink), matching the island's water spirit and coral palette. Fits alongside existing island naming (e.g. Bora Bora).
 
 ### Geography & Set Dressing
 
@@ -37,11 +37,11 @@ A strange tidal effect from the local water spirit causes coral on one side of t
 
 ## Tai'ura — The Water Spirit
 
-| | |
-|---|---|
-| **Name** | Tai'ura (*tai* = tides, *ura* = pink/red) |
-| **Design** | Feminine Tempoross-like spirit with pink jellyfish inside |
-| **Role** | Pushes surfers on waves; creates the swell for the coral park |
+|             |                                                                                     |
+| ----------- | ----------------------------------------------------------------------------------- |
+| **Name**    | Tai'ura (_tai_ = tides, _ura_ = pink/red)                                           |
+| **Design**  | Feminine Tempoross-like spirit with pink jellyfish inside                           |
+| **Role**    | Pushes surfers on waves; creates the swell for the coral park                       |
 | **Visuals** | Pink spirit jellyfish (similar to Tempoross's blue spirit fish) visible when riding |
 
 ### Lore
@@ -87,12 +87,12 @@ A cool Polynesian-inspired NPC who teaches surfing lore (expandable into a quest
 
 Earned through trick performance and combos. Trade at a reward shop (surf-themed cosmetics primary; open to useful sailing/combat items).
 
-| Reward | Description |
-|---|---|
-| **Teeny Tai** | Miniature wave spirit pet resembling Tai'ura, with spirit jellyfish inside. **Not purchasable** — earned through gameplay. |
-| **Tai'ura's Blessing** | Coral blessing for ship combat. Missed cannonballs return to cargo; hits grant **80% ammo recovery** (Ava's assembler-style). *Balance TBD.* |
-| **Ebb and Flow** | New lunar spell. Icon: wave with pink jellyfish spirit. Cooldown; on activation, swapping weapons grants a **single boosted attack**. Tidal theme — weapon swaps mirror changing tides. *Balance TBD.* |
-| **Living Coral** | Chisel + mortar and pestle. **20% chance to double** grinding/processing output. *May exclude some items; floor drops if inventory full. Balance TBD.* |
+| Reward                 | Description                                                                                                                                                                                            |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Teeny Tai**          | Miniature wave spirit pet resembling Tai'ura, with spirit jellyfish inside. **Not purchasable** — earned through gameplay.                                                                             |
+| **Tai'ura's Blessing** | Coral blessing for ship combat. Missed cannonballs return to cargo; hits grant **80% ammo recovery** (Ava's assembler-style). _Balance TBD._                                                           |
+| **Ebb and Flow**       | New lunar spell. Icon: wave with pink jellyfish spirit. Cooldown; on activation, swapping weapons grants a **single boosted attack**. Tidal theme — weapon swaps mirror changing tides. _Balance TBD._ |
+| **Living Coral**       | Chisel + mortar and pestle. **20% chance to double** grinding/processing output. _May exclude some items; floor drops if inventory full. Balance TBD._                                                 |
 
 ---
 
@@ -105,13 +105,13 @@ Earned through trick performance and combos. Trade at a reward shop (surf-themed
 
 ## Technical Scope
 
-| Asset | Notes |
-|---|---|
-| Coral models + animations | Low/high tide states, park features |
-| Player surfing stance | Base pose + trick animations |
-| Surfboard | Micro-boat behaviour + wave VFX on turn |
-| Island | Small-to-medium landmass, guru hut, ironwood, palms, fishing |
-| Water spirit | Tai'ura model + pink jellyfish particles |
+| Asset                     | Notes                                                        |
+| ------------------------- | ------------------------------------------------------------ |
+| Coral models + animations | Low/high tide states, park features                          |
+| Player surfing stance     | Base pose + trick animations                                 |
+| Surfboard                 | Micro-boat behaviour + wave VFX on turn                      |
+| Island                    | Small-to-medium landmass, guru hut, ironwood, palms, fishing |
+| Water spirit              | Tai'ura model + pink jellyfish particles                     |
 
 Leverages existing sailing engine work — surfboards are boats with surf-specific animations rather than a wholly new movement system.
 
@@ -139,4 +139,4 @@ Leverages existing sailing engine work — surfboards are boats with surf-specif
 
 ## Author Note
 
-> *I'd be happy to provide more drawings of my ideas, though I'm not the strongest graphic artist. One question if this submission is selected: would the team produce concept art for picked submissions before the community poll? I'd love to give this idea the best chance if it comes to that!*
+> _I'd be happy to provide more drawings of my ideas, though I'm not the strongest graphic artist. One question if this submission is selected: would the team produce concept art for picked submissions before the community poll? I'd love to give this idea the best chance if it comes to that!_

@@ -1,0 +1,7 @@
+[     683ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:5173/favicon.ico:0
+[   44011ms] TypeError: this.updateCamera is not a function
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780879153082:81:10)
+    at loop (http://127.0.0.1:5173/src/main.ts?t=1780879153082:121:14)
+[   62064ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879171872:0
+[   74674ms] [ERROR] ReferenceError: client is not defined
+    at OsrsClient.mount (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780879184412:126:12) @ http://127.0.0.1:5173/src/main.ts?t=1780879184412:2

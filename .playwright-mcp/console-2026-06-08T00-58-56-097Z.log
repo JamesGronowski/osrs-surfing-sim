@@ -1,0 +1,597 @@
+[ 1546880ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881882214:161:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881882214:154:12
+[ 1547477ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881882214:161:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881882214:154:12
+[ 1548075ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881882214:161:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881882214:154:12
+[ 1548676ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881882214:161:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881882214:154:12
+[ 1549275ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881882214:161:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881882214:154:12
+[ 1549875ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881882214:161:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881882214:154:12
+[ 1550477ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881882214:161:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881882214:154:12
+[ 1551075ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881882214:161:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881882214:154:12
+[ 1551677ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881882214:161:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881882214:154:12
+[ 1555382ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:163:12
+[ 1555976ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:163:12
+[ 1556575ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:163:12
+[ 1557177ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:163:12
+[ 1557776ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:163:12
+[ 1558376ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:163:12
+[ 1558978ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:163:12
+[ 1559578ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:163:12
+[ 1560178ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:163:12
+[ 1560775ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:163:12
+[ 1561376ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:163:12
+[ 1561976ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:163:12
+[ 1562576ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:163:12
+[ 1563175ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:163:12
+[ 1563777ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:163:12
+[ 1564376ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881890748:163:12
+[ 1565234ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1565829ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1566430ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1567031ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1567628ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1568229ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1568829ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1569428ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1570028ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1570628ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1571231ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1571827ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1572428ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1573029ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1573628ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1574229ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1574828ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1575430ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1576028ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1576629ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1577229ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1577828ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1578429ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1579028ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1579630ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1580229ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1580829ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1581428ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1582042ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1582630ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1583229ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1583830ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1584429ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1585029ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1585630ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1586230ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1586829ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1587429ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1588029ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1588628ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1589230ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1589829ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1590430ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1591029ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1591628ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1592228ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1592828ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1593429ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1594034ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1594629ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1595228ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:170:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881900586:163:12
+[ 1596267ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:167:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:160:12
+[ 1596865ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:167:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:160:12
+[ 1597466ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:167:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:160:12
+[ 1598064ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:167:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:160:12
+[ 1598665ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:167:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:160:12
+[ 1599265ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:167:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:160:12
+[ 1599866ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:167:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:160:12
+[ 1600465ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:167:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:160:12
+[ 1601066ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:167:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:160:12
+[ 1601665ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:167:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:160:12
+[ 1602264ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:167:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:160:12
+[ 1602864ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:167:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:160:12
+[ 1603464ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:167:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:160:12
+[ 1604064ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:167:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:160:12
+[ 1604666ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:167:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:160:12
+[ 1605264ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:167:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:160:12
+[ 1605865ms] TypeError: Cannot read properties of undefined (reading 'slot')
+    at http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:49:78
+    at NodeList.forEach (<anonymous>)
+    at OsrsSailingPanel.update (http://127.0.0.1:5173/src/ui/OsrsSailingPanel.ts?t=1780881882214:47:55)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:167:20)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780881931618:160:12
+[ 4871231ms] ReferenceError: TILE_COLORS is not defined
+    at PixiRenderer.drawMap (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780885206512:173:74)
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780885206512:94:10)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780885206512:166:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780885206512:160:12
+[ 4872846ms] ReferenceError: TILE_COLORS is not defined
+    at PixiRenderer.drawMap (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780885208063:177:74)
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780885208063:98:10)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780885208063:166:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780885208063:160:12
+[ 4873445ms] ReferenceError: TILE_COLORS is not defined
+    at PixiRenderer.drawMap (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780885208063:177:74)
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780885208063:98:10)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780885208063:166:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780885208063:160:12
+[ 4874046ms] ReferenceError: TILE_COLORS is not defined
+    at PixiRenderer.drawMap (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780885208063:177:74)
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780885208063:98:10)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780885208063:166:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780885208063:160:12
+[ 4874646ms] ReferenceError: TILE_COLORS is not defined
+    at PixiRenderer.drawMap (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780885208063:177:74)
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780885208063:98:10)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780885208063:166:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780885208063:160:12
+[ 4875245ms] ReferenceError: TILE_COLORS is not defined
+    at PixiRenderer.drawMap (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780885208063:177:74)
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780885208063:98:10)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780885208063:166:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780885208063:160:12
+[ 4882260ms] ReferenceError: TILE_COLORS is not defined
+    at OsrsMinimap.update (http://127.0.0.1:5173/src/ui/OsrsMinimap.ts?t=1780885217660:24:23)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780885217561:170:18)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780885217561:160:12
+[ 5071960ms] ReferenceError: TILE_TEXTURE_SIZE is not defined
+    at PixiRenderer.drawMap (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780885407295:177:49)
+    at PixiRenderer.render (http://127.0.0.1:5173/src/render/PixiRenderer.ts?t=1780885407295:98:10)
+    at OsrsClient.renderFrame (http://127.0.0.1:5173/src/OsrsClient.ts?t=1780885407295:166:19)
+    at http://127.0.0.1:5173/src/OsrsClient.ts?t=1780885407295:160:12

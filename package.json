@@ -1,0 +1,30 @@
+{
+  "name": "osrs-surfing-sim",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "dev": "pnpm --filter @osrs-surfing/client dev",
+    "build": "pnpm -r build",
+    "test": "pnpm --filter @osrs-surfing/engine test",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "validate": "pnpm format:check && pnpm lint && pnpm test && pnpm build",
+    "playtest": "pnpm --filter @osrs-surfing/client playtest",
+    "playtest:update": "pnpm --filter @osrs-surfing/client playtest:update",
+    "visual:test": "pnpm --filter @osrs-surfing/client visual:test",
+    "visual:update": "pnpm --filter @osrs-surfing/client visual:update"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.21.0",
+    "@types/node": "^22.13.10",
+    "eslint": "^9.21.0",
+    "eslint-config-prettier": "^10.0.2",
+    "globals": "^16.0.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.26.0"
+  }
+}

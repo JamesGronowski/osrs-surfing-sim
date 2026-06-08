@@ -1,0 +1,567 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  min-height: 100%;
+  background: #000;
+  color: #ffff00;
+  font-family: 'RuneScape UF', 'RuneScape', 'Trebuchet MS', Verdana, sans-serif;
+  font-size: 12px;
+  image-rendering: pixelated;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+.osrs-scale-shell {
+  flex-shrink: 0;
+  position: relative;
+}
+
+.osrs-scale-wrap {
+  width: 765px;
+  height: 503px;
+}
+
+/* ── Fixed classic frame (765×503) ── */
+.osrs-client {
+  position: relative;
+  width: 765px;
+  height: 503px;
+  background: #000;
+  flex-shrink: 0;
+}
+
+.osrs-window-top {
+  height: 4px;
+  background: url('/assets/osrs/fixed_mode/window_frame_edge_top.png') repeat-x;
+  background-size: auto 4px;
+}
+
+.osrs-client-grid {
+  display: grid;
+  grid-template-columns: 512px 253px;
+  grid-template-rows: 334px 169px;
+  width: 765px;
+  height: 499px;
+}
+
+.osrs-viewport-wrap {
+  grid-column: 1;
+  grid-row: 1;
+  width: 512px;
+  height: 334px;
+  overflow: hidden;
+  background: #000;
+  border-right: 1px solid #2e281d;
+  border-bottom: 1px solid #2e281d;
+}
+
+#game-root {
+  width: 512px;
+  height: 334px;
+}
+
+#game-root canvas {
+  display: block;
+  width: 512px !important;
+  height: 334px !important;
+}
+
+/* ── Chatbox (bottom-left) ── */
+.osrs-chatbox {
+  grid-column: 1;
+  grid-row: 2;
+  width: 512px;
+  height: 169px;
+  display: flex;
+  flex-direction: column;
+  background: url('/assets/osrs/chatbox/background.png') no-repeat;
+  background-size: 512px 142px;
+  background-position: top left;
+  border-right: 1px solid #2e281d;
+}
+
+.osrs-chatbox-messages {
+  flex: 1;
+  padding: 4px 8px;
+  overflow-y: auto;
+  font-size: 12px;
+  line-height: 1.35;
+  color: #ffff00;
+  max-height: 142px;
+}
+
+.osrs-chatbox-messages .chat-xp {
+  color: #00ff80;
+}
+
+.osrs-chatbox-messages .chat-sys {
+  color: #ff981f;
+}
+
+.osrs-chatbox-stones {
+  position: relative;
+  height: 27px;
+  flex-shrink: 0;
+}
+
+.osrs-chatbox-stones-bg {
+  width: 512px;
+  height: 23px;
+  display: block;
+}
+
+/* ── Right sidebar (minimap + tabs + interface) ── */
+.osrs-sidebar {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  width: 253px;
+  height: 503px;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+}
+
+.osrs-minimap {
+  position: relative;
+  width: 253px;
+  height: 164px;
+  flex-shrink: 0;
+  background:
+    url('/assets/osrs/fixed_mode/minimap_left_edge.png') no-repeat left top,
+    url('/assets/osrs/fixed_mode/minimap_right_edge.png') no-repeat right top,
+    url('/assets/osrs/fixed_mode/minimap_and_compass_frame.png') no-repeat center top;
+  background-size:
+    29px 156px,
+    48px 156px,
+    172px 156px;
+}
+
+.osrs-minimap-inner {
+  position: absolute;
+  left: 54px;
+  top: 8px;
+  width: 146px;
+  height: 146px;
+  overflow: hidden;
+}
+
+.osrs-minimap-canvas {
+  width: 146px;
+  height: 146px;
+  image-rendering: pixelated;
+}
+
+.osrs-minimap::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 2px;
+  width: 249px;
+  height: 8px;
+  background: url('/assets/osrs/fixed_mode/minimap_frame_bottom.png') no-repeat;
+}
+
+.osrs-tab-strip {
+  width: 253px;
+  height: 37px;
+  flex-shrink: 0;
+  background: url('/assets/osrs/fixed_mode/tabs_top_row.png') no-repeat center;
+  background-size: 249px 38px;
+  padding: 2px 4px;
+}
+
+.osrs-tab-strip-inner {
+  display: flex;
+  gap: 1px;
+  align-items: center;
+  height: 100%;
+}
+
+.osrs-game-tab {
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: default;
+  opacity: 0.65;
+  line-height: 0;
+}
+
+.osrs-game-tab.active {
+  opacity: 1;
+  filter: drop-shadow(0 0 2px #ff981f);
+}
+
+.osrs-game-tab img {
+  image-rendering: pixelated;
+}
+
+.osrs-interface-panel {
+  flex: 1;
+  width: 253px;
+  background: url('/assets/osrs/fixed_mode/side_panel_background.png') repeat;
+  overflow: hidden;
+  border-top: 1px solid #544834;
+}
+
+/* ── Sailing options (inside interface panel) ── */
+.osrs-sailing-panel {
+  width: 190px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 4px 2px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.osrs-panel-chrome {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.osrs-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.osrs-panel-title {
+  flex: 1;
+  color: #ff981f;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.osrs-boat-thumb,
+.osrs-panel-icon {
+  image-rendering: pixelated;
+}
+
+.osrs-hp-bar {
+  position: relative;
+  height: 12px;
+  background: #2e281d;
+  border: 1px solid #544834;
+}
+
+.osrs-hp-bar-fill {
+  height: 100%;
+  background: linear-gradient(180deg, #f4a7b9 0%, #c96b8a 100%);
+  width: 0%;
+}
+
+.osrs-hp-bar-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: #fff;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.osrs-tab-row {
+  display: flex;
+  gap: 1px;
+}
+
+.osrs-tab {
+  flex: 1;
+  padding: 1px;
+  border: 1px solid #544834;
+  background: #4e453a;
+  cursor: pointer;
+  min-height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.osrs-tab.active {
+  border-color: #ff981f;
+  background: #595046;
+}
+
+.osrs-tab img {
+  image-rendering: pixelated;
+  max-width: 24px;
+  max-height: 24px;
+}
+
+.osrs-tab-body {
+  display: none;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid #544834;
+  padding: 4px;
+}
+
+.osrs-tab-body.active {
+  display: block;
+}
+
+.osrs-section-label {
+  margin: 0 0 4px;
+  color: #ff981f;
+  font-size: 10px;
+}
+
+.osrs-stat-row {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  gap: 2px;
+  margin-bottom: 4px;
+  font-size: 10px;
+  align-items: center;
+}
+
+.osrs-stat-row img {
+  image-rendering: pixelated;
+}
+
+.osrs-xp-track {
+  grid-column: 2;
+  height: 6px;
+  background: #2e281d;
+  border: 1px solid #544834;
+}
+
+.osrs-xp-fill {
+  height: 100%;
+}
+
+.osrs-xp-fill.agility {
+  background: #00ff80;
+}
+
+.osrs-xp-fill.sailing {
+  background: #5eb5e8;
+}
+
+.osrs-stat-line {
+  margin: 2px 0;
+  font-size: 10px;
+}
+
+.osrs-movement-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  position: relative;
+  margin-bottom: 4px;
+}
+
+.osrs-sprite-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: 1px solid #544834;
+  background: #4e453a;
+  cursor: pointer;
+  min-height: 36px;
+  color: #ffff00;
+  font-family: inherit;
+  font-size: 9px;
+}
+
+.osrs-sprite-btn:hover {
+  background: #595046;
+}
+
+.osrs-sprite-btn.active {
+  border-color: #ff981f;
+}
+
+.osrs-sprite-btn img {
+  image-rendering: pixelated;
+  max-width: 28px;
+  max-height: 28px;
+}
+
+.osrs-sprite-btn.wide {
+  flex-direction: row;
+  gap: 4px;
+  min-height: 30px;
+}
+
+.osrs-boat-center {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  min-height: 58px;
+}
+
+.osrs-steering-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.osrs-movement-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+}
+
+.osrs-stone-btn {
+  width: 100%;
+  padding: 3px;
+  border: 1px solid #544834;
+  background: #4e453a;
+  color: #ffff00;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 10px;
+  margin-top: 3px;
+}
+
+.osrs-stone-btn:hover:not(:disabled) {
+  background: #595046;
+}
+
+.osrs-stone-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.osrs-hint {
+  margin: 3px 0 0;
+  font-size: 9px;
+  color: #ff981f;
+  line-height: 1.25;
+}
+
+/* Shop overlay — centered on client */
+.osrs-shop-panel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 280px;
+  max-height: 380px;
+  overflow-y: auto;
+  z-index: 20;
+  background:
+    url('/assets/osrs/fixed_mode/minimap_left_edge.png') repeat-y left,
+    url('/assets/osrs/fixed_mode/minimap_right_edge.png') repeat-y right,
+    url('/assets/osrs/fixed_mode/side_panel_background.png') repeat;
+  background-size:
+    8px auto,
+    8px auto,
+    auto;
+  padding: 8px;
+  border: 2px solid #544834;
+}
+
+.osrs-shop-panel.hidden {
+  display: none;
+}
+
+.osrs-shop-chrome {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.osrs-shop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.osrs-shop-item {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid #544834;
+  padding: 4px;
+}
+
+.osrs-shop-item-title {
+  color: #ff981f;
+  font-size: 11px;
+}
+
+.osrs-shop-item-desc {
+  color: #ffff00;
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.osrs-shop-item-cost {
+  color: #ff981f;
+  font-size: 9px;
+}
+
+.osrs-trick-prepare-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.osrs-trick-prepare-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 2px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid #544834;
+  color: #ffff00;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.osrs-trick-prepare-btn:hover {
+  border-color: #ff981f;
+}
+
+.osrs-trick-prepare-btn.primed {
+  border-color: #00ff00;
+  box-shadow: inset 0 0 0 1px #00ff00;
+}
+
+.osrs-trick-prepare-btn .prepare-label {
+  color: #ff981f;
+  font-weight: bold;
+}
+
+.osrs-trick-prepare-btn .prepare-ticks {
+  color: #00ff00;
+  font-family: monospace;
+  font-size: 10px;
+}
+
+.debug-panel {
+  position: fixed;
+  left: 8px;
+  bottom: 8px;
+  background: rgba(0, 0, 0, 0.85);
+  padding: 4px 8px;
+  font-family: monospace;
+  font-size: 9px;
+  line-height: 1.35;
+  border: 1px solid #544834;
+  color: #00ff00;
+  pointer-events: none;
+  max-width: 320px;
+  z-index: 30;
+}

@@ -1,0 +1,4 @@
+pnpm-lock.yaml
+packages/client/test-results
+packages/client/playwright-report
+.playwright-mcp
