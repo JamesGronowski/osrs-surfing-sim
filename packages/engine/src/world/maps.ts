@@ -21,6 +21,7 @@ import {
   CORAL_PARK_TRICK_ZONE_RADIUS,
   isFarEnoughFromZones,
   randomRingDepth,
+  randomTrickRotationJitterRadians,
   reefCenterAtAngle,
   RING_DEPTH_SPAWN_ATTEMPTS,
   TRICK_FEATURE_TYPES,
@@ -78,6 +79,7 @@ function buildTrickZones(map: WorldMap): TrickZone[] {
       center,
       radius: CORAL_PARK_TRICK_ZONE_RADIUS,
       rotationRadians: rotation,
+      rotationJitterRadians: randomTrickRotationJitterRadians(),
       tricked: false,
     });
   }

@@ -142,8 +142,16 @@ export class OsrsOrbitCamera {
 
   onPointerUp(event: PointerEvent): void {
     if (event.button === 1) {
-      this.middleMouseDragging = false;
+      this.endMiddleMouseDrag();
     }
+  }
+
+  onPointerCancel(): void {
+    this.endMiddleMouseDrag();
+  }
+
+  private endMiddleMouseDrag(): void {
+    this.middleMouseDragging = false;
   }
 
   onWheel(deltaY: number): void {

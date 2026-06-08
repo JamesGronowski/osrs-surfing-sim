@@ -3,6 +3,7 @@ import {
   comboTierName,
   comboTierProgress,
   sailingLevel,
+  trickStanceName,
   type SimulationSnapshot,
   type SpeedState,
 } from '@osrs-surfing/engine';
@@ -173,22 +174,22 @@ export class OsrsSailingPanel {
               <span>Ride</span>
             </button>
           </div>
-          <p class="osrs-section-label">Trick rhythm</p>
+          <p class="osrs-section-label">Stance</p>
           <div class="osrs-trick-prepare-row">
-            <button type="button" class="osrs-trick-prepare-btn" data-prepare-slot="0" title="Prime rail (1)">
-              <span class="prepare-label">Rail</span>
+            <button type="button" class="osrs-trick-prepare-btn" data-prepare-slot="0" title="Low stance (1) — rail, brain coral">
+              <span class="prepare-label">${trickStanceName(0)}</span>
               <span class="prepare-ticks">·</span>
             </button>
-            <button type="button" class="osrs-trick-prepare-btn" data-prepare-slot="1" title="Prime tunnel (2)">
-              <span class="prepare-label">Tunnel</span>
+            <button type="button" class="osrs-trick-prepare-btn" data-prepare-slot="1" title="Medium stance (2) — tunnel, wall ride">
+              <span class="prepare-label">${trickStanceName(1)}</span>
               <span class="prepare-ticks">·</span>
             </button>
-            <button type="button" class="osrs-trick-prepare-btn" data-prepare-slot="2" title="Prime jump (3)">
-              <span class="prepare-label">Jump</span>
+            <button type="button" class="osrs-trick-prepare-btn" data-prepare-slot="2" title="High stance (3) — jump">
+              <span class="prepare-label">${trickStanceName(2)}</span>
               <span class="prepare-ticks">·</span>
             </button>
           </div>
-          <p class="osrs-hint">Prime 1–4 ticks before you hit the matching coral. Too early or late = bail.</p>
+          <p class="osrs-hint">Prime Low, Medium, or High 1–4 ticks before the matching feature. Too early or late = bail.</p>
         </div>
         <div class="osrs-tab-body" data-panel="rewards">
           <p class="osrs-section-label">Coral Token Shop</p>

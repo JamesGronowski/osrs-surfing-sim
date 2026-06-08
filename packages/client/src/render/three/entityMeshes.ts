@@ -1,11 +1,7 @@
-import {
-  getTile,
-  headingToDegrees,
-  type SimulationSnapshot,
-  type WorldMap,
-} from '@osrs-surfing/engine';
+import { getTile, headingToDegrees, type WorldMap } from '@osrs-surfing/engine';
 import { CapsuleGeometry, CylinderGeometry, Group, Mesh, MeshStandardMaterial } from 'three';
 
+import type { DisplaySimulationSnapshot, DisplayTrickAnimation } from '../visualSnapshot.js';
 import { headingToRotationY, tileToWorld3 } from './worldCoords.js';
 
 const PLAYER_SKIN = 0xffcc66;
@@ -17,6 +13,41 @@ const WAKE_PINK = 0xf4a7b9;
 const WAKE_WHITE = 0xffffff;
 
 const SURFACE_Y = 0.12;
+
+function trickAnimationVerticalOffset(animation: DisplayTrickAnimation): number {
+  const lift = animation.zoneRadius;
+  const arc = Math.sin(animation.progress * Math.PI);
+  switch (animation.type) {
+    case 'jump':
+      return arc * lift * 0.5;
+    case 'brain_coral':
+      return arc * lift * 0.34;
+    case 'wall_ride':
+      return arc * lift * 0.22;
+    case 'tunnel':
+      return -arc * lift * 0.12;
+    case 'rail':
+      return lift * 0.16;
+    default:
+      return 0;
+  }
+}
+
+function trickAnimationBoardPitch(animation: DisplayTrickAnimation): number {
+  const arc = Math.sin(animation.progress * Math.PI);
+  switch (animation.type) {
+    case 'jump':
+      return -arc * 0.45;
+    case 'wall_ride':
+      return arc * 0.28;
+    case 'brain_coral':
+      return arc * 0.18;
+    case 'rail':
+      return arc * 0.12;
+    default:
+      return 0;
+  }
+}
 
 function makeSurfboardMesh(): Group {
   const group = new Group();
@@ -97,8 +128,13 @@ export class EntityLayer {
     this.wake.visible = false;
   }
 
-  sync(snapshot: SimulationSnapshot, map: WorldMap): void {
+  sync(snapshot: DisplaySimulationSnapshot, map: WorldMap): void {
     const pos = tileToWorld3(snapshot.surfboard.position.x, snapshot.surfboard.position.y);
+    const trickLift =
+      snapshot.trickAnimation !== null ? trickAnimationVerticalOffset(snapshot.trickAnimation) : 0;
+    const boardPitch =
+      snapshot.trickAnimation !== null ? trickAnimationBoardPitch(snapshot.trickAnimation) : 0;
+    const boardY = SURFACE_Y + trickLift;
     const tile = getTile(
       map,
       Math.floor(snapshot.surfboard.position.x),
@@ -125,21 +161,21 @@ export class EntityLayer {
       return;
     }
 
-    this.ridingBoard.position.set(pos.x, SURFACE_Y, pos.z);
-    this.ridingBoard.rotation.set(0, rotationY, 0);
+    this.ridingBoard.position.set(pos.x, boardY, pos.z);
+    this.ridingBoard.rotation.set(boardPitch, rotationY, 0);
 
-    this.player.position.set(pos.x, SURFACE_Y + 0.22, pos.z);
+    this.player.position.set(pos.x, boardY + 0.22, pos.z);
     this.player.rotation.set(0, rotationY, 0);
 
     this.dockBoard.position.set(0, -100, 0);
 
-    const showWake = snapshot.surfboard.speedState === 'riding';
+    const showWake = snapshot.surfboard.speedState === 'riding' && snapshot.trickAnimation === null;
     this.wake.visible = showWake;
     if (showWake) {
       const behind = headingRad + Math.PI;
       this.wake.position.set(
         pos.x + Math.cos(behind) * 0.85,
-        SURFACE_Y + 0.02,
+        boardY + 0.02,
         pos.z + Math.sin(behind) * 0.85,
       );
       this.wake.rotation.set(0, rotationY, 0);

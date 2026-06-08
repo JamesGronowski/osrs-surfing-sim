@@ -39,6 +39,13 @@ import {
 } from '../world/features.js';
 import { CORAL_PARK_TRICK_ZONE_COUNT, type GameArena } from '../world/maps.js';
 import {
+  createTrickAnimationState,
+  tickTrickAnimation,
+  toTrickAnimationSnapshot,
+  type TrickAnimationSnapshot,
+  type TrickAnimationState,
+} from '../world/trickAnimation.js';
+import {
   createTrickZoneTideSyncState,
   syncTrickZonesWithTide,
   type TrickZoneTideSyncState,
@@ -70,6 +77,7 @@ export interface SimulationSnapshot {
   walkClickValid: boolean;
   onFootMoving: boolean;
   trickPrepare: TrickPrepareState | null;
+  trickAnimation: TrickAnimationSnapshot | null;
 }
 
 export interface XpDropEvent {
@@ -107,6 +115,7 @@ export class GameSimulation {
   private trickZoneTideSync: TrickZoneTideSyncState;
   private trickPrepare: TrickPrepareState | null = null;
   private activeTrickZoneId: string | null = null;
+  private trickAnimation: TrickAnimationState | null = null;
   private tideFrozen = false;
   private movementFrozen = false;
   private readonly boardInteractRadius = 1.3;
@@ -153,6 +162,7 @@ export class GameSimulation {
       walkClickValid: this.walkClickMarker?.valid ?? true,
       onFootMoving: this.walk !== null,
       trickPrepare: this.trickPrepare ? { ...this.trickPrepare } : null,
+      trickAnimation: toTrickAnimationSnapshot(this.trickAnimation),
     };
   }
 
@@ -386,7 +396,7 @@ export class GameSimulation {
   }
 
   prepareTrick(slot: TrickPrepareSlot): void {
-    if (!this.boardMounted || this.surfboard.speedState === 'seated') {
+    if (!this.boardMounted || this.surfboard.speedState === 'seated' || this.trickAnimation) {
       return;
     }
     this.trickPrepare = { slot, ticksSincePrepare: 0 };
@@ -411,6 +421,18 @@ export class GameSimulation {
     const result = awardTrick(this.progression);
     this.progression = result.state;
     this.trickZones = markZoneTricked(this.trickZones, zone.id);
+    this.trickAnimation = createTrickAnimationState(
+      this.arena.map,
+      zone,
+      this.surfboard.position,
+      this.surfboard.currentHeading,
+    );
+    this.surfboard = {
+      ...this.surfboard,
+      intendedHeading: this.trickAnimation.endHeading,
+      isRotating: false,
+    };
+    this.activeTrickZoneId = null;
     this.comboTicksRemaining = COMBO_TIMEOUT_TICKS;
     this.xpDrops.push({
       agility: result.xpGained.agility,
@@ -423,6 +445,7 @@ export class GameSimulation {
 
   private bailTrick(zone: TrickZone, reason?: string): void {
     this.trickPrepare = null;
+    this.trickAnimation = null;
     this.progression = decayCombo(this.progression);
     this.activeTrickZoneId = null;
     this.surfboard = {
@@ -436,6 +459,9 @@ export class GameSimulation {
   }
 
   private checkTrickZoneResolution(): void {
+    if (this.trickAnimation) {
+      return;
+    }
     if (!this.boardMounted || this.surfboard.speedState !== 'riding') {
       this.activeTrickZoneId = null;
       return;
@@ -480,10 +506,30 @@ export class GameSimulation {
     return this.arena;
   }
 
+  private tickTrickAnimationMovement(): void {
+    if (!this.trickAnimation) {
+      return;
+    }
+
+    const result = tickTrickAnimation(this.trickAnimation);
+    this.trickAnimation = result.state;
+    this.surfboard = {
+      ...this.surfboard,
+      position: result.position,
+      currentHeading: result.heading,
+      intendedHeading: result.heading,
+      isRotating: false,
+    };
+  }
+
   tick(): void {
     if (this.boardMounted && !this.movementFrozen) {
-      const result = tickSurfboard(this.surfboard, this.arena.map, this.pendingInput, this.stats);
-      this.surfboard = result.state;
+      if (this.trickAnimation) {
+        this.tickTrickAnimationMovement();
+      } else {
+        const result = tickSurfboard(this.surfboard, this.arena.map, this.pendingInput, this.stats);
+        this.surfboard = result.state;
+      }
     } else if (this.walk) {
       const result = tickOnFootPath(
         this.surfboard.position,

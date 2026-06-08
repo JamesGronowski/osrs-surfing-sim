@@ -42,3 +42,21 @@
 [11896470ms] [ERROR] WebSocket connection to 'ws://localhost:5173/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:5173/@vite/client:1034
 [11897472ms] [ERROR] WebSocket connection to 'ws://localhost:5173/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:5173/@vite/client:1034
 [11898473ms] [ERROR] WebSocket connection to 'ws://localhost:5173/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:5173/@vite/client:1034
+[13745231ms] [ERROR] ReferenceError: trickAnimationProgress is not defined
+    at SurfboardMotionInterpolator.reset (http://localhost:5173/src/render/visualSnapshot.ts?t=1780908882606:30:5)
+    at OsrsClient.mount (http://localhost:5173/src/OsrsClient.ts?t=1780908882606:131:19) @ http://localhost:5173/src/main.ts?t=1780908882606:2
+[13746908ms] [ERROR] ReferenceError: trickAnimationProgress is not defined
+    at SurfboardMotionInterpolator.reset (http://localhost:5173/src/render/visualSnapshot.ts?t=1780908884293:30:5)
+    at OsrsClient.mount (http://localhost:5173/src/OsrsClient.ts?t=1780908884293:131:19) @ http://localhost:5173/src/main.ts?t=1780908884293:2
+[13748680ms] [ERROR] ReferenceError: trickAnimationProgress is not defined
+    at SurfboardMotionInterpolator.reset (http://localhost:5173/src/render/visualSnapshot.ts?t=1780908886043:30:5)
+    at OsrsClient.mount (http://localhost:5173/src/OsrsClient.ts?t=1780908886043:131:19) @ http://localhost:5173/src/main.ts?t=1780908886043:2
+[14781017ms] ReferenceError: surfboardPosition is not defined
+    at SurfboardMotionInterpolator.buildDisplaySnapshot (http://localhost:5173/src/render/visualSnapshot.ts?t=1780909918378:67:19)
+    at OsrsClient.renderVisuals (http://localhost:5173/src/OsrsClient.ts?t=1780909918378:243:41)
+    at OsrsClient.onVisualFrame (http://localhost:5173/src/OsrsClient.ts?t=1780909918378:233:14)
+    at http://localhost:5173/src/OsrsClient.ts?t=1780909918378:237:67
+[15975220ms] The requested module '/@fs/Users/jamesg/Projects/osrs-surfing-sim/packages/engine/dist/index.js?t=1780910936151' does not provide an export named 'trickAnimationPositionAtProgress'
+[16083786ms] The requested module '/@fs/Users/jamesg/Projects/osrs-surfing-sim/packages/engine/dist/index.js?t=1780911136712' does not provide an export named 'trickStanceName'
+[16083940ms] The requested module '/@fs/Users/jamesg/Projects/osrs-surfing-sim/packages/engine/dist/index.js?t=1780911136712' does not provide an export named 'trickStanceName'
+[16084045ms] The requested module '/@fs/Users/jamesg/Projects/osrs-surfing-sim/packages/engine/dist/index.js?t=1780911136712' does not provide an export named 'trickStanceName'

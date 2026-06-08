@@ -20,8 +20,6 @@ export const HIGH_TIDE_REROLL_PROGRESS = 0.92;
 /** Ticks to ease alpha when submerging or resurfacing. */
 export const TRICK_SUBMERGE_FADE_TICKS = 10;
 
-export const TRICK_TRICKED_ALPHA = 0.42;
-
 export interface TrickZone {
   id: string;
   type: TrickFeatureType;
@@ -31,6 +29,8 @@ export interface TrickZone {
   radius: number;
   /** World radians — ride toward +local Y through the feature (OSRS 0=east, clockwise). */
   rotationRadians: number;
+  /** Visual-only yaw offset in radians (±5° at spawn). */
+  rotationJitterRadians?: number;
   tricked: boolean;
   /** Spawned at high-tide center — kept submerged until low tide, not re-rolled each tick. */
   spawnedAtHighTide?: boolean;
@@ -41,9 +41,6 @@ export interface TrickZone {
 }
 
 export function trickZoneVisualAlpha(zone: TrickZone, tide?: TideState | null): number {
-  if (zone.tricked) {
-    return TRICK_TRICKED_ALPHA;
-  }
   if (tide) {
     if (!isTrickZoneSubmerged(zone, tide)) {
       return 1;

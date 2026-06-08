@@ -1,0 +1,99 @@
+import { describe, expect, it } from 'vitest';
+
+import {
+  createTrickAnimationState,
+  signedFeatureRideVector,
+  snapToFeatureCenterline,
+  tickTrickAnimation,
+  TRICK_ANIMATION_ALIGN_PROGRESS,
+  TRICK_ANIMATION_TICKS,
+  trickAnimationPositionAtProgress,
+  trickFeatureRideUnitVector,
+} from './trickAnimation.js';
+import { createCoralParkSlice } from './maps.js';
+import type { TrickZone } from './features.js';
+
+describe('trick animation', () => {
+  const arena = createCoralParkSlice();
+  const zone: TrickZone = {
+    id: 'test-rail',
+    type: 'rail',
+    prepareSlot: 0,
+    center: { x: 30, y: 11 },
+    radius: 4,
+    rotationRadians: 0,
+    tricked: false,
+  };
+  const start = { x: 28, y: 11 };
+
+  it('travels along the locked feature centreline over two ticks', () => {
+    const anim = createTrickAnimationState(arena.map, zone, start, 0);
+
+    expect(anim.start.x).toBeCloseTo(28);
+    expect(anim.start.y).toBeCloseTo(11);
+    expect(anim.end.x).toBeGreaterThan(zone.center.x);
+    expect(anim.end.y).toBeCloseTo(zone.center.y);
+
+    const mid = tickTrickAnimation(anim);
+    expect(mid.state?.ticksElapsed).toBe(1);
+    expect(mid.position.x).toBeGreaterThan(anim.start.x);
+    expect(mid.position.x).toBeLessThan(anim.end.x);
+
+    const end = tickTrickAnimation(mid.state!);
+    expect(end.state).toBeNull();
+    expect(end.position.x).toBeCloseTo(anim.end.x);
+    expect(end.heading).toBe(0);
+  });
+
+  it('eases from entry onto the centreline before riding the feature', () => {
+    const offAxis = { x: 28, y: 12.8 };
+    const anim = createTrickAnimationState(arena.map, zone, offAxis, 0);
+    expect(anim.entry.y).toBeCloseTo(12.8);
+    expect(anim.start.y).toBeCloseTo(zone.center.y);
+    expect(anim.end.y).toBeCloseTo(zone.center.y);
+
+    const midwayAlign = trickAnimationPositionAtProgress(
+      anim,
+      TRICK_ANIMATION_ALIGN_PROGRESS * 0.5,
+    );
+    expect(midwayAlign.y).toBeCloseTo(11.9, 0);
+    expect(midwayAlign.x).toBeCloseTo(28);
+
+    const atLockedStart = trickAnimationPositionAtProgress(anim, TRICK_ANIMATION_ALIGN_PROGRESS);
+    expect(atLockedStart.x).toBeCloseTo(anim.start.x);
+    expect(atLockedStart.y).toBeCloseTo(anim.start.y);
+  });
+
+  it('uses tunnel ride axis through the arch', () => {
+    const tunnelZone: TrickZone = { ...zone, type: 'tunnel', prepareSlot: 1, rotationRadians: 0 };
+    const ride = signedFeatureRideVector(tunnelZone, { x: 28, y: 11 }, 0);
+    expect(ride.x).toBeCloseTo(1);
+    expect(ride.y).toBeCloseTo(0);
+
+    const snapped = snapToFeatureCenterline(tunnelZone, { x: 28, y: 12.4 }, ride);
+    expect(snapped.x).toBeCloseTo(28);
+    expect(snapped.y).toBeCloseTo(zone.center.y);
+
+    const anim = createTrickAnimationState(arena.map, tunnelZone, { x: 28, y: 11 }, 0);
+    expect(anim.end.x).toBeGreaterThan(anim.start.x);
+  });
+
+  it('exposes mesh ride axes for rendering', () => {
+    const tunnelZone: TrickZone = { ...zone, type: 'tunnel', prepareSlot: 1, rotationRadians: 0 };
+    const tunnelRide = trickFeatureRideUnitVector(tunnelZone);
+    expect(tunnelRide.x).toBeCloseTo(1);
+    expect(tunnelRide.y).toBeCloseTo(0);
+  });
+
+  it('completes in exactly two ticks', () => {
+    let anim = createTrickAnimationState(arena.map, zone, start, 0);
+    expect(anim.ticksTotal).toBe(TRICK_ANIMATION_TICKS);
+
+    const first = tickTrickAnimation(anim);
+    anim = first.state!;
+    expect(anim).not.toBeNull();
+
+    const second = tickTrickAnimation(anim);
+    expect(second.state).toBeNull();
+  });
+});

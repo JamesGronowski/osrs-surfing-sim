@@ -4,30 +4,30 @@ A 3D web simulator for the **Ura Ura Swell** surfing minigame concept, built on 
 
 ## Controls
 
-| Action             | Input                                                                                                    |
-| ------------------ | -------------------------------------------------------------------------------------------------------- |
-| Walk               | Click grass or sand — OSRS-style BFS pathing, 1 tile per tick (run)                                      |
-| Talk to Kaulu      | Click the NPC on the island centre                                                                       |
-| Mount board        | Walk to the sand ring and click your surfboard                                                           |
-| Set heading        | Click the ocean — white arrow follows cursor, board arcs to face that direction                          |
-| Paddle (slow)      | Sailing panel **Paddle** / sails icon — slow forward                                                     |
-| Stand / ride swell | Sailing panel **Ride** / set sails — Tai'ura swell, full speed                                           |
-| Stop               | Unset sails (fast) or chevron down — seated on board                                                     |
-| Lie down           | Reverse icon — drop from riding to paddling                                                              |
-| Prime trick        | **Rail** / **Tunnel** / **Jump** buttons (or keys `1`–`3`) — 1–4 ticks before hitting the matching coral |
-| Land trick         | Ride through the primed feature while the timing window is active                                        |
-| Bail               | Wrong button, no prime, or prime too early/late — you stop on the reef                                   |
-| Debug tuning       | `1`/`!` turn rate, `2`/`@` paddle speed, `3`/`#` ride speed                                              |
+| Action             | Input                                                                                                          |
+| ------------------ | -------------------------------------------------------------------------------------------------------------- |
+| Walk               | Click grass or sand — OSRS-style BFS pathing, 1 tile per tick (run)                                            |
+| Talk to Kaulu      | Click the NPC on the island centre                                                                             |
+| Mount board        | Walk to the sand ring and click your surfboard                                                                 |
+| Set heading        | Click the ocean — white arrow follows cursor, board arcs to face that direction                                |
+| Paddle (slow)      | Sailing panel **Paddle** / sails icon — slow forward                                                           |
+| Stand / ride swell | Sailing panel **Ride** / set sails — Tai'ura swell, full speed                                                 |
+| Stop               | Unset sails (fast) or chevron down — seated on board                                                           |
+| Lie down           | Reverse icon — drop from riding to paddling                                                                    |
+| Prime trick        | **Low** / **Medium** / **High** stance buttons (or keys `1`–`3`) — 1–4 ticks before hitting the matching coral |
+| Land trick         | Ride through the primed feature while the timing window is active                                              |
+| Bail               | Wrong button, no prime, or prime too early/late — you stop on the reef                                         |
+| Debug tuning       | `1`/`!` turn rate, `2`/`@` paddle speed, `3`/`#` ride speed                                                    |
 
-### Trick prepare mapping
+### Trick stance mapping
 
-Five coral feature types map to three prepare buttons:
+Five coral feature types map to three stances:
 
-| Button       | Features          |
+| Stance       | Features          |
 | ------------ | ----------------- |
-| Rail (`1`)   | rail, brain coral |
-| Tunnel (`2`) | tunnel, wall ride |
-| Jump (`3`)   | jump              |
+| Low (`1`)    | rail, brain coral |
+| Medium (`2`) | tunnel, wall ride |
+| High (`3`)   | jump              |
 
 ### OSRS sailing mapping
 

@@ -241,9 +241,25 @@ export class ThreeRenderer implements IRenderer {
       return;
     }
 
-    const onPointerDown = (event: PointerEvent) => camera.onPointerDown(event);
+    const onPointerDown = (event: PointerEvent) => {
+      camera.onPointerDown(event);
+      if (event.button === 1) {
+        canvas.setPointerCapture(event.pointerId);
+      }
+    };
     const onPointerMove = (event: PointerEvent) => camera.onPointerMove(event);
-    const onPointerUp = (event: PointerEvent) => camera.onPointerUp(event);
+    const onPointerUp = (event: PointerEvent) => {
+      if (event.button === 1 && canvas.hasPointerCapture(event.pointerId)) {
+        canvas.releasePointerCapture(event.pointerId);
+      }
+      camera.onPointerUp(event);
+    };
+    const onPointerCancel = (event: PointerEvent) => {
+      if (canvas.hasPointerCapture(event.pointerId)) {
+        canvas.releasePointerCapture(event.pointerId);
+      }
+      camera.onPointerCancel();
+    };
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
       camera.onWheel(event.deltaY);
@@ -253,6 +269,7 @@ export class ThreeRenderer implements IRenderer {
     canvas.addEventListener('pointerdown', onPointerDown);
     canvas.addEventListener('pointermove', onPointerMove);
     canvas.addEventListener('pointerup', onPointerUp);
+    canvas.addEventListener('pointercancel', onPointerCancel);
     canvas.addEventListener('wheel', onWheel, { passive: false });
     canvas.addEventListener('contextmenu', onContextMenu);
 
@@ -260,6 +277,7 @@ export class ThreeRenderer implements IRenderer {
       canvas.removeEventListener('pointerdown', onPointerDown);
       canvas.removeEventListener('pointermove', onPointerMove);
       canvas.removeEventListener('pointerup', onPointerUp);
+      canvas.removeEventListener('pointercancel', onPointerCancel);
       canvas.removeEventListener('wheel', onWheel);
       canvas.removeEventListener('contextmenu', onContextMenu);
     };

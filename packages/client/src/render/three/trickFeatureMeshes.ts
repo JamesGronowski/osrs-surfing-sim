@@ -17,13 +17,21 @@ import {
 
 import { radiansToRotationY, tileToWorld3 } from './worldCoords.js';
 
-const TRICKED_BASE = 0x555555;
-const TRICKED_ACCENT = 0x444444;
+/** How far features sink below the water plane when fully submerged (fraction of zone radius). */
+const TRICK_FEATURE_SUBMERGE_DEPTH = 0.55;
 
-function paletteFor(type: TrickFeatureType, tricked: boolean): { base: number; accent: number } {
-  if (tricked) {
-    return { base: TRICKED_BASE, accent: TRICKED_ACCENT };
+function trickFeatureSurfaceY(
+  zone: SimulationSnapshot['trickZones'][number],
+  alpha: number,
+  interactionDisabled: boolean,
+): number {
+  if (!interactionDisabled) {
+    return 0;
   }
+  return -(1 - alpha) * zone.radius * TRICK_FEATURE_SUBMERGE_DEPTH;
+}
+
+function paletteFor(type: TrickFeatureType): { base: number; accent: number } {
   switch (type) {
     case 'rail':
       return { base: 0xf4a7b9, accent: 0xf4c542 };
@@ -76,19 +84,16 @@ function buildTunnelGroup(
   alpha: number,
 ): Group {
   const group = new Group();
-  const base = new Mesh(
-    new BoxGeometry(radius * 1.6, radius * 0.55, radius * 0.8),
-    makeMaterial(palette.base, alpha),
-  );
-  base.position.y = radius * 0.28;
   const arch = new Mesh(
-    new TorusGeometry(radius * 0.75, radius * 0.12, 8, 16, Math.PI),
+    new TorusGeometry(radius * 0.9, radius * 0.13, 12, 24, Math.PI),
     makeMaterial(palette.accent, alpha),
   );
-  arch.rotation.x = Math.PI / 2;
-  arch.rotation.z = Math.PI;
-  arch.position.y = radius * 0.45;
-  group.add(base, arch);
+  // Half-torus in the XZ plane — tube arches upward over the ride path (+Z local).
+  arch.rotation.x = 0;
+  arch.position.y = radius * 0.13;
+  group.add(arch);
+  // Meshes are built along +Z; align with reef tangent (rails use +X).
+  group.rotation.y = Math.PI / 2;
   return group;
 }
 
@@ -110,6 +115,8 @@ function buildJumpGroup(
   );
   lip.position.set(0, radius * 0.35, radius * 0.45);
   group.add(ramp, lip);
+  // Meshes are built along +Z; align with reef tangent (rails use +X).
+  group.rotation.y = (3 * Math.PI) / 2;
   return group;
 }
 
@@ -150,6 +157,8 @@ function buildWallRideGroup(
   );
   crest.position.y = radius * 1.05;
   group.add(wall, crest);
+  // Meshes are built along +Z; ride direction matches rails along +X.
+  group.rotation.y = Math.PI / 2;
   return group;
 }
 
@@ -175,15 +184,33 @@ function buildTrickGroup(
   }
 }
 
-function addApproachChevrons(group: Group, radius: number, alpha: number): void {
+/** Matches trick ride axis in parent-local space (chevrons are built along +Z). */
+function approachChevronRotationY(type: TrickFeatureType): number {
+  switch (type) {
+    case 'jump':
+      return -Math.PI / 2;
+    default:
+      return Math.PI / 2;
+  }
+}
+
+function addApproachChevrons(
+  group: Group,
+  type: TrickFeatureType,
+  radius: number,
+  alpha: number,
+): void {
+  const chevrons = new Group();
+  chevrons.rotation.y = approachChevronRotationY(type);
   const material = makeMaterial(0xfff566, alpha * 0.9);
   for (const offset of [-0.72, -0.52, -0.32]) {
     const cone = new Mesh(new ConeGeometry(radius * 0.15, radius * 0.25, 3), material);
     cone.rotation.x = Math.PI;
     cone.rotation.z = Math.PI;
     cone.position.set(0, radius * 0.08, radius * offset + radius * 0.22);
-    group.add(cone);
+    chevrons.add(cone);
   }
+  group.add(chevrons);
 }
 
 function disposeGroupContents(group: Group): void {
@@ -214,7 +241,7 @@ function zoneMeshKey(
     !interactionDisabled &&
     snapshot.trickPrepare !== null &&
     snapshot.trickPrepare.slot === zone.prepareSlot;
-  return `${zone.id}:${zone.type}:${zone.tricked}:${zone.radius}:${showChevrons}`;
+  return `${zone.id}:${zone.type}:${zone.radius}:${showChevrons}`;
 }
 
 function setGroupOpacity(group: Group, opacity: number): void {
@@ -260,7 +287,7 @@ export class TrickFeatureLayer {
 
       if (this.meshKeys[i] !== meshKey) {
         disposeGroupContents(group);
-        const palette = paletteFor(zone.type, zone.tricked);
+        const palette = paletteFor(zone.type);
         const feature = buildTrickGroup(zone.type, zone.radius, palette, featureAlpha);
         group.add(feature);
 
@@ -270,7 +297,7 @@ export class TrickFeatureLayer {
           snapshot.trickPrepare !== null &&
           snapshot.trickPrepare.slot === zone.prepareSlot
         ) {
-          addApproachChevrons(group, zone.radius, featureAlpha);
+          addApproachChevrons(group, zone.type, zone.radius, featureAlpha);
         }
         this.meshKeys[i] = meshKey;
       } else {
@@ -278,8 +305,10 @@ export class TrickFeatureLayer {
       }
 
       const pos = tileToWorld3(zone.center.x, zone.center.y);
-      group.position.set(pos.x, 0, pos.z);
-      group.rotation.y = radiansToRotationY(zone.rotationRadians);
+      group.position.set(pos.x, trickFeatureSurfaceY(zone, alpha, interactionDisabled), pos.z);
+      group.rotation.y = radiansToRotationY(
+        zone.rotationRadians + (zone.rotationJitterRadians ?? 0),
+      );
     }
   }
 

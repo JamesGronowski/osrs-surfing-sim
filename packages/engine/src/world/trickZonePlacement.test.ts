@@ -12,6 +12,7 @@ import {
   createTrickZoneAtAngle,
   createTrickZoneTideSyncState,
   pickRandomTrickType,
+  randomTrickRotationJitterRadians,
   REEF_RING_DEPTH_MAX,
   REEF_RING_DEPTH_MIN,
   syncTrickZonesWithTide,
@@ -127,6 +128,14 @@ describe('syncTrickZonesWithTide', () => {
       }
       expect(diff).toBeLessThanOrEqual(slotTolerance);
     }
+  });
+});
+
+describe('randomTrickRotationJitterRadians', () => {
+  it('maps random 0–1 to ±5 degrees', () => {
+    expect(randomTrickRotationJitterRadians(() => 0)).toBeCloseTo((-5 * Math.PI) / 180);
+    expect(randomTrickRotationJitterRadians(() => 1)).toBeCloseTo((5 * Math.PI) / 180);
+    expect(randomTrickRotationJitterRadians(() => 0.5)).toBeCloseTo(0);
   });
 });
 

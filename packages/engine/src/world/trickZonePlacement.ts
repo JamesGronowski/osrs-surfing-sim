@@ -26,12 +26,13 @@ export const TRICK_FEATURE_TYPES: TrickFeatureType[] = [
   'wall_ride',
 ];
 
+/** Low = grind, Medium = tunnel/wall ride, High = jump. */
 export const TRICK_TYPE_TO_PREPARE_SLOT: Record<TrickFeatureType, TrickPrepareSlot> = {
   rail: 0,
-  tunnel: 1,
-  jump: 2,
   brain_coral: 0,
+  tunnel: 1,
   wall_ride: 1,
+  jump: 2,
 };
 
 /** Matches initial buildTrickZones offset in maps.ts. */
@@ -45,6 +46,15 @@ export const RING_DEPTH_SPAWN_ATTEMPTS = 5;
 
 const COUNTER_RIDE_CHANCE = 0.2;
 const TAU = Math.PI * 2;
+
+export const TRICK_ROTATION_JITTER_DEG_MIN = -5;
+export const TRICK_ROTATION_JITTER_DEG_MAX = 5;
+
+export function randomTrickRotationJitterRadians(random: () => number = Math.random): number {
+  const span = TRICK_ROTATION_JITTER_DEG_MAX - TRICK_ROTATION_JITTER_DEG_MIN;
+  const degrees = TRICK_ROTATION_JITTER_DEG_MIN + random() * span;
+  return (degrees * Math.PI) / 180;
+}
 
 export interface TrickZoneTideSyncState {
   nextZoneId: number;
@@ -148,6 +158,7 @@ export function createTrickZoneAtAngle(
     center,
     radius: CORAL_PARK_TRICK_ZONE_RADIUS,
     rotationRadians,
+    rotationJitterRadians: randomTrickRotationJitterRadians(random),
     tricked: false,
   };
 }

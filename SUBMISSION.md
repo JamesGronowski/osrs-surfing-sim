@@ -81,7 +81,7 @@ A cool Polynesian-inspired NPC who teaches surfing lore (expandable into a quest
 - Wall rides
 - Jumps
 
-Five feature types map to three prepare inputs (Rail / Tunnel / Jump), similar to Sol Heredit's body-part priming.
+Five feature types map to three stances (Low / Medium / High), similar to Sol Heredit's body-part priming.
 
 ### Simulator prototype (this repo)
 

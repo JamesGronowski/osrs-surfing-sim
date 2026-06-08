@@ -1,9 +1,19 @@
 import {
   interpolateHeadingIndex,
+  trickAnimationPositionAtProgress,
   type HeadingIndex,
   type SimulationSnapshot,
+  type TrickAnimationSnapshot,
   type WorldPos,
 } from '@osrs-surfing/engine';
+
+export interface DisplayTrickAnimation extends TrickAnimationSnapshot {
+  progress: number;
+}
+
+export type DisplaySimulationSnapshot = SimulationSnapshot & {
+  trickAnimation: DisplayTrickAnimation | null;
+};
 
 function lerpPosition(from: WorldPos, to: WorldPos, t: number): WorldPos {
   return {
@@ -28,6 +38,8 @@ export class SurfboardMotionInterpolator {
   private headingEnd: HeadingIndex = 0;
   private intendedHeadingStart: HeadingIndex = 0;
   private intendedHeadingEnd: HeadingIndex = 0;
+  private trickProgressStart = 0;
+  private trickProgressEnd = 0;
 
   reset(snapshot: SimulationSnapshot): void {
     const pos = { ...snapshot.surfboard.position };
@@ -37,6 +49,8 @@ export class SurfboardMotionInterpolator {
     this.headingEnd = snapshot.surfboard.currentHeading;
     this.intendedHeadingStart = snapshot.surfboard.intendedHeading;
     this.intendedHeadingEnd = snapshot.surfboard.intendedHeading;
+    this.trickProgressStart = trickAnimationProgress(snapshot.trickAnimation);
+    this.trickProgressEnd = this.trickProgressStart;
   }
 
   onSimulationTick(before: SimulationSnapshot, after: SimulationSnapshot): void {
@@ -46,6 +60,8 @@ export class SurfboardMotionInterpolator {
     this.headingEnd = after.surfboard.currentHeading;
     this.intendedHeadingStart = before.surfboard.intendedHeading;
     this.intendedHeadingEnd = after.surfboard.intendedHeading;
+    this.trickProgressStart = trickAnimationProgress(before.trickAnimation);
+    this.trickProgressEnd = trickAnimationProgress(after.trickAnimation);
   }
 
   /**
@@ -53,6 +69,10 @@ export class SurfboardMotionInterpolator {
    * without a matching motion segment update.
    */
   ensureSynced(snapshot: SimulationSnapshot): void {
+    if (snapshot.trickAnimation) {
+      return;
+    }
+
     const simPos = snapshot.surfboard.position;
     const segmentLength = positionDistance(this.segmentStart, this.segmentEnd);
     const simToEnd = positionDistance(simPos, this.segmentEnd);
@@ -66,7 +86,7 @@ export class SurfboardMotionInterpolator {
     snapshot: SimulationSnapshot,
     tidePhaseFrom: number | null,
     tickBlend: number,
-  ): SimulationSnapshot {
+  ): DisplaySimulationSnapshot {
     const t = Math.min(1, Math.max(0, tickBlend));
 
     let displayTide = snapshot.tide;
@@ -75,11 +95,20 @@ export class SurfboardMotionInterpolator {
       displayTide = { ...snapshot.tide, phaseRadians };
     }
 
+    const trickProgress = snapshot.trickAnimation
+      ? this.trickProgressStart + (this.trickProgressEnd - this.trickProgressStart) * t
+      : 0;
+
+    const surfboardPosition =
+      snapshot.trickAnimation !== null
+        ? trickAnimationPositionAtProgress(snapshot.trickAnimation, trickProgress)
+        : lerpPosition(this.segmentStart, this.segmentEnd, t);
+
     return {
       ...snapshot,
       surfboard: {
         ...snapshot.surfboard,
-        position: lerpPosition(this.segmentStart, this.segmentEnd, t),
+        position: surfboardPosition,
         currentHeading: interpolateHeadingIndex(this.headingStart, this.headingEnd, t),
         intendedHeading: interpolateHeadingIndex(
           this.intendedHeadingStart,
@@ -88,6 +117,19 @@ export class SurfboardMotionInterpolator {
         ),
       },
       tide: displayTide,
+      trickAnimation: snapshot.trickAnimation
+        ? {
+            ...snapshot.trickAnimation,
+            progress: trickProgress,
+          }
+        : null,
     };
   }
+}
+
+function trickAnimationProgress(animation: TrickAnimationSnapshot | null): number {
+  if (!animation) {
+    return 0;
+  }
+  return animation.ticksElapsed / animation.ticksTotal;
 }

@@ -11,16 +11,16 @@ Reference for the **Coral Park** arena in the simulator (`createCoralParkSlice`)
 
 ## Trick features
 
-| Type          | Prepare button | Slot |
-| ------------- | -------------- | ---- |
-| `rail`        | Rail (`1`)     | 0    |
-| `brain_coral` | Rail (`1`)     | 0    |
-| `tunnel`      | Tunnel (`2`)   | 1    |
-| `wall_ride`   | Tunnel (`2`)   | 1    |
-| `jump`        | Jump (`3`)     | 2    |
+| Type          | Stance       | Slot |
+| ------------- | ------------ | ---- |
+| `rail`        | Low (`1`)    | 0    |
+| `brain_coral` | Low (`1`)    | 0    |
+| `tunnel`      | Medium (`2`) | 1    |
+| `wall_ride`   | Medium (`2`) | 1    |
+| `jump`        | High (`3`)   | 2    |
 
 - Yellow chevrons show ride direction (clockwise reef tangent; ~20% counter-ride).
-- Prime **1–4 ticks** before hitting the feature with the matching button.
+- Prime **1–4 ticks** before hitting the feature with the matching stance.
 - Approach heading must be within `TRICK_APPROACH_TOLERANCE_DEG` (70°) of the feature rotation.
 - Features under the tide sweep are **not interactable** (`isTrickZoneSubmerged`).
 
