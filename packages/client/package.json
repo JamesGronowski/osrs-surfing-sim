@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@osrs-surfing/engine": "workspace:*",
-    "pixi.js": "^8.9.1"
+    "three": "^0.184.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0",

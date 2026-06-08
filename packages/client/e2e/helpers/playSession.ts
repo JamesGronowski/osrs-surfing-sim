@@ -15,7 +15,8 @@ export const CORAL_PARK = createCoralParkSlice();
 const FRAME_WIDTH = 765;
 const FRAME_HEIGHT = 503;
 const STEER_POLL_MS = 150;
-const PLAYTHROUGH_SNAPSHOT_RATIO = 0.04;
+/** 3D WebGL view tolerates more pixel variance than the old 2D canvas. */
+const PLAYTHROUGH_SNAPSHOT_RATIO = 0.12;
 /** Stop this many tiles outside the zone center before priming. */
 const TRICK_PRIME_APPROACH_MARGIN = 4;
 /** Stay at least this far outside the zone hitbox until after prepare. */

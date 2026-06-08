@@ -87,13 +87,13 @@ Five feature types map to three prepare inputs (Rail / Tunnel / Jump), similar t
 
 The 2D simulator implements **Coral Park** with behaviour that may differ slightly from final OSRS scope but demonstrates core loops:
 
-| Area | Prototype behaviour |
-| ---- | ------------------- |
-| Reef layout | Organic coral donut; 15 evenly spaced trick slots |
-| Feature variety | rail, tunnel, jump, brain_coral, wall_ride — random type + depth on each tide swap |
-| Tide | Rotating submerged arc; features disabled while under the sweep |
-| Visual cycle | Fade out on high-tide entry → fully transparent just before centre → reroll → fade in underwater → fully opaque and enabled at low tide |
-| Movement | OSRS sailing-style paddle / ride / arc turns on the reef loop |
+| Area            | Prototype behaviour                                                                                                                     |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Reef layout     | Organic coral donut; 15 evenly spaced trick slots                                                                                       |
+| Feature variety | rail, tunnel, jump, brain_coral, wall_ride — random type + depth on each tide swap                                                      |
+| Tide            | Rotating submerged arc; features disabled while under the sweep                                                                         |
+| Visual cycle    | Fade out on high-tide entry → fully transparent just before centre → reroll → fade in underwater → fully opaque and enabled at low tide |
+| Movement        | OSRS sailing-style paddle / ride / arc turns on the reef loop                                                                           |
 
 Technical detail: [docs/CORAL_PARK.md](docs/CORAL_PARK.md)
 

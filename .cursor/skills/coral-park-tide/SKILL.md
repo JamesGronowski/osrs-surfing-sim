@@ -27,7 +27,7 @@ For feature at polar angle θ:
 - [ ] spawnedAtHighTide prevents purge/re-roll loop underwater
 - [ ] trickZoneVisualAlpha(zone, tide) matches intended fade curve
 - [ ] isTrickZoneSubmerged gates gameplay (findTrickZoneAt, renderer)
-- [ ] PixiRenderer passes tide to trickZoneVisualAlpha
+- [ ] TrickFeatureLayer passes tide to trickZoneVisualAlpha
 - [ ] Tests updated in features.test.ts / trickZonePlacement.test.ts
 - [ ] pnpm validate passes
 ```
@@ -44,4 +44,4 @@ For feature at polar angle θ:
 
 1. Add to `TrickFeatureType` in `features.ts`.
 2. Map in `TRICK_TYPE_TO_PREPARE_SLOT` and `TRICK_FEATURE_TYPES` in `trickZonePlacement.ts`.
-3. Add client graphic in `trickFeatureGraphic.ts` if needed.
+3. Add client mesh in `trickFeatureMeshes.ts` if needed.

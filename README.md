@@ -1,6 +1,6 @@
 # Ura Ura Surfing Simulator
 
-A 2D top-down simulator for the **Ura Ura Swell** surfing minigame concept, built on OSRS-style sailing movement mechanics.
+A 3D web simulator for the **Ura Ura Swell** surfing minigame concept, built on OSRS-style sailing movement mechanics.
 
 ## Controls
 
@@ -23,11 +23,11 @@ A 2D top-down simulator for the **Ura Ura Swell** surfing minigame concept, buil
 
 Five coral feature types map to three prepare buttons:
 
-| Button | Features |
-| ------ | -------- |
-| Rail (`1`) | rail, brain coral |
+| Button       | Features          |
+| ------------ | ----------------- |
+| Rail (`1`)   | rail, brain coral |
 | Tunnel (`2`) | tunnel, wall ride |
-| Jump (`3`) | jump |
+| Jump (`3`)   | jump              |
 
 ### OSRS sailing mapping
 
@@ -55,7 +55,7 @@ pnpm visual:update   # refresh all screenshot baselines
 ## Project structure
 
 - `packages/engine` — pure TypeScript simulation (movement, collision, tide, trick zones)
-- `packages/client` — PixiJS renderer + OSRS-styled UI (renderer-agnostic engine output)
+- `packages/client` — Three.js 3D viewport + OSRS-styled UI (renderer-agnostic engine output)
 - `packages/client/public/assets/osrs/` — vanilla OSRS UI sprites from [melkypie/resource-packs](https://github.com/melkypie/resource-packs/tree/sample-vanilla) (see `ATTRIBUTION.md`)
 - `docs/CORAL_PARK.md` — tide cycle, feature placement, and engine file reference
 

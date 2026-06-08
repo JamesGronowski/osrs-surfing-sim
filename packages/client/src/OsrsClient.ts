@@ -12,7 +12,7 @@ const TRICK_KEY_SLOTS: Partial<Record<string, TrickPrepareSlot>> = {
 };
 
 import { installSurfTestBridge } from './dev/surfTestBridge.js';
-import { bindPointerEvents, PixiRenderer } from './render/PixiRenderer.js';
+import { ThreeRenderer } from './render/ThreeRenderer.js';
 import { SurfboardMotionInterpolator } from './render/visualSnapshot.js';
 import { DebugPanel } from './ui/DebugPanel.js';
 import { OsrsChatbox } from './ui/OsrsChatbox.js';
@@ -22,9 +22,6 @@ import { OsrsShopPanel } from './ui/OsrsShopPanel.js';
 import { OsrsTabStrip } from './ui/OsrsTabStrip.js';
 import { applyIntegerScale } from './ui/scaleLayout.js';
 
-/** Pixels per world tile — lower = more zoomed out in the 512×334 viewport. */
-const TILE_SIZE_PX = 10;
-
 const HELP_LINES = [
   'Click the ground to walk. Click Kaulu to talk.',
   'Click your surfboard on the sand ring to paddle out.',
@@ -33,7 +30,7 @@ const HELP_LINES = [
 
 export class OsrsClient {
   private simulation: GameSimulation;
-  private renderer: PixiRenderer;
+  private renderer: ThreeRenderer;
   private chatbox: OsrsChatbox;
   private sidePanel: OsrsSailingPanel;
   private shopPanel: OsrsShopPanel;
@@ -44,7 +41,7 @@ export class OsrsClient {
   private lastVisualFrameMs = 0;
   /** Ms elapsed within the current tick period (0 … tickMs). */
   private tickAccumulatorMs = 0;
-  private readonly motion = new SurfboardMotionInterpolator();
+  readonly motion = new SurfboardMotionInterpolator();
   private tidePhaseFrom: number | null = null;
   private paused = false;
   private lastDisplayPosition = { x: 0, y: 0 };
@@ -52,7 +49,7 @@ export class OsrsClient {
 
   private constructor(
     simulation: GameSimulation,
-    renderer: PixiRenderer,
+    renderer: ThreeRenderer,
     chatbox: OsrsChatbox,
     sidePanel: OsrsSailingPanel,
     shopPanel: OsrsShopPanel,
@@ -98,8 +95,8 @@ export class OsrsClient {
       throw new Error('Missing required DOM elements');
     }
 
-    const renderer = new PixiRenderer();
-    await renderer.init(gameRoot, TILE_SIZE_PX);
+    const renderer = new ThreeRenderer();
+    await renderer.init(gameRoot, 1);
 
     new OsrsTabStrip(tabStripRoot);
     const minimap = new OsrsMinimap(minimapRoot);
@@ -167,7 +164,7 @@ export class OsrsClient {
     const spawnSnapshot = simulation.getSnapshot();
     client.motion.reset(spawnSnapshot);
     client.tidePhaseFrom = spawnSnapshot.tide?.phaseRadians ?? null;
-    client.wireViewport(gameRoot);
+    client.wireViewport();
     client.startTickLoop();
 
     installSurfTestBridge(simulation, {
@@ -184,19 +181,14 @@ export class OsrsClient {
     });
 
     window.addEventListener('keydown', client.onKeyDown);
+    window.addEventListener('keyup', client.onKeyUp);
     window.addEventListener('beforeunload', () => client.destroy());
 
     return client;
   }
 
-  private wireViewport(gameRoot: HTMLElement): void {
-    const canvas = gameRoot.querySelector('canvas');
-    if (!canvas) {
-      throw new Error('Canvas not found');
-    }
-
-    this.unbindPointer = bindPointerEvents(
-      canvas,
+  private wireViewport(): void {
+    this.unbindPointer = this.renderer.bindPointerInput(
       (worldX, worldY) => {
         if (Number.isNaN(worldX)) {
           this.simulation.clearCursor();
@@ -207,15 +199,24 @@ export class OsrsClient {
       (worldX, worldY) => {
         this.simulation.clickWorld(worldX, worldY);
       },
-      (x, y) => this.renderer.screenToWorld(x, y),
     );
   }
 
   private readonly onKeyDown = (event: KeyboardEvent): void => {
+    if (this.renderer.handleKeyDown(event)) {
+      event.preventDefault();
+      return;
+    }
     const slot = TRICK_KEY_SLOTS[event.code];
     if (slot !== undefined) {
       event.preventDefault();
       this.simulation.prepareTrick(slot);
+    }
+  };
+
+  private readonly onKeyUp = (event: KeyboardEvent): void => {
+    if (this.renderer.handleKeyUp(event)) {
+      event.preventDefault();
     }
   };
 
@@ -323,6 +324,7 @@ export class OsrsClient {
     }
     this.unbindPointer?.();
     window.removeEventListener('keydown', this.onKeyDown);
+    window.removeEventListener('keyup', this.onKeyUp);
     this.renderer.destroy();
   }
 }

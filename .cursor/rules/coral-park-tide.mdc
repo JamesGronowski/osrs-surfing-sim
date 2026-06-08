@@ -1,6 +1,6 @@
 ---
 description: Coral Park tide cycle, trick feature placement, and fade timing
-globs: packages/engine/src/world/features.ts,packages/engine/src/world/trickZonePlacement.ts,packages/engine/src/world/maps.ts,packages/engine/src/world/coralParkCoast.ts,packages/client/src/render/PixiRenderer.ts
+globs: packages/engine/src/world/features.ts,packages/engine/src/world/trickZonePlacement.ts,packages/engine/src/world/maps.ts,packages/engine/src/world/coralParkCoast.ts,packages/client/src/render/three/trickFeatureMeshes.ts
 alwaysApply: false
 ---
 
@@ -25,7 +25,7 @@ Read [docs/CORAL_PARK.md](docs/CORAL_PARK.md) before changing tide or feature be
 
 - **Re-roll loop:** never purge zones with `spawnedAtHighTide` while phase is still between reroll and low tide.
 - **Alpha vs gameplay:** `trickZoneVisualAlpha(zone, tide)` for rendering; `isTrickZoneSubmerged` for interaction.
-- **Renderer:** pass `tide` into `trickZoneVisualAlpha` in `PixiRenderer.drawTrickZones`.
+- **Renderer:** pass `tide` into `trickZoneVisualAlpha` in `TrickFeatureLayer.sync`.
 
 ## Tests
 
