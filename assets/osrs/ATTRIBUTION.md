@@ -7,4 +7,6 @@ Sprites in this folder are sourced from the [melkypie/resource-packs](https://gi
 
 Used folders: `sailing/`, `fixed_mode/`, `chatbox/`, `tab/`, `skill/`, `button/`, `chevron/`
 
+Wave-themed movement icons in `../surf/` are original art for this project (MIT, same as repo).
+
 Game content is © Jagex Ltd. This project is a fan simulator and is not affiliated with Jagex.
