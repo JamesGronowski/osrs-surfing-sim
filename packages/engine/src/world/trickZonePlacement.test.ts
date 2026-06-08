@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { createTideState, isTrickZoneSubmerged, tideTrailingEdgeRadians } from './features.js';
+import {
+  createTideState,
+  highTideRerollPhaseForAngle,
+  highTideEntryPhaseForAngle,
+  isTrickZoneSubmerged,
+  tideTrailingEdgeRadians,
+} from './features.js';
 import { CORAL_PARK_TRICK_ZONE_COUNT, createCoralParkSlice } from './maps.js';
 import {
   createTrickZoneAtAngle,
@@ -8,7 +14,6 @@ import {
   pickRandomTrickType,
   REEF_RING_DEPTH_MAX,
   REEF_RING_DEPTH_MIN,
-  SUBMERGED_PURGE_ARC,
   syncTrickZonesWithTide,
   TRICK_TYPE_TO_PREPARE_SLOT,
   trickSlotAngle,
@@ -17,32 +22,35 @@ import {
 } from './trickZonePlacement.js';
 
 describe('syncTrickZonesWithTide', () => {
-  it('keeps submerged features until the purge arc elapses', () => {
+  it('keeps zones before high-tide center', () => {
     const arena = createCoralParkSlice();
     const tide = createTideState(arena.tide!);
-    const submerged = arena.trickZones.find((zone) => isTrickZoneSubmerged(zone, tide));
-    expect(submerged).toBeDefined();
+    const zone = arena.trickZones[0];
+    const zoneAngle = zonePolarAngle(zone, tide);
+    const beforeCenter = {
+      ...tide,
+      phaseRadians: highTideEntryPhaseForAngle(zoneAngle, tide) + 0.01,
+    };
 
     const syncState = createTrickZoneTideSyncState();
     const afterSync = syncTrickZonesWithTide(
       arena.trickZones,
-      tide,
+      beforeCenter,
       arena.map,
       syncState,
       CORAL_PARK_TRICK_ZONE_COUNT,
     );
 
-    expect(afterSync.some((zone) => zone.id === submerged!.id)).toBe(true);
+    expect(afterSync.some((entry) => entry.id === zone.id)).toBe(true);
     expect(afterSync.length).toBeGreaterThanOrEqual(arena.trickZones.length);
     expect(afterSync.length).toBeLessThanOrEqual(CORAL_PARK_TRICK_ZONE_COUNT);
   });
 
-  it('purges long-submerged features and pre-seeds at slot angles', () => {
+  it('cycles features through high-tide center over many ticks', () => {
     const arena = createCoralParkSlice();
     let tide = createTideState(arena.tide!);
     let zones = arena.trickZones.map((zone) => ({ ...zone, center: { ...zone.center } }));
     const syncState = createTrickZoneTideSyncState();
-    const purgeTicks = Math.ceil(SUBMERGED_PURGE_ARC / tide.advancePerTick) + 2;
 
     for (let tick = 0; tick < 400; tick += 1) {
       tide = { ...tide, phaseRadians: tide.phaseRadians + tide.advancePerTick };
@@ -62,20 +70,22 @@ describe('syncTrickZonesWithTide', () => {
     const exposedCount = zones.length - submergedCount;
     expect(exposedCount).toBeGreaterThan(0);
     expect(submergedCount).toBeGreaterThan(0);
-
-    void purgeTicks;
   });
 
-  it('pre-seeds at slot angles when submerged', () => {
+  it('pre-seeds at slot angles when high-tide reroll point passes', () => {
     const arena = createCoralParkSlice();
     const tide = createTideState(arena.tide!);
     const slot = 0;
     const slotAngle = trickSlotAngle(slot, CORAL_PARK_TRICK_ZONE_COUNT);
+    const atReroll = {
+      ...tide,
+      phaseRadians: highTideRerollPhaseForAngle(slotAngle, tide),
+    };
 
     const spawned = createTrickZoneAtAngle(
       arena.map,
       slotAngle,
-      tide,
+      atReroll,
       'preseed-test',
       [],
       0.62,
@@ -85,7 +95,7 @@ describe('syncTrickZonesWithTide', () => {
     );
 
     expect(spawned).not.toBeNull();
-    expect(isTrickZoneSubmerged(spawned!, tide)).toBe(true);
+    expect(isTrickZoneSubmerged(spawned!, atReroll)).toBe(true);
   });
 
   it('places active zones near evenly spaced slot angles', () => {

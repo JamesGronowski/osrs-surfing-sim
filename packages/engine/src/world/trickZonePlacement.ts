@@ -7,9 +7,9 @@ import {
   coralParkReefOuterRadius,
 } from './coralParkCoast.js';
 import {
+  isPastHighTideReroll,
   isPointInTideSweep,
   isTrickZoneSubmerged,
-  TRICK_SUBMERGE_FADE_TICKS,
   type TideState,
   type TrickFeatureType,
   type TrickZone,
@@ -17,12 +17,6 @@ import {
 
 export const CORAL_PARK_TRICK_ZONE_RADIUS = 4;
 export const MIN_TRICK_CENTER_GAP = 12;
-
-/** Tide travel while submerged before a feature is removed (radians). */
-export const SUBMERGED_PURGE_ARC = 0.42;
-
-/** Consecutive submerged ticks before emerge-fade can start (boundary debounce). */
-export const SUBMERGED_CONFIRM_TICKS = 2;
 
 export const TRICK_FEATURE_TYPES: TrickFeatureType[] = [
   'rail',
@@ -54,10 +48,6 @@ const TAU = Math.PI * 2;
 
 export interface TrickZoneTideSyncState {
   nextZoneId: number;
-  submergedTicks: Map<string, number>;
-  emergedTicks: Map<string, number>;
-  /** Zone was confirmed submerged last tick — gates emerge fade-in. */
-  wasSubmerged: Map<string, boolean>;
 }
 
 /** Clockwise reef ride tangent at a given polar angle. */
@@ -68,9 +58,6 @@ export function clockwiseTangent(angle: number): number {
 export function createTrickZoneTideSyncState(): TrickZoneTideSyncState {
   return {
     nextZoneId: 1000,
-    submergedTicks: new Map(),
-    emergedTicks: new Map(),
-    wasSubmerged: new Map(),
   };
 }
 
@@ -194,8 +181,8 @@ function spawnTrickZoneAtSlot(
 }
 
 /**
- * Keep submerged features visible-but-disabled, purge after a short submerged arc,
- * and pre-seed replacements at fixed slot angles around the reef.
+ * Purge features at the high-tide reroll point (just before center), then spawn
+ * replacements that fade in underwater until low tide exposes them fully opaque.
  */
 export function syncTrickZonesWithTide(
   zones: TrickZone[],
@@ -209,58 +196,18 @@ export function syncTrickZonesWithTide(
   const active: TrickZone[] = [];
 
   for (const zone of zones) {
-    const submerged = isTrickZoneSubmerged(zone, tide);
-    if (!submerged) {
-      state.submergedTicks.delete(zone.id);
+    const zoneAngle = zonePolarAngle(zone, tide);
 
-      const shouldEmergeFade =
-        state.wasSubmerged.get(zone.id) === true || state.emergedTicks.has(zone.id);
-      state.wasSubmerged.delete(zone.id);
-
-      if (!shouldEmergeFade) {
-        state.emergedTicks.delete(zone.id);
-        active.push({
-          ...zone,
-          emergedRenderTicks: undefined,
-          submergedRenderTicks: undefined,
-        });
-        continue;
-      }
-
-      const emerged = (state.emergedTicks.get(zone.id) ?? 0) + 1;
-      if (emerged <= TRICK_SUBMERGE_FADE_TICKS) {
-        state.emergedTicks.set(zone.id, emerged);
-        active.push({ ...zone, emergedRenderTicks: emerged, submergedRenderTicks: undefined });
-      } else {
-        state.emergedTicks.delete(zone.id);
-        active.push({ ...zone, emergedRenderTicks: undefined, submergedRenderTicks: undefined });
-      }
+    if (!isTrickZoneSubmerged(zone, tide)) {
+      active.push(zone.spawnedAtHighTide ? { ...zone, spawnedAtHighTide: undefined } : zone);
       continue;
     }
 
-    state.emergedTicks.delete(zone.id);
-    const ticks = (state.submergedTicks.get(zone.id) ?? 0) + 1;
-    state.submergedTicks.set(zone.id, ticks);
-    if (ticks >= SUBMERGED_CONFIRM_TICKS) {
-      state.wasSubmerged.set(zone.id, true);
-    }
-
-    const submergedArc = ticks * tide.advancePerTick;
-    if (submergedArc >= SUBMERGED_PURGE_ARC) {
-      state.submergedTicks.delete(zone.id);
-      state.wasSubmerged.delete(zone.id);
+    if (isPastHighTideReroll(zoneAngle, tide) && !zone.spawnedAtHighTide) {
       continue;
     }
 
-    const renderTicks = Math.max(
-      zone.submergedRenderTicks ?? 0,
-      Math.min(TRICK_SUBMERGE_FADE_TICKS, ticks),
-    );
-    active.push({
-      ...zone,
-      submergedRenderTicks: renderTicks,
-      emergedRenderTicks: undefined,
-    });
+    active.push(zone);
   }
 
   for (let slot = 0; slot < targetCount; slot += 1) {
@@ -273,6 +220,10 @@ export function syncTrickZonesWithTide(
     }
 
     const slotAngle = trickSlotAngle(slot, targetCount);
+    if (!isPastHighTideReroll(slotAngle, tide)) {
+      continue;
+    }
+
     const spawned = spawnTrickZoneAtSlot(
       map,
       slotAngle,
@@ -288,17 +239,7 @@ export function syncTrickZonesWithTide(
     }
 
     state.nextZoneId += 1;
-    if (isTrickZoneSubmerged(spawned, tide)) {
-      state.submergedTicks.set(spawned.id, SUBMERGED_CONFIRM_TICKS);
-      state.wasSubmerged.set(spawned.id, true);
-      active.push({
-        ...spawned,
-        submergedRenderTicks: TRICK_SUBMERGE_FADE_TICKS,
-        emergedRenderTicks: undefined,
-      });
-    } else {
-      active.push(spawned);
-    }
+    active.push({ ...spawned, spawnedAtHighTide: true });
   }
 
   return active;

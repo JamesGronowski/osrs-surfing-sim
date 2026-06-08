@@ -292,7 +292,7 @@ export class PixiRenderer implements IRenderer {
         r,
         zone,
         interactionDisabled,
-        trickZoneVisualAlpha(zone),
+        trickZoneVisualAlpha(zone, tide),
       );
     }
   }

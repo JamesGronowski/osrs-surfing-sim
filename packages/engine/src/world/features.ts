@@ -11,8 +11,11 @@ export const TRICK_APPROACH_TOLERANCE_DEG = 70;
 
 export type TrickFeatureType = 'rail' | 'tunnel' | 'brain_coral' | 'wall_ride' | 'jump';
 
-/** Render alpha when a feature is fully submerged (gameplay still uses the binary tide check). */
+/** Render alpha when a feature is fully submerged (legacy tick-based fade fallback). */
 export const TRICK_SUBMERGED_ALPHA = 0.28;
+
+/** Fade-out completes and reroll happens this far along entry→center (just before midpoint). */
+export const HIGH_TIDE_REROLL_PROGRESS = 0.92;
 
 /** Ticks to ease alpha when submerging or resurfacing. */
 export const TRICK_SUBMERGE_FADE_TICKS = 10;
@@ -29,15 +32,38 @@ export interface TrickZone {
   /** World radians — ride toward +local Y through the feature (OSRS 0=east, clockwise). */
   rotationRadians: number;
   tricked: boolean;
+  /** Spawned at high-tide center — kept submerged until low tide, not re-rolled each tick. */
+  spawnedAtHighTide?: boolean;
   /** Ticks spent submerged this cycle — drives fade-out (set by tide sync). */
   submergedRenderTicks?: number;
   /** Ticks since resurfacing — drives fade-in (set by tide sync). */
   emergedRenderTicks?: number;
 }
 
-export function trickZoneVisualAlpha(zone: TrickZone): number {
+export function trickZoneVisualAlpha(zone: TrickZone, tide?: TideState | null): number {
   if (zone.tricked) {
     return TRICK_TRICKED_ALPHA;
+  }
+  if (tide) {
+    if (!isTrickZoneSubmerged(zone, tide)) {
+      return 1;
+    }
+    const zoneAngle = Math.atan2(zone.center.y - tide.centerY, zone.center.x - tide.centerX);
+    const entry = highTideEntryPhaseForAngle(zoneAngle, tide);
+    const reroll = highTideRerollPhaseForAngle(zoneAngle, tide);
+    const lowTide = lowTidePhaseForAngle(zoneAngle);
+
+    if (zone.spawnedAtHighTide) {
+      if (phaseInProgressRange(tide.phaseRadians, reroll, lowTide)) {
+        return progressInPhaseRange(tide.phaseRadians, reroll, lowTide);
+      }
+      return 0;
+    }
+
+    if (phaseInProgressRange(tide.phaseRadians, entry, reroll)) {
+      return 1 - progressInPhaseRange(tide.phaseRadians, entry, reroll);
+    }
+    return 0;
   }
   if (zone.submergedRenderTicks !== undefined) {
     const t = Math.min(1, zone.submergedRenderTicks / TRICK_SUBMERGE_FADE_TICKS);
@@ -143,6 +169,90 @@ export function isTrickZoneSubmerged(zone: TrickZone, tide: TideState): boolean 
 /** Trailing edge of the submerged band — where dry reef is returning (low tide line). */
 export function tideTrailingEdgeRadians(tide: TideState): number {
   return normalizeAngle(tide.phaseRadians + tide.sweepRadians);
+}
+
+/** Center of the high-tide submerged arc. */
+export function tideCenterRadians(tide: TideState): number {
+  return normalizeAngle(tide.phaseRadians + tide.sweepRadians / 2);
+}
+
+/** Tide phase when the high-tide center sits over a reef polar angle. */
+export function highTideCenterPhaseForAngle(angle: number, tide: TideState): number {
+  return normalizeAngle(angle - tide.sweepRadians / 2);
+}
+
+/** Tide phase when the submerged band trailing edge reaches an angle. */
+export function highTideEntryPhaseForAngle(angle: number, tide: TideState): number {
+  return normalizeAngle(angle - tide.sweepRadians);
+}
+
+/** Tide phase when the submerged band leading edge passes an angle (low tide). */
+export function lowTidePhaseForAngle(angle: number): number {
+  return normalizeAngle(angle);
+}
+
+/** Tide phase just before high-tide center when fade-out completes and reroll happens. */
+export function highTideRerollPhaseForAngle(angle: number, tide: TideState): number {
+  return phaseAtProgress(
+    highTideEntryPhaseForAngle(angle, tide),
+    highTideCenterPhaseForAngle(angle, tide),
+    HIGH_TIDE_REROLL_PROGRESS,
+  );
+}
+
+/** True when tide phase is at or past the reroll point but before low tide for an angle. */
+export function isPastHighTideReroll(angle: number, tide: TideState): boolean {
+  const reroll = highTideRerollPhaseForAngle(angle, tide);
+  const lowTide = lowTidePhaseForAngle(angle);
+  return phaseInProgressRange(tide.phaseRadians, reroll, lowTide);
+}
+
+/** @deprecated Use isPastHighTideReroll */
+export function isPastHighTideCenter(angle: number, tide: TideState): boolean {
+  return isPastHighTideReroll(angle, tide);
+}
+
+export function phaseAtProgress(start: number, end: number, t: number): number {
+  const s = normalizeAngle(start);
+  const e = normalizeAngle(end);
+  if (s <= e) {
+    return normalizeAngle(s + (e - s) * t);
+  }
+  const span = TAU - s + e;
+  return normalizeAngle(s + span * t);
+}
+
+export function phaseInProgressRange(phase: number, start: number, end: number): boolean {
+  const p = normalizeAngle(phase);
+  const s = normalizeAngle(start);
+  const e = normalizeAngle(end);
+  if (s <= e) {
+    return p >= s && p <= e;
+  }
+  return p >= s || p <= e;
+}
+
+export function progressInPhaseRange(phase: number, start: number, end: number): number {
+  const p = normalizeAngle(phase);
+  const s = normalizeAngle(start);
+  const e = normalizeAngle(end);
+  if (s <= e) {
+    if (p <= s) {
+      return 0;
+    }
+    if (p >= e) {
+      return 1;
+    }
+    return (p - s) / (e - s);
+  }
+  const span = TAU - s + e;
+  if (p >= s) {
+    return Math.min(1, (p - s) / span);
+  }
+  if (p <= e) {
+    return Math.min(1, (TAU - s + p) / span);
+  }
+  return 0;
 }
 
 /** Clockwise angular distance from `from` to `to` (both normalized). */

@@ -4,21 +4,24 @@ import { getTile } from './collision.js';
 import {
   createTideState,
   findTrickZoneAt,
+  highTideEntryPhaseForAngle,
+  highTideRerollPhaseForAngle,
   isApproachHeadingValid,
+  phaseAtProgress,
   isPointInTideSweep,
   isTrickZoneSubmerged,
+  lowTidePhaseForAngle,
   tideTrailingEdgeRadians,
-  TRICK_SUBMERGE_FADE_TICKS,
-  TRICK_SUBMERGED_ALPHA,
   trickZoneVisualAlpha,
   type TrickZone,
 } from './features.js';
-import { createCoralParkSlice } from './maps.js';
+import { CORAL_PARK_TRICK_ZONE_COUNT, createCoralParkSlice } from './maps.js';
 import {
   createTrickZoneAtAngle,
   createTrickZoneTideSyncState,
-  SUBMERGED_CONFIRM_TICKS,
   syncTrickZonesWithTide,
+  trickSlotAngle,
+  zonePolarAngle,
 } from './trickZonePlacement.js';
 
 const tide = createTideState({
@@ -31,23 +34,41 @@ const tide = createTideState({
 });
 
 describe('trickZoneVisualAlpha', () => {
-  it('eases alpha while submerged but gameplay uses the binary tide check', () => {
-    const zone: TrickZone = {
-      id: 'fade',
-      type: 'rail',
-      prepareSlot: 0,
-      center: { x: 0, y: 0 },
-      radius: 2,
-      rotationRadians: 0,
-      tricked: false,
-      submergedRenderTicks: TRICK_SUBMERGE_FADE_TICKS / 2,
+  it('fades out to transparent before reroll and in to opaque at low tide', () => {
+    const arena = createCoralParkSlice();
+    const tideState = createTideState(arena.tide!);
+    const zone = arena.trickZones[0];
+    const zoneAngle = zonePolarAngle(zone, tideState);
+    const entryPhase = highTideEntryPhaseForAngle(zoneAngle, tideState);
+    const rerollPhase = highTideRerollPhaseForAngle(zoneAngle, tideState);
+    const lowTidePhase = lowTidePhaseForAngle(zoneAngle);
+
+    const exposedTide = { ...tideState, phaseRadians: lowTidePhase + 0.05 };
+    expect(trickZoneVisualAlpha(zone, exposedTide)).toBe(1);
+
+    const midFadeTide = {
+      ...tideState,
+      phaseRadians: phaseAtProgress(entryPhase, rerollPhase, 0.5),
     };
-    const alpha = trickZoneVisualAlpha(zone);
-    expect(alpha).toBeGreaterThan(TRICK_SUBMERGED_ALPHA);
-    expect(alpha).toBeLessThan(1);
-    expect(trickZoneVisualAlpha({ ...zone, submergedRenderTicks: TRICK_SUBMERGE_FADE_TICKS })).toBe(
-      TRICK_SUBMERGED_ALPHA,
-    );
+    const midAlpha = trickZoneVisualAlpha(zone, midFadeTide);
+    expect(midAlpha).toBeGreaterThan(0);
+    expect(midAlpha).toBeLessThan(1);
+
+    const rerollTide = { ...tideState, phaseRadians: rerollPhase };
+    expect(trickZoneVisualAlpha(zone, rerollTide)).toBe(0);
+
+    const replacement: TrickZone = { ...zone, spawnedAtHighTide: true };
+    expect(trickZoneVisualAlpha(replacement, rerollTide)).toBe(0);
+
+    const midRiseTide = {
+      ...tideState,
+      phaseRadians: phaseAtProgress(rerollPhase, lowTidePhase, 0.5),
+    };
+    const riseAlpha = trickZoneVisualAlpha(replacement, midRiseTide);
+    expect(riseAlpha).toBeGreaterThan(0);
+    expect(riseAlpha).toBeLessThan(1);
+
+    expect(trickZoneVisualAlpha(replacement, exposedTide)).toBe(1);
   });
 });
 
@@ -95,68 +116,96 @@ describe('ring tide', () => {
 });
 
 describe('syncTrickZonesWithTide', () => {
-  it('retains submerged zones for gameplay surf-over and rendering', () => {
+  it('retains zones before reroll and purges past it', () => {
     const arena = createCoralParkSlice();
     const tideState = createTideState(arena.tide!);
-    const submerged = arena.trickZones.find((zone) => isTrickZoneSubmerged(zone, tideState));
-    expect(submerged).toBeDefined();
-
+    const zone = arena.trickZones[0];
+    const zoneAngle = zonePolarAngle(zone, tideState);
     const syncState = createTrickZoneTideSyncState();
-    const zones = syncTrickZonesWithTide(
-      arena.trickZones,
-      tideState,
+
+    const beforeReroll = {
+      ...tideState,
+      phaseRadians: highTideEntryPhaseForAngle(zoneAngle, tideState) + 0.01,
+    };
+    const kept = syncTrickZonesWithTide([zone], beforeReroll, arena.map, syncState, 1);
+    expect(kept.some((entry) => entry.id === zone.id)).toBe(true);
+
+    const pastReroll = {
+      ...tideState,
+      phaseRadians: highTideRerollPhaseForAngle(zoneAngle, tideState),
+    };
+    const purged = syncTrickZonesWithTide([zone], pastReroll, arena.map, syncState, 1);
+    expect(purged.some((entry) => entry.id === zone.id)).toBe(false);
+  });
+
+  it('does not re-roll replacements while tide remains past reroll point', () => {
+    const arena = createCoralParkSlice();
+    const tideState = createTideState(arena.tide!);
+    const slotAngle = trickSlotAngle(0, CORAL_PARK_TRICK_ZONE_COUNT);
+    const syncState = createTrickZoneTideSyncState();
+    const atReroll = {
+      ...tideState,
+      phaseRadians: highTideRerollPhaseForAngle(slotAngle, tideState),
+    };
+
+    let zones = syncTrickZonesWithTide(
+      [],
+      atReroll,
       arena.map,
       syncState,
-      arena.trickZones.length,
+      CORAL_PARK_TRICK_ZONE_COUNT,
     );
+    expect(zones.length).toBeGreaterThanOrEqual(1);
+    const replacement = zones[0];
+    const { id, type, center } = replacement;
 
-    expect(zones.some((zone) => zone.id === submerged!.id)).toBe(true);
-    expect(zones.length).toBe(arena.trickZones.length);
-  });
-
-  it('does not fade in zones that were never submerged', () => {
-    const arena = createCoralParkSlice();
-    const tideState = createTideState(arena.tide!);
-    const exposed = arena.trickZones.filter((zone) => !isTrickZoneSubmerged(zone, tideState));
-    expect(exposed.length).toBeGreaterThan(0);
-
-    const syncState = createTrickZoneTideSyncState();
-    const zones = syncTrickZonesWithTide(exposed, tideState, arena.map, syncState, exposed.length);
-
-    for (const zone of zones) {
-      expect(zone.emergedRenderTicks).toBeUndefined();
-      expect(trickZoneVisualAlpha(zone)).toBe(1);
+    for (let tick = 0; tick < 8; tick += 1) {
+      const stillSubmerged = {
+        ...atReroll,
+        phaseRadians: atReroll.phaseRadians + tideState.advancePerTick * (tick + 1),
+      };
+      zones = syncTrickZonesWithTide(
+        zones,
+        stillSubmerged,
+        arena.map,
+        syncState,
+        CORAL_PARK_TRICK_ZONE_COUNT,
+      );
+      const match = zones.find((zone) => zone.id === id);
+      expect(match).toBeDefined();
+      expect(match!.type).toBe(type);
+      expect(match!.center.x).toBe(center.x);
+      expect(match!.center.y).toBe(center.y);
     }
   });
 
-  it('fades in after confirmed submersion then stays opaque while exposed', () => {
+  it('spawns replacements at reroll and exposes them at low tide', () => {
     const arena = createCoralParkSlice();
     const tideState = createTideState(arena.tide!);
-    const submerged = arena.trickZones.find((zone) => isTrickZoneSubmerged(zone, tideState));
-    expect(submerged).toBeDefined();
-
+    const slotAngle = trickSlotAngle(0, CORAL_PARK_TRICK_ZONE_COUNT);
     const syncState = createTrickZoneTideSyncState();
-    for (let i = 0; i < SUBMERGED_CONFIRM_TICKS; i += 1) {
-      syncTrickZonesWithTide([submerged!], tideState, arena.map, syncState, 1);
-    }
 
-    const dryTide = {
+    const atReroll = {
       ...tideState,
-      phaseRadians: tideState.phaseRadians + tideState.sweepRadians + 1,
+      phaseRadians: highTideRerollPhaseForAngle(slotAngle, tideState),
     };
-    let zones = syncTrickZonesWithTide([submerged!], dryTide, arena.map, syncState, 1);
-    expect(zones[0].emergedRenderTicks).toBe(1);
-    expect(trickZoneVisualAlpha(zones[0])).toBeGreaterThan(TRICK_SUBMERGED_ALPHA);
+    const spawned = syncTrickZonesWithTide(
+      [],
+      atReroll,
+      arena.map,
+      syncState,
+      CORAL_PARK_TRICK_ZONE_COUNT,
+    );
+    expect(spawned.length).toBeGreaterThanOrEqual(1);
+    const replacement = spawned[0];
+    expect(trickZoneVisualAlpha(replacement, atReroll)).toBe(0);
 
-    for (let tick = 0; tick < TRICK_SUBMERGE_FADE_TICKS; tick += 1) {
-      zones = syncTrickZonesWithTide(zones, dryTide, arena.map, syncState, 1);
-    }
-
-    expect(zones[0].emergedRenderTicks).toBeUndefined();
-    expect(trickZoneVisualAlpha(zones[0])).toBe(1);
-
-    zones = syncTrickZonesWithTide(zones, dryTide, arena.map, syncState, 1);
-    expect(trickZoneVisualAlpha(zones[0])).toBe(1);
+    const atLowTide = {
+      ...tideState,
+      phaseRadians: lowTidePhaseForAngle(slotAngle) + 0.05,
+    };
+    expect(trickZoneVisualAlpha(replacement, atLowTide)).toBe(1);
+    expect(isTrickZoneSubmerged(replacement, atLowTide)).toBe(false);
   });
 
   it('keeps exposed reef features active after tide cycles', () => {
@@ -186,6 +235,7 @@ describe('syncTrickZonesWithTide', () => {
       expect(getTile(arena.map, Math.floor(zone.center.x), Math.floor(zone.center.y))).toBe(
         'coral_rideable',
       );
+      expect(trickZoneVisualAlpha(zone, tideState)).toBe(1);
     }
   });
 });
