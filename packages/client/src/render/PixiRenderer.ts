@@ -281,10 +281,13 @@ export class PixiRenderer implements IRenderer {
     const tide = snapshot.tide;
 
     for (const zone of snapshot.trickZones) {
-      const submerged = tide ? isTrickZoneSubmerged(zone, tide) : false;
+      if (tide && isTrickZoneSubmerged(zone, tide)) {
+        continue;
+      }
+
       const center = this.worldToScreen(zone.center.x, zone.center.y);
       const r = zone.radius * this.tileSizePx;
-      drawTrickFeature(this.trickGraphics!, center.x, center.y, r, zone, submerged);
+      drawTrickFeature(this.trickGraphics!, center.x, center.y, r, zone);
     }
   }
 

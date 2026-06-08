@@ -2,7 +2,6 @@ import { Graphics } from 'pixi.js';
 
 import type { TrickFeatureType, TrickZone } from '@osrs-surfing/engine';
 
-const SUBMERGED_ALPHA = 0.42;
 const TRICKED_ALPHA = 0.42;
 const APPROACH_CHEVRON_COLOR = 0xfff566;
 
@@ -331,11 +330,10 @@ export function drawTrickFeature(
   screenY: number,
   pixelRadius: number,
   zone: TrickZone,
-  submerged: boolean,
 ): void {
   const r = pixelRadius;
   const rotation = zone.rotationRadians;
-  const alpha = zone.tricked ? TRICKED_ALPHA : submerged ? SUBMERGED_ALPHA : 1;
+  const alpha = zone.tricked ? TRICKED_ALPHA : 1;
   const palette = paletteFor(zone.type, zone.tricked);
 
   switch (zone.type) {
@@ -360,6 +358,6 @@ export function drawTrickFeature(
   }
 
   if (!zone.tricked) {
-    drawApproachChevrons(g, screenX, screenY, r, rotation, palette.approach, submerged ? alpha : 1);
+    drawApproachChevrons(g, screenX, screenY, r, rotation, palette.approach, 1);
   }
 }

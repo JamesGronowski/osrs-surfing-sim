@@ -32,14 +32,17 @@ import {
   findTrickZoneAt,
   isTrickPrepareTimingValid,
   markZoneTricked,
-  refreshTrickZonesForTide,
   tickTide,
   type TideState,
   type TrickPrepareState,
   type TrickZone,
 } from '../world/features.js';
-import type { GameArena } from '../world/maps.js';
-import { relocateTrickZoneOnReef } from '../world/trickZonePlacement.js';
+import { CORAL_PARK_TRICK_ZONE_COUNT, type GameArena } from '../world/maps.js';
+import {
+  createTrickZoneTideSyncState,
+  syncTrickZonesWithTide,
+  type TrickZoneTideSyncState,
+} from '../world/trickZonePlacement.js';
 
 export interface SimulationConfig {
   arena: GameArena;
@@ -101,7 +104,7 @@ export class GameSimulation {
   private walkClickMarker: { tx: number; ty: number; valid: boolean } | null = null;
   private pendingNpcTalk: NpcDefinition | null = null;
   private pendingBoardMount = false;
-  private zoneWasSubmerged = new Map<string, boolean>();
+  private trickZoneTideSync: TrickZoneTideSyncState;
   private trickPrepare: TrickPrepareState | null = null;
   private activeTrickZoneId: string | null = null;
   private tideFrozen = false;
@@ -121,6 +124,7 @@ export class GameSimulation {
     this.progression = createProgressionState();
     this.trickZones = config.arena.trickZones.map((zone) => ({ ...zone }));
     this.tide = config.arena.tide ? createTideState(config.arena.tide) : null;
+    this.trickZoneTideSync = createTrickZoneTideSyncState(this.tide);
   }
 
   getSnapshot(): SimulationSnapshot {
@@ -504,11 +508,12 @@ export class GameSimulation {
 
     if (this.tide && !this.tideFrozen) {
       this.tide = tickTide(this.tide);
-      this.trickZones = refreshTrickZonesForTide(
+      this.trickZones = syncTrickZonesWithTide(
         this.trickZones,
         this.tide,
-        this.zoneWasSubmerged,
-        (zone, allZones) => relocateTrickZoneOnReef(zone, this.arena.map, allZones),
+        this.arena.map,
+        this.trickZoneTideSync,
+        CORAL_PARK_TRICK_ZONE_COUNT,
       );
     }
 

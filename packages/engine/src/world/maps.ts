@@ -1,4 +1,3 @@
-import type { TrickPrepareSlot } from '../constants/tricks.js';
 import { createWorldMap, setTile, type WorldMap } from './collision.js';
 import {
   CORAL_PARK_ISLAND_CX,
@@ -15,13 +14,15 @@ import {
   coralParkTileAngle,
   coralParkTileDistance,
 } from './coralParkCoast.js';
-import type { TideConfig, TrickFeatureType, TrickZone } from './features.js';
+import type { TideConfig, TrickZone } from './features.js';
 import type { NpcDefinition } from './npc.js';
 import {
   clockwiseTangent,
   CORAL_PARK_TRICK_ZONE_RADIUS,
   isFarEnoughFromZones,
   reefCenterAtAngle,
+  TRICK_FEATURE_TYPES,
+  TRICK_TYPE_TO_PREPARE_SLOT,
 } from './trickZonePlacement.js';
 
 export {
@@ -44,23 +45,14 @@ export interface GameArena {
   npcs: NpcDefinition[];
 }
 
-const TRICK_TYPES: TrickFeatureType[] = ['rail', 'tunnel', 'jump', 'brain_coral', 'wall_ride'];
-const TYPE_TO_SLOT: Record<TrickFeatureType, TrickPrepareSlot> = {
-  rail: 0,
-  tunnel: 1,
-  jump: 2,
-  brain_coral: 0,
-  wall_ride: 1,
-};
-
 const TRICK_RING_POSITIONS = [0.32, 0.62, 0.88];
-const TRICK_ZONE_COUNT = 15;
+export const CORAL_PARK_TRICK_ZONE_COUNT = 15;
 
 function buildTrickZones(map: WorldMap): TrickZone[] {
   const zones: TrickZone[] = [];
-  const angleStep = (Math.PI * 2) / TRICK_ZONE_COUNT;
+  const angleStep = (Math.PI * 2) / CORAL_PARK_TRICK_ZONE_COUNT;
 
-  for (let i = 0; i < TRICK_ZONE_COUNT; i += 1) {
+  for (let i = 0; i < CORAL_PARK_TRICK_ZONE_COUNT; i += 1) {
     const positionAngle = i * angleStep + 0.22;
     const ringT = TRICK_RING_POSITIONS[i % TRICK_RING_POSITIONS.length];
     const center = reefCenterAtAngle(map, positionAngle, ringT);
@@ -68,14 +60,14 @@ function buildTrickZones(map: WorldMap): TrickZone[] {
       continue;
     }
 
-    const type = TRICK_TYPES[i % TRICK_TYPES.length];
+    const type = TRICK_FEATURE_TYPES[i % TRICK_FEATURE_TYPES.length];
     const counterRide = i % 5 === 0;
     const rotation = counterRide ? positionAngle + Math.PI / 2 : clockwiseTangent(positionAngle);
 
     zones.push({
       id: `${type}-${i}`,
       type,
-      prepareSlot: TYPE_TO_SLOT[type],
+      prepareSlot: TRICK_TYPE_TO_PREPARE_SLOT[type],
       center,
       radius: CORAL_PARK_TRICK_ZONE_RADIUS,
       rotationRadians: rotation,
@@ -151,7 +143,7 @@ export function createCoralParkSlice(): GameArena {
           'Ride the wide reef loop around the island.',
           'Yellow chevrons show which way to ride through each feature.',
           'Prime a trick button 1–4 ticks before you hit the matching coral.',
-          "Tai'ura's tide submerges features — they wash back up somewhere new on the reef.",
+          "Tai'ura's tide submerges features — new ones wash up wherever the reef dries out.",
         ],
       },
     ],

@@ -7,3 +7,19 @@
 [  955020ms] The requested module '/@fs/Users/jamesg/Projects/osrs-surfing-sim/packages/engine/dist/index.js?t=1780895493840' does not provide an export named 'comboTierName'
 [  958116ms] The requested module '/@fs/Users/jamesg/Projects/osrs-surfing-sim/packages/engine/dist/index.js?t=1780895493840' does not provide an export named 'comboTierName'
 [  974194ms] The requested module '/@fs/Users/jamesg/Projects/osrs-surfing-sim/packages/engine/dist/index.js?t=1780895493840' does not provide an export named 'comboTierName'
+[ 3561262ms] ReferenceError: submerged is not defined
+    at drawTrickFeature (http://localhost:5173/src/render/trickFeatureGraphic.ts?t=1780898698649:250:78)
+    at PixiRenderer.drawTrickZones (http://localhost:5173/src/render/PixiRenderer.ts?t=1780898698649:223:7)
+    at PixiRenderer.render (http://localhost:5173/src/render/PixiRenderer.ts?t=1780898698649:110:10)
+    at OsrsClient.renderVisuals (http://localhost:5173/src/OsrsClient.ts?t=1780898698649:247:19)
+    at OsrsClient.onVisualFrame (http://localhost:5173/src/OsrsClient.ts?t=1780898698649:230:14)
+    at http://localhost:5173/src/OsrsClient.ts?t=1780898698649:234:67
+[ 3611253ms] ReferenceError: isTrickZoneSubmerged is not defined
+    at http://localhost:5173/@fs/Users/jamesg/Projects/osrs-surfing-sim/packages/engine/dist/game/simulation.js?t=1780898745138:370:69
+    at Array.filter (<anonymous>)
+    at http://localhost:5173/@fs/Users/jamesg/Projects/osrs-surfing-sim/packages/engine/dist/game/simulation.js?t=1780898745138:370:42
+    at refreshTrickZonesForTide (http://localhost:5173/@fs/Users/jamesg/Projects/osrs-surfing-sim/packages/engine/dist/world/features.js?t=1780898745132:113:34)
+    at GameSimulation.tick (http://localhost:5173/@fs/Users/jamesg/Projects/osrs-surfing-sim/packages/engine/dist/game/simulation.js?t=1780898745138:369:31)
+    at OsrsClient.onGameTick (http://localhost:5173/src/OsrsClient.ts?t=1780898745139:193:21)
+    at OsrsClient.onVisualFrame (http://localhost:5173/src/OsrsClient.ts?t=1780898745139:227:16)
+    at http://localhost:5173/src/OsrsClient.ts?t=1780898745139:234:67

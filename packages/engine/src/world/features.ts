@@ -113,6 +113,16 @@ export function isTrickZoneSubmerged(zone: TrickZone, tide: TideState): boolean 
   return isPointInTideSweep(zone.center.x, zone.center.y, tide);
 }
 
+/** Trailing edge of the submerged band — where dry reef is returning (low tide line). */
+export function tideTrailingEdgeRadians(tide: TideState): number {
+  return normalizeAngle(tide.phaseRadians + tide.sweepRadians);
+}
+
+/** Clockwise angular distance from `from` to `to` (both normalized). */
+export function clockwiseAngleDelta(from: number, to: number): number {
+  return normalizeAngle(to - from);
+}
+
 export function isApproachHeadingValid(zone: TrickZone, riderHeading: HeadingIndex): boolean {
   const riderRad = (headingToDegrees(riderHeading) * Math.PI) / 180;
   let diff = Math.abs(normalizeAngle(riderRad - zone.rotationRadians));
@@ -169,33 +179,4 @@ export function advanceTrickPrepare(prepare: TrickPrepareState | null): TrickPre
 
 export function markZoneTricked(zones: TrickZone[], zoneId: string): TrickZone[] {
   return zones.map((zone) => (zone.id === zoneId ? { ...zone, tricked: true } : zone));
-}
-
-export type TrickZoneRelocator = (zone: TrickZone, allZones: TrickZone[]) => TrickZone;
-
-/** Re-enable tricks and optionally relocate features when the tide reveals them again. */
-export function refreshTrickZonesForTide(
-  zones: TrickZone[],
-  tide: TideState | null,
-  wasSubmerged: Map<string, boolean>,
-  relocate?: TrickZoneRelocator,
-): TrickZone[] {
-  if (!tide) {
-    return zones;
-  }
-
-  const next = zones.map((zone) => ({ ...zone, center: { ...zone.center } }));
-
-  for (let i = 0; i < next.length; i += 1) {
-    const zone = next[i];
-    const submerged = isTrickZoneSubmerged(zone, tide);
-    const prev = wasSubmerged.get(zone.id) ?? false;
-    wasSubmerged.set(zone.id, submerged);
-
-    if (prev && !submerged) {
-      next[i] = relocate ? relocate(zone, next) : { ...zone, tricked: false };
-    }
-  }
-
-  return next;
 }

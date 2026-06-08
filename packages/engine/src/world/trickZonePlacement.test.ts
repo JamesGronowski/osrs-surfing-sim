@@ -1,44 +1,61 @@
 import { describe, expect, it } from 'vitest';
 
 import { getTile } from './collision.js';
-import { createCoralParkSlice } from './maps.js';
-import { relocateTrickZoneOnReef } from './trickZonePlacement.js';
-import type { TrickZone } from './features.js';
+import { createTideState, isTrickZoneSubmerged, tideTrailingEdgeRadians } from './features.js';
+import { CORAL_PARK_TRICK_ZONE_COUNT, createCoralParkSlice } from './maps.js';
+import {
+  createTrickZoneAtAngle,
+  createTrickZoneTideSyncState,
+  pickRandomTrickType,
+  syncTrickZonesWithTide,
+  TRICK_TYPE_TO_PREPARE_SLOT,
+} from './trickZonePlacement.js';
 
-describe('relocateTrickZoneOnReef', () => {
-  it('places resurfaced features on rideable coral away from their old spot', () => {
+describe('syncTrickZonesWithTide', () => {
+  it('maintains target count after tide cycles', () => {
     const arena = createCoralParkSlice();
-    const zone = arena.trickZones[0];
-    const original = { ...zone.center };
+    let tide = createTideState(arena.tide!);
+    let zones = arena.trickZones.map((zone) => ({ ...zone }));
+    const syncState = createTrickZoneTideSyncState(tide);
 
-    let roll = 0;
-    const random = () => {
-      roll += 1;
-      return (roll * 0.137) % 1;
-    };
+    for (let tick = 0; tick < 300; tick += 1) {
+      tide = { ...tide, phaseRadians: tide.phaseRadians + tide.advancePerTick };
+      zones = syncTrickZonesWithTide(
+        zones,
+        tide,
+        arena.map,
+        syncState,
+        CORAL_PARK_TRICK_ZONE_COUNT,
+      );
+    }
 
-    const relocated = relocateTrickZoneOnReef(zone, arena.map, arena.trickZones, random);
-
-    expect(relocated.tricked).toBe(false);
-    expect(getTile(arena.map, Math.floor(relocated.center.x), Math.floor(relocated.center.y))).toBe(
-      'coral_rideable',
-    );
-    expect(
-      Math.hypot(relocated.center.x - original.x, relocated.center.y - original.y),
-    ).toBeGreaterThan(4);
+    expect(zones).toHaveLength(CORAL_PARK_TRICK_ZONE_COUNT);
+    for (const zone of zones) {
+      expect(isTrickZoneSubmerged(zone, tide)).toBe(false);
+      expect(getTile(arena.map, Math.floor(zone.center.x), Math.floor(zone.center.y))).toBe(
+        'coral_rideable',
+      );
+    }
   });
+});
 
-  it('keeps feature type and id when relocating', () => {
+describe('createTrickZoneAtAngle', () => {
+  it('spawns on dry reef at the low-tide line', () => {
     const arena = createCoralParkSlice();
-    const zone: TrickZone = {
-      ...arena.trickZones[0],
-      tricked: true,
-    };
+    const tide = createTideState(arena.tide!);
+    const spawnAngle = tideTrailingEdgeRadians(tide) + 0.2;
 
-    const relocated = relocateTrickZoneOnReef(zone, arena.map, arena.trickZones, () => 0.42);
+    const zone = createTrickZoneAtAngle(arena.map, spawnAngle, tide, 'spawn-1', [], () => 0.25);
 
-    expect(relocated.id).toBe(zone.id);
-    expect(relocated.type).toBe(zone.type);
-    expect(relocated.prepareSlot).toBe(zone.prepareSlot);
+    expect(zone).not.toBeNull();
+    expect(zone!.prepareSlot).toBe(TRICK_TYPE_TO_PREPARE_SLOT[zone!.type]);
+    expect(isTrickZoneSubmerged(zone!, tide)).toBe(false);
+  });
+});
+
+describe('pickRandomTrickType', () => {
+  it('returns a valid trick type', () => {
+    expect(pickRandomTrickType(() => 0)).toBe('rail');
+    expect(pickRandomTrickType(() => 0.99)).toBe('wall_ride');
   });
 });
