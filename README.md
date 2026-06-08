@@ -73,6 +73,17 @@ Round central island with **Kaulu the Surf Guru**, a sand-ring board dock, and a
 
 See [docs/CORAL_PARK.md](docs/CORAL_PARK.md) for tide phase timing, spawn rules, and where to edit behaviour.
 
+## GitHub Pages
+
+Pushes to `main` build the client and deploy to the `gh-pages` branch.
+
+One-time setup in the repo on GitHub:
+
+1. **Settings → Actions → General → Workflow permissions** — select **Read and write permissions**
+2. **Settings → Pages → Build and deployment** — Source: **Deploy from a branch**, Branch: **`gh-pages`** / **`/ (root)`**
+
+Live site: https://staysleeping.github.io/osrs-surfing-sim/
+
 ## License
 
 Original code in this repository is licensed under the [MIT License](LICENSE).
