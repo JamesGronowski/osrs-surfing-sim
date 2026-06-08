@@ -72,3 +72,11 @@ Round central island with **Kaulu the Surf Guru**, a sand-ring board dock, and a
 - Ride **clockwise** around the island; yellow chevrons mark approach direction per feature.
 
 See [docs/CORAL_PARK.md](docs/CORAL_PARK.md) for tide phase timing, spawn rules, and where to edit behaviour.
+
+## License
+
+Original code in this repository is licensed under the [MIT License](LICENSE).
+
+OSRS UI sprites are from [melkypie/resource-packs](https://github.com/melkypie/resource-packs) (BSD-2-Clause). See [ATTRIBUTION.md](packages/client/public/assets/osrs/ATTRIBUTION.md).
+
+This is an unofficial fan project. Old School RuneScape and related trademarks are © Jagex Ltd. Not affiliated with or endorsed by Jagex.
