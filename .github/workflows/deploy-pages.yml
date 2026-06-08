@@ -20,6 +20,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/configure-pages@v5
+
       - uses: pnpm/action-setup@v4
         with:
           version: 9.15.4
@@ -41,9 +43,23 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+      actions: read
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Enable GitHub Pages
+        run: |
+          if gh api "repos/${GITHUB_REPOSITORY}/pages" --jq .status >/dev/null 2>&1; then
+            gh api -X PUT "repos/${GITHUB_REPOSITORY}/pages" -f build_type=workflow
+          else
+            gh api -X POST "repos/${GITHUB_REPOSITORY}/pages" -f build_type=workflow
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - id: deployment
         uses: actions/deploy-pages@v4
