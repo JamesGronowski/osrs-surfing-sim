@@ -9,6 +9,7 @@ export * from './world/collision.js';
 export * from './world/features.js';
 export * from './world/tideVisuals.js';
 export * from './world/trickAnimation.js';
+export * from './world/trickHitbox.js';
 export * from './world/maps.js';
 export * from './world/trickZonePlacement.js';
 export * from './world/npc.js';

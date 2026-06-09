@@ -5,6 +5,7 @@ import {
 } from '../constants/tricks.js';
 import { headingToDegrees, type HeadingIndex } from '../movement/heading.js';
 import type { WorldPos } from './coords.js';
+import { isPointInTrickZoneHitbox } from './trickHitbox.js';
 
 /** Max angle between rider heading and feature approach direction. */
 export const TRICK_APPROACH_TOLERANCE_DEG = 70;
@@ -318,14 +319,23 @@ export function clockwiseAngleDelta(from: number, to: number): number {
   return normalizeAngle(to - from);
 }
 
-export function isApproachHeadingValid(zone: TrickZone, riderHeading: HeadingIndex): boolean {
-  const riderRad = (headingToDegrees(riderHeading) * Math.PI) / 180;
-  let diff = Math.abs(normalizeAngle(riderRad - zone.rotationRadians));
+function approachHeadingDelta(riderRad: number, targetRad: number): number {
+  let diff = Math.abs(normalizeAngle(riderRad - targetRad));
   if (diff > Math.PI) {
     diff = TAU - diff;
   }
+  return diff;
+}
+
+export function isApproachHeadingValid(zone: TrickZone, riderHeading: HeadingIndex): boolean {
+  const riderRad = (headingToDegrees(riderHeading) * Math.PI) / 180;
   const tolerance = (TRICK_APPROACH_TOLERANCE_DEG * Math.PI) / 180;
-  return diff <= tolerance;
+  const targets =
+    zone.type === 'jump'
+      ? [zone.rotationRadians, zone.rotationRadians + Math.PI]
+      : [zone.rotationRadians];
+
+  return targets.some((target) => approachHeadingDelta(riderRad, target) <= tolerance);
 }
 
 export function findTrickZoneAt(
@@ -346,7 +356,7 @@ export function findTrickZoneAt(
     const dx = pos.x - zone.center.x;
     const dy = pos.y - zone.center.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    if (dist <= zone.radius && dist < bestDist) {
+    if (isPointInTrickZoneHitbox(zone, pos) && dist < bestDist) {
       best = zone;
       bestDist = dist;
     }

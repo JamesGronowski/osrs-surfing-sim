@@ -101,19 +101,32 @@ function wallRidePose(animation: DisplayTrickAnimation, progress: number): Trick
   };
 }
 
+function jumpTravelsWithZoneAxis(animation: DisplayTrickAnimation): boolean {
+  const dx = animation.end.x - animation.start.x;
+  const dy = animation.end.y - animation.start.y;
+  const rideLength = Math.hypot(dx, dy);
+  if (rideLength < 1e-6) {
+    return true;
+  }
+  const axisX = Math.cos(animation.rotationRadians);
+  const axisY = Math.sin(animation.rotationRadians);
+  return (dx * axisX + dy * axisY) / rideLength >= 0;
+}
+
 function jumpPose(animation: DisplayTrickAnimation, progress: number): TrickBoardPose {
+  const direction = jumpTravelsWithZoneAxis(animation) ? 1 : -1;
   const radius = animation.zoneRadius;
   const arc = Math.sin(progress * Math.PI);
   const flip = progress * Math.PI * 1.1;
 
   return {
     liftY: arc * radius * 0.62,
-    pitch: -arc * 0.4 - flip * 0.65,
-    roll: Math.sin(progress * Math.PI * 2.2) * 0.48,
+    pitch: direction * (-arc * 0.4 - flip * 0.65),
+    roll: direction * Math.sin(progress * Math.PI * 2.2) * 0.48,
     yawOffset: 0,
     offsetX: 0,
     offsetY: 0,
-    riderLean: Math.sin(progress * Math.PI * 2) * 0.15,
+    riderLean: direction * Math.sin(progress * Math.PI * 2) * 0.15,
   };
 }
 

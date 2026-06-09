@@ -17,6 +17,8 @@ import {
   type TrickPrepareState,
   type TrickZone,
 } from '../world/features.js';
+import { trickZoneHitboxReach } from '../world/trickHitbox.js';
+
 const TAU = Math.PI * 2;
 
 /** Mid-reef radial depth for staying on the rideable ring. */
@@ -355,7 +357,7 @@ function steerTowardZone(
   if (dist > 20) {
     return { steerX: zone.center.x, steerY: zone.center.y };
   }
-  if (dist > zone.radius + 2.5) {
+  if (dist > trickZoneHitboxReach(zone) + 2.5) {
     return { steerX: zone.center.x, steerY: zone.center.y };
   }
 
@@ -378,7 +380,7 @@ function shouldPrimeTrick(
   const primeDistance = inFrontHalf
     ? DEMO_SURFER_ZONE_PRIME_DISTANCE + 4
     : DEMO_SURFER_ZONE_PRIME_DISTANCE;
-  const minDist = zone.radius * (inFrontHalf ? 0.35 : 0.45);
+  const minDist = trickZoneHitboxReach(zone) * (inFrontHalf ? 0.35 : 0.45);
   if (dist < primeDistance && dist > minDist) {
     return zone.prepareSlot;
   }

@@ -96,6 +96,21 @@ describe('trick approach', () => {
     expect(isApproachHeadingValid(zone, 8)).toBe(false);
     expect(isApproachHeadingValid(zone, 1)).toBe(true);
   });
+
+  it('accepts either travel direction for jump approach headings', () => {
+    const jump: TrickZone = {
+      id: 'jump',
+      type: 'jump',
+      prepareSlot: 2,
+      center: { x: 0, y: 0 },
+      radius: 2,
+      rotationRadians: 0,
+      tricked: false,
+    };
+    expect(isApproachHeadingValid(jump, 0)).toBe(true);
+    expect(isApproachHeadingValid(jump, 8)).toBe(true);
+    expect(isApproachHeadingValid(jump, 4)).toBe(false);
+  });
 });
 
 describe('ring tide', () => {

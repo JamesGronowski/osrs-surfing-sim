@@ -72,12 +72,38 @@ function dot(ax: number, ay: number, bx: number, by: number): number {
 
 const RIDE_AXIS_ENTRY_THRESHOLD = 0.08;
 
+/** Pick jump travel direction from rider heading along the feature axis. */
+function signedJumpRideVector(
+  zone: TrickZone,
+  entryPosition: WorldPos,
+  startHeading: HeadingIndex,
+): { x: number; y: number } {
+  const axis = trickFeatureRideUnitVector(zone);
+  const travel = headingToUnitVector(startHeading);
+  const travelDot = dot(travel.x, travel.y, axis.x, axis.y);
+
+  if (Math.abs(travelDot) >= 0.05) {
+    return travelDot >= 0 ? axis : { x: -axis.x, y: -axis.y };
+  }
+
+  const offset = {
+    x: entryPosition.x - zone.center.x,
+    y: entryPosition.y - zone.center.y,
+  };
+  const along = dot(offset.x, offset.y, axis.x, axis.y);
+  return along <= 0 ? axis : { x: -axis.x, y: -axis.y };
+}
+
 /** Ride direction through the feature. */
 export function signedFeatureRideVector(
   zone: TrickZone,
   entryPosition: WorldPos,
   startHeading: HeadingIndex,
 ): { x: number; y: number } {
+  if (zone.type === 'jump') {
+    return signedJumpRideVector(zone, entryPosition, startHeading);
+  }
+
   const axis = trickFeatureRideUnitVector(zone);
   const travel = headingToUnitVector(startHeading);
   const travelDot = dot(travel.x, travel.y, axis.x, axis.y);

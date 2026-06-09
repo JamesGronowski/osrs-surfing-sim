@@ -1,0 +1,8 @@
+[ 1497194ms] ReferenceError: TUNNEL_TORUS_RIDE_DEPTH_SCALE is not defined
+    at buildTunnelGroup (http://localhost:5173/src/render/three/trickFeatureMeshes.ts?t=1780979975936:170:24)
+    at buildTrickGroup (http://localhost:5173/src/render/three/trickFeatureMeshes.ts?t=1780979975936:242:14)
+    at TrickFeatureLayer.sync (http://localhost:5173/src/render/three/trickFeatureMeshes.ts?t=1780979975936:327:25)
+    at ThreeRenderer.render (http://localhost:5173/src/render/ThreeRenderer.ts?t=1780979975936:144:17)
+    at OsrsClient.renderVisuals (http://localhost:5173/src/OsrsClient.ts?t=1780979975936:290:19)
+    at OsrsClient.onVisualFrame (http://localhost:5173/src/OsrsClient.ts?t=1780979975936:274:12)
+    at http://localhost:5173/src/OsrsClient.ts?t=1780979975936:233:67

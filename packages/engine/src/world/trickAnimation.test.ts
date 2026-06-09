@@ -108,6 +108,15 @@ describe('trick animation', () => {
     expect(anim.end.y).toBeLessThan(anim.start.y);
   });
 
+  it('rides jumps from either end of the feature axis', () => {
+    const jumpZone: TrickZone = { ...zone, type: 'jump', prepareSlot: 2, rotationRadians: 0 };
+    const fromWest = createTrickAnimationState(arena.map, jumpZone, { x: 28, y: 11 }, 0);
+    const fromEast = createTrickAnimationState(arena.map, jumpZone, { x: 32, y: 11 }, 8);
+
+    expect(fromWest.end.x).toBeGreaterThan(fromWest.start.x);
+    expect(fromEast.end.x).toBeLessThan(fromEast.start.x);
+  });
+
   it('follows rider heading when picking ride direction past feature centre', () => {
     const wallZone: TrickZone = {
       ...zone,

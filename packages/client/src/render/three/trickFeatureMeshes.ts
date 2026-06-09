@@ -2,6 +2,12 @@ import {
   isTrickZoneSubmerged,
   TIDE_REEF_RIDE_SURFACE_Y,
   tideRideSurfaceY,
+  TUNNEL_TORUS_BASE_Y_FACTOR,
+  TUNNEL_TORUS_CLEARANCE_ABOVE_ARCH,
+  TUNNEL_TORUS_LENGTH_SCALE,
+  TUNNEL_TORUS_MAJOR_RADIUS_FACTOR,
+  TUNNEL_TORUS_TUBE_RADIUS_FACTOR,
+  trickZoneHitboxExtents,
   trickZoneVisualAlpha,
   trickZoneVisualSubmergeProgress,
   type SimulationSnapshot,
@@ -13,6 +19,7 @@ import {
   Group,
   IcosahedronGeometry,
   Mesh,
+  MeshBasicMaterial,
   MeshStandardMaterial,
   TorusGeometry,
   type Material,
@@ -26,21 +33,45 @@ const REEF_OVERLAY_TOP_Y = 0.06;
 /** Extra clearance below reef geometry when fully submerged. */
 const TRICK_FEATURE_SUBMERGE_BELOW_FLOOR = 0.2;
 
-/** Narrow half-torus so a low stance visibly clips through the arch. */
-const TUNNEL_TORUS_MAJOR_RADIUS_FACTOR = 0.5;
-const TUNNEL_TORUS_TUBE_RADIUS_FACTOR = 0.065;
+/** Toggle semi-transparent hitbox overlays (sizes from engine trickHitbox.ts). */
+const SHOW_TRICK_HITBOXES = true;
+/** Hitbox overlay colour (edit here). */
+const TRICK_HITBOX_COLOR = 0x22ff66;
+/** Opacity (0–1); not faded with tide so debug boxes stay visible. */
+const TRICK_HITBOX_OPACITY = 0.45;
+/** Draw above terrain, water, and feature meshes. */
+const TRICK_HITBOX_RENDER_ORDER = 10_000;
+const TRICK_HITBOX_MESH_NAME = 'trick-hitbox';
+
+/** Jump ramp half-run along local Z from centre to outer edge (fraction of zone radius). */
+const JUMP_RAMP_RUN_FACTOR = 1;
+/** Peak height where both ramp top edges meet (fraction of zone radius). */
+const JUMP_PEAK_HEIGHT_FACTOR = 0.55;
+/** Outer ramp top sits this far below ride surface at y=0 (fraction of zone radius). */
+const JUMP_RAMP_LIP_BELOW_SURFACE_FACTOR = 0.12;
+/** Ramp slab thickness (fraction of zone radius). */
+const JUMP_RAMP_THICKNESS_FACTOR = 0.14;
+/** Ramp width across the reef (fraction of zone radius). */
+const JUMP_RAMP_WIDTH_FACTOR = 2.2;
+/** How far each ramp extends past centre so the slabs interpenetrate at the peak (fraction of run). */
+const JUMP_RAMP_CENTER_OVERLAP_RUN_FACTOR = 0.5;
 
 /** Tallest mesh extent above group origin per feature type (fraction of zone radius). */
 function trickFeatureHeightAboveSurface(type: TrickFeatureType, radius: number): number {
   switch (type) {
     case 'tunnel':
-      return radius * (TUNNEL_TORUS_MAJOR_RADIUS_FACTOR + TUNNEL_TORUS_TUBE_RADIUS_FACTOR + 0.06);
+      return (
+        radius *
+        (TUNNEL_TORUS_MAJOR_RADIUS_FACTOR +
+          TUNNEL_TORUS_TUBE_RADIUS_FACTOR +
+          TUNNEL_TORUS_CLEARANCE_ABOVE_ARCH)
+      );
     case 'wall_ride':
       return radius * 1.125;
     case 'brain_coral':
       return radius * 0.8;
     case 'jump':
-      return radius * 0.4;
+      return radius * (JUMP_PEAK_HEIGHT_FACTOR + JUMP_RAMP_THICKNESS_FACTOR * 0.5);
     case 'rail':
     default:
       return radius * 0.57;
@@ -106,6 +137,68 @@ function makeMaterial(color: number, opacity: number): MeshStandardMaterial {
   });
 }
 
+function makeHitboxMaterial(): MeshBasicMaterial {
+  return new MeshBasicMaterial({
+    color: TRICK_HITBOX_COLOR,
+    transparent: true,
+    opacity: TRICK_HITBOX_OPACITY,
+    depthTest: false,
+    depthWrite: false,
+  });
+}
+
+function buildHitboxMesh(type: TrickFeatureType, radius: number): Mesh {
+  const extents = trickZoneHitboxExtents(type, radius);
+  const mesh = new Mesh(
+    new BoxGeometry(extents.halfAlongRide * 2, extents.height, extents.halfLateral * 2),
+    makeHitboxMaterial(),
+  );
+  mesh.name = TRICK_HITBOX_MESH_NAME;
+  mesh.renderOrder = TRICK_HITBOX_RENDER_ORDER;
+  mesh.position.y = extents.centerY;
+  return mesh;
+}
+
+function syncHitboxOverlay(
+  group: Group,
+  type: TrickFeatureType,
+  radius: number,
+  surfaceYOffset: number,
+): void {
+  const extents = trickZoneHitboxExtents(type, radius);
+  const existing = group.getObjectByName(TRICK_HITBOX_MESH_NAME) as Mesh | undefined;
+
+  if (!SHOW_TRICK_HITBOXES) {
+    if (existing) {
+      existing.visible = false;
+    }
+    return;
+  }
+
+  const width = extents.halfAlongRide * 2;
+  const height = extents.height;
+  const depth = extents.halfLateral * 2;
+  let hitbox = existing;
+  if (!hitbox) {
+    hitbox = buildHitboxMesh(type, radius);
+    group.add(hitbox);
+  } else {
+    const geometry = hitbox.geometry as BoxGeometry;
+    if (
+      geometry.parameters.width !== width ||
+      geometry.parameters.height !== height ||
+      geometry.parameters.depth !== depth
+    ) {
+      geometry.dispose();
+      hitbox.geometry = new BoxGeometry(width, height, depth);
+    }
+    hitbox.renderOrder = TRICK_HITBOX_RENDER_ORDER;
+    hitbox.position.y = extents.centerY;
+  }
+  hitbox.position.y = extents.centerY + surfaceYOffset;
+  hitbox.visible = true;
+}
+
 function buildRailGroup(
   radius: number,
   palette: { base: number; accent: number },
@@ -136,19 +229,49 @@ function buildTunnelGroup(
     new TorusGeometry(
       radius * TUNNEL_TORUS_MAJOR_RADIUS_FACTOR,
       radius * TUNNEL_TORUS_TUBE_RADIUS_FACTOR,
-      10,
-      20,
+      14,
+      28,
       Math.PI,
     ),
     makeMaterial(palette.accent, alpha),
   );
-  // Half-torus in the XZ plane — tube arches upward over the ride path (+Z local).
-  arch.rotation.x = 0;
-  arch.position.y = radius * 0.08;
+  // Half-torus in the XY plane — bore is +Z; stretch that axis into a long ride-through tube.
+  arch.scale.set(1, 1, TUNNEL_TORUS_LENGTH_SCALE);
+  arch.position.y = radius * TUNNEL_TORUS_BASE_Y_FACTOR;
   group.add(arch);
   // Meshes are built along +Z; align with reef tangent (rails use +X).
   group.rotation.y = Math.PI / 2;
   return group;
+}
+
+function buildJumpRamp(
+  radius: number,
+  zSign: 1 | -1,
+  palette: { base: number; accent: number },
+  alpha: number,
+): Mesh {
+  const run = radius * JUMP_RAMP_RUN_FACTOR;
+  const peakY = radius * JUMP_PEAK_HEIGHT_FACTOR;
+  const lipBelow = radius * JUMP_RAMP_LIP_BELOW_SURFACE_FACTOR;
+  const thickness = radius * JUMP_RAMP_THICKNESS_FACTOR;
+  const width = radius * JUMP_RAMP_WIDTH_FACTOR;
+
+  const rise = peakY + lipBelow;
+  const angle = Math.atan2(rise, run);
+  const overlap = run * JUMP_RAMP_CENTER_OVERLAP_RUN_FACTOR;
+  const depth = run + overlap;
+  const innerTopOffsetY = (thickness / 2) * Math.cos(angle) + (depth / 2) * Math.sin(angle);
+  const centerY = peakY - innerTopOffsetY;
+  const centerZ =
+    -zSign * ((thickness / 2) * Math.sin(angle) - (depth / 2) * Math.cos(angle));
+
+  const ramp = new Mesh(
+    new BoxGeometry(width, thickness, depth),
+    makeMaterial(palette.base, alpha),
+  );
+  ramp.position.set(0, centerY, centerZ);
+  ramp.rotation.x = zSign * angle;
+  return ramp;
 }
 
 function buildJumpGroup(
@@ -157,18 +280,10 @@ function buildJumpGroup(
   alpha: number,
 ): Group {
   const group = new Group();
-  const ramp = new Mesh(
-    new BoxGeometry(radius * 1.4, radius * 0.35, radius * 1.1),
-    makeMaterial(palette.base, alpha),
+  group.add(
+    buildJumpRamp(radius, -1, palette, alpha),
+    buildJumpRamp(radius, 1, palette, alpha),
   );
-  ramp.position.set(0, radius * 0.18, -radius * 0.15);
-  ramp.rotation.x = -0.35;
-  const lip = new Mesh(
-    new BoxGeometry(radius * 1.5, radius * 0.1, radius * 0.2),
-    makeMaterial(palette.accent, alpha),
-  );
-  lip.position.set(0, radius * 0.35, radius * 0.45);
-  group.add(ramp, lip);
   // Meshes are built along +Z; align with reef tangent (rails use +X).
   group.rotation.y = Math.PI / 2;
   return group;
@@ -238,23 +353,32 @@ function buildTrickGroup(
   }
 }
 
-function addApproachChevrons(group: Group, radius: number, alpha: number): void {
-  const chevrons = new Group();
-  chevrons.rotation.y = Math.PI / 2;
+function addApproachChevrons(
+  group: Group,
+  type: TrickFeatureType,
+  radius: number,
+  alpha: number,
+): void {
   const material = makeMaterial(0xfff566, alpha * 0.9);
-  for (const offset of [-0.72, -0.52, -0.32]) {
-    const cone = new Mesh(new ConeGeometry(radius * 0.15, radius * 0.25, 3), material);
-    cone.rotation.x = Math.PI;
-    cone.rotation.z = Math.PI;
-    cone.position.set(0, radius * 0.08, radius * offset + radius * 0.22);
-    chevrons.add(cone);
+  const approachSides = type === 'jump' ? [-1, 1] : [1];
+
+  for (const side of approachSides) {
+    const chevrons = new Group();
+    chevrons.rotation.y = Math.PI / 2;
+    for (const offset of [-0.72, -0.52, -0.32]) {
+      const cone = new Mesh(new ConeGeometry(radius * 0.15, radius * 0.25, 3), material);
+      cone.rotation.x = Math.PI;
+      cone.rotation.z = Math.PI;
+      cone.position.set(0, radius * 0.08, side * (radius * offset + radius * 0.22));
+      chevrons.add(cone);
+    }
+    group.add(chevrons);
   }
-  group.add(chevrons);
 }
 
 function disposeGroupContents(group: Group): void {
-  while (group.children.length > 0) {
-    const child = group.children[0];
+  const children = group.children.filter((child) => child.name !== TRICK_HITBOX_MESH_NAME);
+  for (const child of children) {
     group.remove(child);
     child.traverse((node) => {
       if (node instanceof Mesh) {
@@ -285,7 +409,7 @@ function zoneMeshKey(
 
 function setGroupOpacity(group: Group, opacity: number): void {
   group.traverse((node) => {
-    if (node instanceof Mesh) {
+    if (node instanceof Mesh && node.name !== TRICK_HITBOX_MESH_NAME) {
       const material = node.material as MeshStandardMaterial;
       material.opacity = opacity;
       material.transparent = opacity < 1;
@@ -336,7 +460,7 @@ export class TrickFeatureLayer {
           snapshot.trickPrepare !== null &&
           snapshot.trickPrepare.slot === zone.prepareSlot
         ) {
-          addApproachChevrons(group, zone.radius, featureAlpha);
+          addApproachChevrons(group, zone.type, zone.radius, featureAlpha);
         }
         this.meshKeys[i] = meshKey;
       } else {
@@ -344,11 +468,11 @@ export class TrickFeatureLayer {
       }
 
       const pos = tileToWorld3(zone.center.x, zone.center.y);
-      group.position.set(
-        pos.x,
-        trickFeatureSurfaceY(zone, tide, tickBlend, interactionDisabled),
-        pos.z,
-      );
+      const surfaceY = trickFeatureSurfaceY(zone, tide, tickBlend, interactionDisabled);
+      const reefSurfaceY = trickFeatureTideBaseY(zone, tide);
+      syncHitboxOverlay(group, zone.type, zone.radius, reefSurfaceY - surfaceY);
+
+      group.position.set(pos.x, surfaceY, pos.z);
       group.rotation.y = radiansToRotationY(
         zone.rotationRadians + (zone.rotationJitterRadians ?? 0),
       );

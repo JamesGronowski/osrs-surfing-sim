@@ -1,0 +1,71 @@
+- generic [ref=e2]:
+  - generic [ref=e7]:
+    - generic [ref=e12]:
+      - text: Welcome to Ura Ura Swell.
+      - text: Click the ground to walk. Click Kaulu to talk.
+      - text: Click your surfboard on the sand ring to paddle out.
+      - text: Prime Low, Medium, or High stance 1–4 ticks before you hit the matching coral feature.
+    - complementary [ref=e14]:
+      - button "Compass" [ref=e18] [cursor=pointer]:
+        - img "Compass"
+      - generic [ref=e19]:
+        - generic [ref=e21]:
+          - button "Sailing Options" [ref=e22] [cursor=pointer]:
+            - img "Sailing Options" [ref=e23]
+          - button "Skills" [ref=e24] [cursor=pointer]:
+            - img "Skills" [ref=e25]
+          - button "Quest List" [disabled] [ref=e26]:
+            - img "Quest List" [ref=e27]
+          - button "Inventory" [disabled] [ref=e28]:
+            - img "Inventory" [ref=e29]
+          - button "Worn Equipment" [disabled] [ref=e30]:
+            - img "Worn Equipment" [ref=e31]
+          - button "Prayer" [disabled] [ref=e32]:
+            - img "Prayer" [ref=e33]
+          - button "Magic" [disabled] [ref=e34]:
+            - img "Magic" [ref=e35]
+        - generic [ref=e40]:
+          - generic [ref=e42]: Ura Ura Board
+          - generic [ref=e44]: Combo
+          - generic [ref=e45]:
+            - button "Facilities" [ref=e46] [cursor=pointer]:
+              - img "Facilities" [ref=e47]
+            - button "Crew" [ref=e48] [cursor=pointer]:
+              - img "Crew" [ref=e49]
+          - generic [ref=e50]:
+            - paragraph [ref=e51]: Navigation
+            - generic [ref=e52]:
+              - button "Full speed ahead" [ref=e53] [cursor=pointer]
+              - button "Slow down" [ref=e54] [cursor=pointer]
+              - button "Increase speed" [ref=e55] [cursor=pointer]
+            - paragraph [ref=e56]: Stance
+            - generic [ref=e57]:
+              - button "Low ·" [ref=e58] [cursor=pointer]:
+                - generic [ref=e59]: Low
+                - generic [ref=e60]: ·
+              - button "Medium ·" [ref=e61] [cursor=pointer]:
+                - generic [ref=e62]: Medium
+                - generic [ref=e63]: ·
+              - button "High ·" [ref=e64] [cursor=pointer]:
+                - generic [ref=e65]: High
+                - generic [ref=e66]: ·
+            - paragraph [ref=e67]: Prime Low, Medium, or High 1–4 ticks before the matching feature. Too early or late = bail.
+        - generic [ref=e70]:
+          - button "Friends List" [disabled] [ref=e71]:
+            - img "Friends List" [ref=e72]
+          - button "Ignore List" [disabled] [ref=e73]:
+            - img "Ignore List" [ref=e74]
+          - button "Chat-channel" [disabled] [ref=e75]:
+            - img "Chat-channel" [ref=e76]
+          - button "Account Management" [disabled] [ref=e77]:
+            - img "Account Management" [ref=e78]
+          - button "Logout" [disabled] [ref=e79]:
+            - img "Logout" [ref=e80]
+          - button "Settings" [disabled] [ref=e81]:
+            - img "Settings" [ref=e82]
+          - button "Emotes" [disabled] [ref=e83]:
+            - img "Emotes" [ref=e84]
+  - generic:
+    - generic:
+      - strong: Debug
+      - text: "[1/2/3] tune turn/paddle/ride"
