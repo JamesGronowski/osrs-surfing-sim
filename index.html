@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ura Ura Surfing Simulator</title>
-    <script type="module" crossorigin src="/osrs-surfing-sim/assets/index-C8_rsp89.js"></script>
-    <link rel="stylesheet" crossorigin href="/osrs-surfing-sim/assets/index-CBMBRT6e.css">
+    <script type="module" crossorigin src="/osrs-surfing-sim/assets/index-Dia9HOYL.js"></script>
+    <link rel="stylesheet" crossorigin href="/osrs-surfing-sim/assets/index-l5eW2_Yp.css">
   </head>
   <body>
     <div id="app">
@@ -13,6 +13,7 @@
         <div class="osrs-scale-wrap" id="osrs-scale-wrap">
           <div class="osrs-client" id="osrs-client">
             <div class="osrs-window-top"></div>
+            <div class="osrs-top-right-corner" aria-hidden="true"></div>
             <div class="osrs-client-grid">
               <div class="osrs-viewport-wrap">
                 <div id="game-root"></div>
@@ -20,11 +21,28 @@
               <div id="chatbox-root"></div>
               <aside class="osrs-sidebar">
                 <div class="osrs-minimap" id="minimap-root">
-                  <div class="osrs-minimap-inner" id="minimap-canvas"></div>
+                  <div class="osrs-minimap-map" id="minimap-map"></div>
+                  <button
+                    type="button"
+                    class="osrs-minimap-compass"
+                    id="minimap-compass"
+                    title="Face north"
+                  >
+                    <img alt="" />
+                  </button>
+                  <img class="osrs-minimap-frame" id="minimap-frame" alt="" />
                 </div>
-                <div class="osrs-tab-strip" id="tab-strip"></div>
-                <div class="osrs-interface-panel">
-                  <div id="side-panel"></div>
+                <div class="osrs-sidebar-body">
+                  <div id="tab-strip-top"></div>
+                  <div class="osrs-interface-row">
+                    <div class="osrs-interface-edge osrs-interface-edge-left" aria-hidden="true"></div>
+                    <div class="osrs-interface-panel">
+                      <div id="skills-panel"></div>
+                      <div id="sailing-panel"></div>
+                    </div>
+                    <div class="osrs-interface-edge osrs-interface-edge-right" aria-hidden="true"></div>
+                  </div>
+                  <div id="tab-strip-bottom"></div>
                 </div>
               </aside>
             </div>
