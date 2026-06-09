@@ -1,4 +1,10 @@
-import { getTile, headingToDegrees, type WorldMap } from '@osrs-surfing/engine';
+import {
+  getTile,
+  headingToDegrees,
+  tideRideSurfaceY,
+  type TideState,
+  type WorldMap,
+} from '@osrs-surfing/engine';
 import { CapsuleGeometry, CylinderGeometry, Group, Mesh, MeshStandardMaterial } from 'three';
 
 import type { DisplaySimulationSnapshot, DisplayTrickAnimation } from '../visualSnapshot.js';
@@ -35,13 +41,15 @@ function boardRiderPose(
   tileY: number,
   heading: number,
   animation: DisplayTrickAnimation | null,
+  tide: TideState | null,
 ): BoardRiderPose {
   const pose = animation ? trickBoardPose(animation) : null;
   const world = tileToWorld3(tileX + (pose?.offsetX ?? 0), tileY + (pose?.offsetY ?? 0));
+  const surfaceY = tideRideSurfaceY(tileX, tileY, tide);
   return {
     worldX: world.x,
     worldZ: world.z,
-    boardY: SURFACE_Y + (pose?.liftY ?? 0),
+    boardY: surfaceY + (pose?.liftY ?? 0),
     rotationY: headingToRotationY(heading) + (pose?.yawOffset ?? 0),
     pitch: pose?.pitch ?? 0,
     roll: pose?.roll ?? 0,
@@ -197,6 +205,7 @@ export class EntityLayer {
       snapshot.surfboard.position.y,
       snapshot.surfboard.currentHeading,
       snapshot.trickAnimation,
+      snapshot.tide,
     );
     const rotationY = beached ? 0 : headingToRotationY(snapshot.surfboard.currentHeading);
     const boardY = riderPose.boardY;
@@ -250,6 +259,7 @@ export class EntityLayer {
       demo.surfboard.position.y,
       demo.surfboard.currentHeading,
       demo.trickAnimation,
+      snapshot.tide,
     );
     const headingRad = (headingToDegrees(demo.surfboard.currentHeading) * Math.PI) / 180;
 

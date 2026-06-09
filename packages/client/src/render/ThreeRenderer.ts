@@ -184,6 +184,7 @@ export class ThreeRenderer implements IRenderer {
     const deltaSeconds = Math.min(0.1, deltaMs / 1000);
 
     this.mapMeshes.build(map, snapshot.tide);
+    this.mapMeshes.updateTideVisuals(map, snapshot.tide);
     void visualTimeMs;
 
     this.orbitCamera.setFocus(snapshot.surfboard.position.x, snapshot.surfboard.position.y);
@@ -222,7 +223,6 @@ export class ThreeRenderer implements IRenderer {
   }
 
   syncMapAfterTick(snapshot: SimulationSnapshot, map: WorldMap): void {
-    this.mapMeshes?.build(map, snapshot.tide);
     this.mapMeshes?.rebuildOverlay(map, snapshot.tide);
   }
 

@@ -31,6 +31,21 @@ describe('surfboard movement', () => {
     expect(state.speedState).toBe('seated');
   });
 
+  it('reverses while backing up', () => {
+    const map = createWorldMap(20, 20, 'deep_water');
+    let state = createSurfboard(10, 10, 0);
+
+    state = tickSurfboard(state, map, { reverse: true }).state;
+    expect(state.speedState).toBe('reversing');
+
+    const reverseStartX = state.position.x;
+    state = tickSurfboard(state, map, {}).state;
+    expect(state.position.x).toBeLessThan(reverseStartX);
+
+    state = tickSurfboard(state, map, { stop: true }).state;
+    expect(state.speedState).toBe('seated');
+  });
+
   it('moves forward while paddling and arcs when turning', () => {
     const map = createWorldMap(20, 20, 'deep_water');
     let state = createSurfboard(5, 5, 0);

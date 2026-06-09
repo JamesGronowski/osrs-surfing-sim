@@ -21,7 +21,8 @@ import { OsrsChatbox } from './ui/OsrsChatbox.js';
 import { OsrsMinimap } from './ui/OsrsMinimap.js';
 import { OsrsSailingPanel } from './ui/OsrsSailingPanel.js';
 import { OsrsShopPanel } from './ui/OsrsShopPanel.js';
-import { OsrsTabStrip } from './ui/OsrsTabStrip.js';
+import { OsrsSkillsPanel } from './ui/OsrsSkillsPanel.js';
+import { OsrsTabStrip, type ControlPanelTabId } from './ui/OsrsTabStrip.js';
 import { applyIntegerScale } from './ui/scaleLayout.js';
 
 const HELP_LINES = [
@@ -34,7 +35,9 @@ export class OsrsClient {
   private simulation: GameSimulation;
   private renderer: ThreeRenderer;
   private chatbox: OsrsChatbox;
-  private sidePanel: OsrsSailingPanel;
+  private sailingPanel: OsrsSailingPanel;
+  private skillsPanel: OsrsSkillsPanel;
+  private tabStrip: OsrsTabStrip;
   private shopPanel: OsrsShopPanel;
   private debugPanel: DebugPanel;
   private minimap: OsrsMinimap;
@@ -54,7 +57,9 @@ export class OsrsClient {
     simulation: GameSimulation,
     renderer: ThreeRenderer,
     chatbox: OsrsChatbox,
-    sidePanel: OsrsSailingPanel,
+    sailingPanel: OsrsSailingPanel,
+    skillsPanel: OsrsSkillsPanel,
+    tabStrip: OsrsTabStrip,
     shopPanel: OsrsShopPanel,
     debugPanel: DebugPanel,
     minimap: OsrsMinimap,
@@ -62,7 +67,9 @@ export class OsrsClient {
     this.simulation = simulation;
     this.renderer = renderer;
     this.chatbox = chatbox;
-    this.sidePanel = sidePanel;
+    this.sailingPanel = sailingPanel;
+    this.skillsPanel = skillsPanel;
+    this.tabStrip = tabStrip;
     this.shopPanel = shopPanel;
     this.debugPanel = debugPanel;
     this.minimap = minimap;
@@ -83,7 +90,8 @@ export class OsrsClient {
     });
 
     const gameRoot = document.getElementById('game-root');
-    const sidePanelRoot = document.getElementById('side-panel');
+    const sailingPanelRoot = document.getElementById('sailing-panel');
+    const skillsPanelRoot = document.getElementById('skills-panel');
     const shopPanelRoot = document.getElementById('shop-panel');
     const debugPanelRoot = document.getElementById('debug-panel');
     const chatboxRoot = document.getElementById('chatbox-root');
@@ -92,7 +100,8 @@ export class OsrsClient {
 
     if (
       !gameRoot ||
-      !sidePanelRoot ||
+      !sailingPanelRoot ||
+      !skillsPanelRoot ||
       !shopPanelRoot ||
       !debugPanelRoot ||
       !chatboxRoot ||
@@ -105,7 +114,6 @@ export class OsrsClient {
     const renderer = new ThreeRenderer();
     await renderer.init(gameRoot, 1);
 
-    new OsrsTabStrip(tabStripRoot);
     const minimap = new OsrsMinimap(minimapRoot);
     const chatbox = new OsrsChatbox(chatboxRoot);
     for (const line of HELP_LINES) {
@@ -131,6 +139,11 @@ export class OsrsClient {
       });
     });
 
+    const panelRefs: {
+      sailing: OsrsSailingPanel | null;
+      skills: OsrsSkillsPanel | null;
+    } = { sailing: null, skills: null };
+
     const shopPanel = new OsrsShopPanel(shopPanelRoot, (unlockId) => {
       const error = simulation.tryPurchaseUnlock(unlockId);
       if (error) {
@@ -139,35 +152,41 @@ export class OsrsClient {
       const snapshot = simulation.getSnapshot();
       saveProgression(snapshot.progression);
       shopPanel.update(snapshot.progression);
-      sidePanel.update(snapshot);
+      panelRefs.sailing?.update(snapshot);
+      panelRefs.skills?.update(snapshot);
     });
 
-    const sidePanel = new OsrsSailingPanel(sidePanelRoot, {
+    const skillsPanel = new OsrsSkillsPanel(skillsPanelRoot);
+    panelRefs.skills = skillsPanel;
+    const sailingPanel = new OsrsSailingPanel(sailingPanelRoot, {
       onSpeedState: (state) => simulation.setSpeedState(state),
-      onLieDown: () => {
-        const state = simulation.getSnapshot().surfboard.speedState;
-        if (state === 'riding') {
-          simulation.setSpeedState('paddling');
-        } else {
-          simulation.setSpeedState('seated');
-        }
-      },
       onOpenShop: () => {
         shopPanel.toggle();
         shopPanel.update(simulation.getSnapshot().progression);
       },
       onPrepareTrick: (slot) => simulation.prepareTrick(slot),
     });
+    panelRefs.sailing = sailingPanel;
+
+    const showControlPanelTab = (tab: ControlPanelTabId, tabStrip: OsrsTabStrip): void => {
+      sailingPanel.setVisible(tab === 'combat');
+      skillsPanel.setVisible(tab === 'stats');
+      tabStrip.setActiveTab(tab);
+    };
+    const tabStrip = new OsrsTabStrip(tabStripRoot, (tab) => showControlPanelTab(tab, tabStrip));
 
     const client = new OsrsClient(
       simulation,
       renderer,
       chatbox,
-      sidePanel,
+      sailingPanel,
+      skillsPanel,
+      tabStrip,
       shopPanel,
       debugPanel,
       minimap,
     );
+    showControlPanelTab('combat', tabStrip);
 
     const spawnSnapshot = simulation.getSnapshot();
     if (savedProgression) {
@@ -264,7 +283,8 @@ export class OsrsClient {
     this.motion.onSimulationTick(beforeTick, snapshot);
     const map = this.simulation.getArena().map;
     this.renderer.syncMapAfterTick(snapshot, map);
-    this.sidePanel.update(snapshot);
+    this.sailingPanel.update(snapshot);
+    this.skillsPanel.update(snapshot);
     this.shopPanel.update(snapshot.progression);
     this.persistProgressionIfChanged(snapshot.progression);
     this.debugPanel.update(snapshot);

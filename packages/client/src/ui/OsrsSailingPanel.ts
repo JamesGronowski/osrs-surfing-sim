@@ -1,8 +1,6 @@
 import {
-  agilityLevel,
   comboTierName,
   comboTierProgress,
-  sailingLevel,
   trickStanceName,
   type SimulationSnapshot,
   type SpeedState,
@@ -22,14 +20,97 @@ const COMBO_TIER_BAR_COLORS: Record<ComboTierName, string> = {
   Dragon: 'linear-gradient(180deg, #f0a050 0%, #8b2020 100%)',
 };
 
+type NavButtonId = 'toggle-full' | 'speed-down' | 'speed-up';
+
+interface NavButtonConfig {
+  icon: string;
+  title: string;
+  disabled: boolean;
+  targetState: SpeedState | null;
+}
+
 export interface OsrsSailingPanelCallbacks {
   onSpeedState: (state: SpeedState) => void;
   onOpenShop: () => void;
   onPrepareTrick: (slot: TrickPrepareSlot) => void;
-  onLieDown: () => void;
 }
 
-type PanelTab = 'stats' | 'movement' | 'rewards';
+type PanelTab = 'movement' | 'rewards';
+
+function navButtonConfig(state: SpeedState, button: NavButtonId): NavButtonConfig {
+  const a = OSRS_ASSETS;
+  switch (button) {
+    case 'toggle-full':
+      return {
+        icon: state === 'riding' ? a.sailing.unsetSailsFast : a.sailing.setSails,
+        title: state === 'riding' ? 'Stop' : 'Full speed ahead',
+        disabled: false,
+        targetState: state === 'riding' ? 'seated' : 'riding',
+      };
+    case 'speed-down':
+      if (state === 'riding') {
+        return {
+          icon: a.chevron.down,
+          title: 'Slow down',
+          disabled: false,
+          targetState: 'paddling',
+        };
+      }
+      if (state === 'paddling') {
+        return {
+          icon: a.chevron.downStop,
+          title: 'Stop',
+          disabled: false,
+          targetState: 'seated',
+        };
+      }
+      if (state === 'seated') {
+        return {
+          icon: a.sailing.reverse,
+          title: 'Reverse',
+          disabled: false,
+          targetState: 'reversing',
+        };
+      }
+      return {
+        icon: a.sailing.reverse,
+        title: 'Reverse',
+        disabled: true,
+        targetState: null,
+      };
+    case 'speed-up':
+      if (state === 'reversing') {
+        return {
+          icon: a.sailing.unsetSailsFast,
+          title: 'Stop',
+          disabled: false,
+          targetState: 'seated',
+        };
+      }
+      if (state === 'seated') {
+        return {
+          icon: a.chevron.up,
+          title: 'Increase speed',
+          disabled: false,
+          targetState: 'paddling',
+        };
+      }
+      if (state === 'paddling') {
+        return {
+          icon: a.chevron.upDouble,
+          title: 'Full speed',
+          disabled: false,
+          targetState: 'riding',
+        };
+      }
+      return {
+        icon: a.chevron.up,
+        title: 'Full speed',
+        disabled: true,
+        targetState: null,
+      };
+  }
+}
 
 export class OsrsSailingPanel {
   private root: HTMLElement;
@@ -40,7 +121,7 @@ export class OsrsSailingPanel {
   constructor(root: HTMLElement, callbacks: OsrsSailingPanelCallbacks) {
     this.root = root;
     this.callbacks = callbacks;
-    this.root.className = 'osrs-sailing-panel';
+    this.root.className = 'osrs-control-panel osrs-sailing-panel';
     this.root.innerHTML = this.renderShell();
     this.bindEvents();
   }
@@ -56,7 +137,7 @@ export class OsrsSailingPanel {
           : OSRS_ASSETS.sailing.steering;
     }
 
-    this.setActiveSpeed(snapshot.surfboard.speedState);
+    this.updateNavButtons(snapshot.surfboard.speedState);
 
     const comboFill = this.root.querySelector('#combo-bar-fill') as HTMLElement;
     const comboLabel = this.root.querySelector('#combo-label');
@@ -68,22 +149,7 @@ export class OsrsSailingPanel {
       comboLabel.textContent = combo > 0 ? `${comboTierName(combo)} · ${combo}` : 'Combo';
     }
 
-    const agility = snapshot.progression.xp.agility;
-    const sailing = snapshot.progression.xp.sailing;
-    this.updateSkillRow('agility', agilityLevel(agility), agility % 1000, 1000);
-    this.updateSkillRow('sailing', sailingLevel(sailing), sailing % 1200, 1200);
-
-    const tokens = String(snapshot.progression.coralTokens);
-    const tokenEl = this.root.querySelector('#coral-tokens');
-    if (tokenEl) {
-      tokenEl.textContent = tokens;
-    }
     this.syncTokenDisplay(snapshot.progression.coralTokens);
-
-    const tricksEl = this.root.querySelector('#tricks-landed');
-    if (tricksEl) {
-      tricksEl.textContent = String(snapshot.progression.session.tricksLanded);
-    }
 
     this.root.querySelectorAll<HTMLButtonElement>('[data-prepare-slot]').forEach((btn) => {
       const slot = Number(btn.dataset.prepareSlot) as TrickPrepareSlot;
@@ -102,6 +168,10 @@ export class OsrsSailingPanel {
     });
   }
 
+  setVisible(visible: boolean): void {
+    this.root.classList.toggle('hidden', !visible);
+  }
+
   private renderShell(): string {
     const a = OSRS_ASSETS;
     return `
@@ -116,63 +186,26 @@ export class OsrsSailingPanel {
           <span class="osrs-hp-bar-label" id="combo-label">Combo</span>
         </div>
         <div class="osrs-tab-row">
-          <button type="button" class="osrs-tab" data-tab="stats" title="Stats">
-            <img src="${a.sailing.tabStats}" alt="Stats" width="28" height="28" />
+          <button type="button" class="osrs-tab active" data-tab="movement" title="Facilities">
+            <img src="${a.sailing.tabFacilities}" alt="Facilities" width="28" height="28" />
           </button>
-          <button type="button" class="osrs-tab active" data-tab="movement" title="Movement">
-            <img src="${a.sailing.tabFacilities}" alt="Movement" width="28" height="28" />
+          <button type="button" class="osrs-tab" data-tab="rewards" title="Crew">
+            <img src="${a.sailing.tabCrew}" alt="Crew" width="28" height="28" />
           </button>
-          <button type="button" class="osrs-tab" data-tab="rewards" title="Rewards">
-            <img src="${a.sailing.tabCrew}" alt="Rewards" width="28" height="28" />
-          </button>
-        </div>
-        <div class="osrs-tab-body" data-panel="stats">
-          <div class="osrs-stat-row">
-            <img src="${a.skill.agility}" alt="" width="18" height="18" />
-            <span id="agility-label">Agility 1</span>
-            <div class="osrs-xp-track"><div class="osrs-xp-fill agility" id="agility-fill"></div></div>
-          </div>
-          <div class="osrs-stat-row">
-            <img src="${a.skill.sailing}" alt="" width="18" height="18" />
-            <span id="sailing-label">Sailing 1</span>
-            <div class="osrs-xp-track"><div class="osrs-xp-fill sailing" id="sailing-fill"></div></div>
-          </div>
-          <div class="osrs-stat-line">Tricks: <span id="tricks-landed">0</span></div>
-          <div class="osrs-stat-line">Coral Tokens: <span id="coral-tokens">0</span></div>
         </div>
         <div class="osrs-tab-body active" data-panel="movement">
           <p class="osrs-section-label">Navigation</p>
-          <div class="osrs-movement-grid">
-            <button type="button" class="osrs-sprite-btn" data-action="lie-down" title="Lie down (paddle)">
-              <img src="${a.sailing.reverse}" alt="Lie down" />
+          <div class="osrs-nav-row">
+            <button type="button" class="osrs-sprite-btn" data-nav-btn="toggle-full" title="Full speed ahead">
+              <img src="${a.sailing.setSails}" alt="" />
             </button>
-            <button type="button" class="osrs-sprite-btn" data-action="speed-up" title="Stand — ride swell">
-              <img src="${a.chevron.up}" alt="Faster" />
+            <button type="button" class="osrs-sprite-btn" data-nav-btn="speed-down" title="Slow down">
+              <img src="${a.chevron.down}" alt="" />
             </button>
-            <button type="button" class="osrs-sprite-btn" disabled aria-hidden="true"></button>
-            <button type="button" class="osrs-sprite-btn osrs-boat-center" disabled aria-hidden="true">
-              <img src="${a.sailing.raft}" alt="" id="boat-center-icon" />
-            </button>
-            <button type="button" class="osrs-sprite-btn" data-action="paddle" title="Paddle">
-              <img src="${a.sailing.sails}" alt="Paddle" />
-            </button>
-            <button type="button" class="osrs-sprite-btn" data-action="speed-down" title="Slow / seated">
-              <img src="${a.chevron.down}" alt="Slower" />
-            </button>
-            <button type="button" class="osrs-sprite-btn" data-action="stop" title="Stop — seated">
-              <img src="${a.sailing.unsetSailsFast}" alt="Stop" id="stop-icon" />
+            <button type="button" class="osrs-sprite-btn" data-nav-btn="speed-up" title="Increase speed">
+              <img src="${a.chevron.up}" alt="" />
             </button>
             <img src="${a.sailing.steering}" alt="" class="osrs-steering-badge" id="steering-icon" />
-          </div>
-          <div class="osrs-movement-row">
-            <button type="button" class="osrs-sprite-btn wide" data-action="paddle" title="Start paddling">
-              <img src="${a.sailing.unsetSailsSlow}" alt="Paddle" />
-              <span>Paddle</span>
-            </button>
-            <button type="button" class="osrs-sprite-btn wide" data-action="ride" title="Stand on swell">
-              <img src="${a.sailing.setSails}" alt="Ride" />
-              <span>Ride</span>
-            </button>
           </div>
           <p class="osrs-section-label">Stance</p>
           <div class="osrs-trick-prepare-row">
@@ -213,32 +246,19 @@ export class OsrsSailingPanel {
       });
     }
 
-    this.root.querySelectorAll('[data-action="paddle"]').forEach((btn) => {
-      btn.addEventListener('click', () => this.callbacks.onSpeedState('paddling'));
+    this.root.querySelectorAll<HTMLButtonElement>('[data-nav-btn]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (btn.disabled) {
+          return;
+        }
+        const id = btn.dataset.navBtn as NavButtonId;
+        const config = navButtonConfig(this.speedState, id);
+        if (config.targetState) {
+          this.callbacks.onSpeedState(config.targetState);
+        }
+      });
     });
-    this.root.querySelectorAll('[data-action="ride"]').forEach((btn) => {
-      btn.addEventListener('click', () => this.callbacks.onSpeedState('riding'));
-    });
-    this.root.querySelectorAll('[data-action="stop"]').forEach((btn) => {
-      btn.addEventListener('click', () => this.callbacks.onSpeedState('seated'));
-    });
-    this.root.querySelector('[data-action="lie-down"]')?.addEventListener('click', () => {
-      this.callbacks.onLieDown();
-    });
-    this.root.querySelector('[data-action="speed-up"]')?.addEventListener('click', () => {
-      if (this.speedState === 'seated') {
-        this.callbacks.onSpeedState('paddling');
-      } else {
-        this.callbacks.onSpeedState('riding');
-      }
-    });
-    this.root.querySelector('[data-action="speed-down"]')?.addEventListener('click', () => {
-      if (this.speedState === 'riding') {
-        this.callbacks.onLieDown();
-      } else {
-        this.callbacks.onSpeedState('seated');
-      }
-    });
+
     this.root.querySelectorAll<HTMLButtonElement>('[data-prepare-slot]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const slot = Number(btn.dataset.prepareSlot) as TrickPrepareSlot;
@@ -250,31 +270,19 @@ export class OsrsSailingPanel {
     });
   }
 
-  private setActiveSpeed(state: SpeedState): void {
-    this.root.querySelectorAll<HTMLElement>('.osrs-sprite-btn[data-action]').forEach((btn) => {
-      const action = btn.dataset.action;
-      const active =
-        (action === 'paddle' && state === 'paddling') ||
-        (action === 'ride' && state === 'riding') ||
-        (action === 'stop' && state === 'seated');
-      btn.classList.toggle('active', active);
+  private updateNavButtons(state: SpeedState): void {
+    this.root.querySelectorAll<HTMLButtonElement>('[data-nav-btn]').forEach((btn) => {
+      const id = btn.dataset.navBtn as NavButtonId;
+      const config = navButtonConfig(state, id);
+      btn.disabled = config.disabled;
+      btn.title = config.title;
+      const img = btn.querySelector('img');
+      if (img) {
+        img.src = config.icon;
+        img.alt = config.title;
+      }
+      btn.classList.toggle('active', id === 'toggle-full' && state === 'riding');
     });
-  }
-
-  private updateSkillRow(
-    skill: 'agility' | 'sailing',
-    level: number,
-    current: number,
-    max: number,
-  ): void {
-    const label = this.root.querySelector(`#${skill}-label`);
-    const fill = this.root.querySelector(`#${skill}-fill`) as HTMLElement;
-    if (label) {
-      label.textContent = `${skill === 'agility' ? 'Agility' : 'Sailing'} ${level}`;
-    }
-    if (fill) {
-      fill.style.width = `${Math.min(100, (current / max) * 100)}%`;
-    }
   }
 
   syncTokenDisplay(tokens: number): void {

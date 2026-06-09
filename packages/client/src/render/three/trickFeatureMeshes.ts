@@ -1,5 +1,7 @@
 import {
   isTrickZoneSubmerged,
+  TIDE_REEF_RIDE_SURFACE_Y,
+  tideRideSurfaceY,
   trickZoneVisualAlpha,
   trickZoneVisualSubmergeProgress,
   type SimulationSnapshot,
@@ -53,17 +55,28 @@ function trickFeatureFullSubmergeDepth(type: TrickFeatureType, radius: number): 
   );
 }
 
+function trickFeatureTideBaseY(
+  zone: SimulationSnapshot['trickZones'][number],
+  tide: SimulationSnapshot['tide'],
+): number {
+  if (!tide) {
+    return 0;
+  }
+  return tideRideSurfaceY(zone.center.x, zone.center.y, tide) - TIDE_REEF_RIDE_SURFACE_Y;
+}
+
 function trickFeatureSurfaceY(
   zone: SimulationSnapshot['trickZones'][number],
   tide: SimulationSnapshot['tide'],
   tickBlend: number,
   interactionDisabled: boolean,
 ): number {
+  const tideBase = trickFeatureTideBaseY(zone, tide);
   if (!interactionDisabled) {
-    return 0;
+    return tideBase;
   }
   const submerge = trickZoneVisualSubmergeProgress(zone, tide, tickBlend);
-  return -submerge * trickFeatureFullSubmergeDepth(zone.type, zone.radius);
+  return tideBase - submerge * trickFeatureFullSubmergeDepth(zone.type, zone.radius);
 }
 
 function paletteFor(type: TrickFeatureType): { base: number; accent: number } {

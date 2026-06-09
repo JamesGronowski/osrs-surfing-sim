@@ -1,4 +1,9 @@
-import { isPointInTideSweep, type TideState, type TileType } from '@osrs-surfing/engine';
+import {
+  TIDE_LEADING_WASH_HEIGHT,
+  tideWaveSurfaceY,
+  type TideState,
+  type TileType,
+} from '@osrs-surfing/engine';
 
 import { TILE_PALETTE } from './tilePalette.js';
 
@@ -18,9 +23,12 @@ export function resolveRenderTileVariant(
   worldY: number,
   tide: TideState | null,
 ): RenderTileVariant {
-  if (tile === 'coral_rideable') {
-    const submerged = tide !== null && isPointInTideSweep(worldX, worldY, tide);
-    return submerged ? 'reef_submerged' : 'reef_exposed';
+  if (tile === 'coral_rideable' && tide !== null) {
+    const flood =
+      TIDE_LEADING_WASH_HEIGHT > 0
+        ? tideWaveSurfaceY(worldX, worldY, tide) / TIDE_LEADING_WASH_HEIGHT
+        : 0;
+    return flood > 0.35 ? 'reef_submerged' : 'reef_exposed';
   }
   return tile;
 }

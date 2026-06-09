@@ -405,6 +405,17 @@ export class GameSimulation {
         this.pendingInput.startPaddle = true;
       }
       this.pendingInput.standUp = true;
+    } else if (state === 'reversing') {
+      if (!this.boardMounted) {
+        if (!this.isNearBoard()) {
+          this.pendingDialogue.push('Walk to your surfboard on the beach first.');
+          return;
+        }
+        this.tryMountBoard();
+      }
+      if (this.boardMounted) {
+        this.pendingInput.reverse = true;
+      }
     }
   }
 

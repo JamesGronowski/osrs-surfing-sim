@@ -8,7 +8,7 @@ import {
   type HeadingIndex,
 } from './heading.js';
 
-export type SpeedState = 'seated' | 'paddling' | 'riding';
+export type SpeedState = 'seated' | 'paddling' | 'riding' | 'reversing';
 
 export interface SurfboardStats {
   turnRateDegPerTick: number;
@@ -29,6 +29,7 @@ export interface SurfboardInput {
   startPaddle?: boolean;
   standUp?: boolean;
   lieDown?: boolean;
+  reverse?: boolean;
   stop?: boolean;
 }
 
@@ -70,6 +71,9 @@ function getForwardSpeed(state: SurfboardState, stats: SurfboardStats): number {
   if (state.speedState === 'riding') {
     return stats.speedRide / SPEED_STAT_TO_TILES_PER_TICK;
   }
+  if (state.speedState === 'reversing') {
+    return -stats.speedPaddle / SPEED_STAT_TO_TILES_PER_TICK;
+  }
   return 0;
 }
 
@@ -88,6 +92,9 @@ function applyInput(state: SurfboardState, input: SurfboardInput): SurfboardStat
   }
   if (input.lieDown && next.speedState === 'riding') {
     next.speedState = 'paddling';
+  }
+  if (input.reverse && next.speedState === 'seated') {
+    next.speedState = 'reversing';
   }
   if (input.stop) {
     next.speedState = 'seated';
@@ -127,7 +134,7 @@ export function tickSurfboard(
   }
 
   const speed = getForwardSpeed(next, stats);
-  if (speed > 0) {
+  if (speed !== 0) {
     const vector = headingToUnitVector(next.currentHeading);
     const targetX = next.position.x + vector.x * speed;
     const targetY = next.position.y + vector.y * speed;

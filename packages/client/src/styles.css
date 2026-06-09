@@ -198,6 +198,10 @@ body,
   line-height: 0;
 }
 
+.osrs-game-tab:not(:disabled) {
+  cursor: pointer;
+}
+
 .osrs-game-tab.active {
   opacity: 1;
   filter: drop-shadow(0 0 2px #ff981f);
@@ -215,14 +219,18 @@ body,
   border-top: 1px solid #544834;
 }
 
-/* ── Sailing options (inside interface panel) ── */
-.osrs-sailing-panel {
+/* ── Control panel content (sailing options, skills, …) ── */
+.osrs-control-panel {
   width: 190px;
   height: 100%;
   margin: 0 auto;
   padding: 4px 2px;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+.osrs-control-panel.hidden {
+  display: none;
 }
 
 .osrs-panel-chrome {
@@ -248,6 +256,21 @@ body,
 
 .osrs-boat-thumb,
 .osrs-panel-icon {
+  image-rendering: pixelated;
+}
+
+.osrs-panel-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: default;
+  opacity: 0.55;
+}
+
+.osrs-panel-icon-btn img {
   image-rendering: pixelated;
 }
 
@@ -357,7 +380,7 @@ body,
   font-size: 10px;
 }
 
-.osrs-movement-grid {
+.osrs-nav-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2px;
@@ -380,12 +403,17 @@ body,
   font-size: 9px;
 }
 
-.osrs-sprite-btn:hover {
+.osrs-sprite-btn:hover:not(:disabled) {
   background: #595046;
 }
 
 .osrs-sprite-btn.active {
   border-color: #ff981f;
+}
+
+.osrs-sprite-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
 }
 
 .osrs-sprite-btn img {
@@ -400,12 +428,6 @@ body,
   min-height: 30px;
 }
 
-.osrs-boat-center {
-  grid-column: 2;
-  grid-row: 1 / span 2;
-  min-height: 58px;
-}
-
 .osrs-steering-badge {
   position: absolute;
   top: 0;
@@ -414,12 +436,6 @@ body,
   height: 20px;
   image-rendering: pixelated;
   pointer-events: none;
-}
-
-.osrs-movement-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2px;
 }
 
 .osrs-stone-btn {

@@ -65,6 +65,8 @@ export const OSRS_ASSETS = {
   },
   chevron: {
     up: osrsAssetUrl('chevron/yellow_up_single.png'),
+    upDouble: osrsAssetUrl('chevron/yellow_up_double.png'),
     down: osrsAssetUrl('chevron/yellow_down_single.png'),
+    downStop: osrsAssetUrl('chevron/yellow_down_stop.png'),
   },
 } as const;
