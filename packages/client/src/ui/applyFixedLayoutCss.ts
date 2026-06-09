@@ -1,0 +1,78 @@
+import {
+  CHAT_HEIGHT,
+  CHAT_MESSAGES_HEIGHT,
+  CHAT_STONES_HEIGHT,
+  CLIENT_GRID_HEIGHT,
+  FIXED_FRAME_HEIGHT,
+  FIXED_FRAME_WIDTH,
+  MINIMAP_BOTTOM_HEIGHT,
+  MINIMAP_BOTTOM_LEFT,
+  MINIMAP_BOTTOM_WIDTH,
+  MINIMAP_COMPASS_LEFT,
+  MINIMAP_COMPASS_SIZE,
+  MINIMAP_COMPASS_TOP,
+  MINIMAP_FRAME_HEIGHT,
+  MINIMAP_FRAME_LEFT,
+  MINIMAP_FRAME_WIDTH,
+  MINIMAP_HEIGHT,
+  MINIMAP_LEFT_EDGE_WIDTH,
+  MINIMAP_MAP_LEFT,
+  MINIMAP_MAP_SIZE,
+  MINIMAP_MAP_TOP,
+  MINIMAP_RIGHT_EDGE_WIDTH,
+  SIDE_PANEL_HEIGHT,
+  SIDE_PANEL_LEFT,
+  SIDE_PANEL_WIDTH,
+  SIDEBAR_BODY_HEIGHT,
+  SIDEBAR_WIDTH,
+  TAB_BAR_HEIGHT,
+  TAB_STRIP_LEFT,
+  TAB_STRIP_WIDTH,
+  VIEWPORT_HEIGHT,
+  VIEWPORT_WIDTH,
+  WINDOW_TOP_HEIGHT,
+} from './fixedLayout.js';
+
+const PX = (value: number): string => `${value}px`;
+
+export function applyFixedLayoutCss(): void {
+  const root = document.documentElement;
+  const vars: Record<string, string> = {
+    '--osrs-frame-width': PX(FIXED_FRAME_WIDTH),
+    '--osrs-frame-height': PX(FIXED_FRAME_HEIGHT),
+    '--osrs-window-top-height': PX(WINDOW_TOP_HEIGHT),
+    '--osrs-grid-height': PX(CLIENT_GRID_HEIGHT),
+    '--osrs-viewport-width': PX(VIEWPORT_WIDTH),
+    '--osrs-viewport-height': PX(VIEWPORT_HEIGHT),
+    '--osrs-chat-height': PX(CHAT_HEIGHT),
+    '--osrs-chat-messages-height': PX(CHAT_MESSAGES_HEIGHT),
+    '--osrs-chat-stones-height': PX(CHAT_STONES_HEIGHT),
+    '--osrs-sidebar-width': PX(SIDEBAR_WIDTH),
+    '--osrs-minimap-height': PX(MINIMAP_HEIGHT),
+    '--osrs-minimap-left-edge': PX(MINIMAP_LEFT_EDGE_WIDTH),
+    '--osrs-minimap-right-edge': PX(MINIMAP_RIGHT_EDGE_WIDTH),
+    '--osrs-minimap-frame-left': PX(MINIMAP_FRAME_LEFT),
+    '--osrs-minimap-frame-width': PX(MINIMAP_FRAME_WIDTH),
+    '--osrs-minimap-frame-height': PX(MINIMAP_FRAME_HEIGHT),
+    '--osrs-minimap-map-left': PX(MINIMAP_MAP_LEFT),
+    '--osrs-minimap-map-top': PX(MINIMAP_MAP_TOP),
+    '--osrs-minimap-map-size': PX(MINIMAP_MAP_SIZE),
+    '--osrs-minimap-compass-left': PX(MINIMAP_COMPASS_LEFT),
+    '--osrs-minimap-compass-top': PX(MINIMAP_COMPASS_TOP),
+    '--osrs-minimap-compass-size': PX(MINIMAP_COMPASS_SIZE),
+    '--osrs-minimap-bottom-left': PX(MINIMAP_BOTTOM_LEFT),
+    '--osrs-minimap-bottom-width': PX(MINIMAP_BOTTOM_WIDTH),
+    '--osrs-minimap-bottom-height': PX(MINIMAP_BOTTOM_HEIGHT),
+    '--osrs-tab-strip-width': PX(TAB_STRIP_WIDTH),
+    '--osrs-tab-strip-left': PX(TAB_STRIP_LEFT),
+    '--osrs-tab-bar-height': PX(TAB_BAR_HEIGHT),
+    '--osrs-sidebar-body-height': PX(SIDEBAR_BODY_HEIGHT),
+    '--osrs-side-panel-width': PX(SIDE_PANEL_WIDTH),
+    '--osrs-side-panel-height': PX(SIDE_PANEL_HEIGHT),
+    '--osrs-side-panel-left': PX(SIDE_PANEL_LEFT),
+  };
+
+  for (const [name, value] of Object.entries(vars)) {
+    root.style.setProperty(name, value);
+  }
+}

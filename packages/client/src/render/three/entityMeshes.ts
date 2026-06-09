@@ -8,7 +8,7 @@ import {
 import { CapsuleGeometry, CylinderGeometry, Group, Mesh, MeshStandardMaterial } from 'three';
 
 import type { DisplaySimulationSnapshot, DisplayTrickAnimation } from '../visualSnapshot.js';
-import { trickBoardPose } from './trickAnimationPose.js';
+import { tideSpinBoardPose, trickBoardPose } from './trickAnimationPose.js';
 import { headingToRotationY, tileToWorld3 } from './worldCoords.js';
 
 const PLAYER_SKIN = 0xffcc66;
@@ -42,8 +42,13 @@ function boardRiderPose(
   heading: number,
   animation: DisplayTrickAnimation | null,
   tide: TideState | null,
+  tideSpinProgress: number | null = null,
 ): BoardRiderPose {
-  const pose = animation ? trickBoardPose(animation) : null;
+  const pose = animation
+    ? trickBoardPose(animation)
+    : tideSpinProgress !== null
+      ? tideSpinBoardPose(tideSpinProgress)
+      : null;
   const world = tileToWorld3(tileX + (pose?.offsetX ?? 0), tileY + (pose?.offsetY ?? 0));
   const surfaceY = tideRideSurfaceY(tileX, tileY, tide);
   return {
@@ -260,6 +265,7 @@ export class EntityLayer {
       demo.surfboard.currentHeading,
       demo.trickAnimation,
       snapshot.tide,
+      demo.tideSpinProgress,
     );
     const headingRad = (headingToDegrees(demo.surfboard.currentHeading) * Math.PI) / 180;
 
@@ -267,7 +273,9 @@ export class EntityLayer {
     this.demoSurfer.visible = true;
     applyBoardRiderPose(this.demoSurferBoard, this.demoSurfer, riderPose);
 
-    const showWake = demo.surfboard.speedState === 'riding' && demo.trickAnimation === null;
+    const showWake =
+      demo.trickAnimation === null &&
+      (demo.surfboard.speedState === 'riding' || demo.tideSpinProgress !== null);
     this.demoSurferWake.visible = showWake;
     if (showWake) {
       const behind = headingRad + Math.PI;

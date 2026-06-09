@@ -169,7 +169,7 @@ function buildJumpGroup(
   );
   lip.position.set(0, radius * 0.35, radius * 0.45);
   group.add(ramp, lip);
-  // Meshes are built along +Z; align with reef tangent (rails use +X).
+  // Ramp/lip run opposite to tunnel +Z; flip so lip faces the ride direction.
   group.rotation.y = (3 * Math.PI) / 2;
   return group;
 }
@@ -238,14 +238,8 @@ function buildTrickGroup(
   }
 }
 
-/** Matches trick ride axis in parent-local space (chevrons are built along +Z). */
 function approachChevronRotationY(type: TrickFeatureType): number {
-  switch (type) {
-    case 'jump':
-      return -Math.PI / 2;
-    default:
-      return Math.PI / 2;
-  }
+  return type === 'jump' ? -Math.PI / 2 : Math.PI / 2;
 }
 
 function addApproachChevrons(

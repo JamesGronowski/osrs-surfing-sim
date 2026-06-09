@@ -1,3 +1,4 @@
+import { HEADING_COUNT } from '../constants/movement.js';
 import { snapAngleToHeading, type HeadingIndex } from '../movement/heading.js';
 import type { SurfboardInput, SurfboardState } from '../movement/surfboard.js';
 import {
@@ -22,8 +23,26 @@ export const DEMO_SURFER_RING_DEPTH = 0.55;
 /** Slow down when this far ahead of the dry-reef trailing edge (fraction of sweep). */
 export const DEMO_SURFER_SLOW_AHEAD_FRACTION = 0.28;
 
-/** Speed up when this close to the submerged leading edge (fraction of sweep). */
-export const DEMO_SURFER_FAST_LEADING_FRACTION = 0.18;
+/** Start paddling when within this fraction of the sweep from the high-tide leading edge. */
+export const DEMO_SURFER_CAUTION_LEADING_FRACTION = 0.4;
+
+/** Trigger a tight spin when the high-tide leading edge is this close (fraction of sweep). */
+export const DEMO_SURFER_SPIN_LEADING_FRACTION = 0.22;
+
+/** Ticks spent carving a clockwise spin while the swell passes. */
+export const DEMO_SURFER_TIDE_SPIN_TICKS = 8;
+
+/** Heading steps advanced per spin tick (16 steps = full rotation). */
+export const DEMO_SURFER_TIDE_SPIN_HEADING_STEP = 2;
+
+/** Faster board rotation during a tide spin. */
+export const DEMO_SURFER_TIDE_SPIN_TURN_RATE = 45;
+
+/** Extra leading-edge buffer for tide advance over this many ticks. */
+export const DEMO_SURFER_TIDE_LOOKAHEAD_TICKS = 4;
+
+/** Reef lookahead steps when checking whether ride speed would enter high tide. */
+export const DEMO_SURFER_PATH_LOOKAHEAD_STEPS = 2;
 
 /** How far clockwise to scan for the next trick feature (fraction of sweep). */
 export const DEMO_SURFER_ZONE_LOOKAHEAD_FRACTION = 0.55;
@@ -106,30 +125,98 @@ function dryZoneMargins(
   };
 }
 
+function tideLeadingBuffer(tide: TideState): number {
+  return tide.advancePerTick * DEMO_SURFER_TIDE_LOOKAHEAD_TICKS;
+}
+
+function effectiveToLeading(angle: number, tide: TideState): number {
+  return dryZoneMargins(angle, tide).toLeading;
+}
+
+/** True when Nalu should carve a clockwise spin to let the swell pass. */
+export function shouldStartTideSpin(
+  position: { x: number; y: number },
+  surfboard: SurfboardState,
+  tide: TideState,
+): boolean {
+  if (isPointInTideSweep(position.x, position.y, tide)) {
+    return false;
+  }
+
+  const { angle } = polarFromIsland(position.x, position.y);
+  const toLeading = effectiveToLeading(angle, tide);
+  const spinThreshold =
+    tide.sweepRadians * DEMO_SURFER_SPIN_LEADING_FRACTION + tideLeadingBuffer(tide);
+  const pathRisk = pathAheadEntersHighTide(position, tide, surfboard.speedState);
+  return toLeading < spinThreshold || pathRisk;
+}
+
+export function tideSpinTargetHeading(currentHeading: HeadingIndex): HeadingIndex {
+  return (currentHeading + DEMO_SURFER_TIDE_SPIN_HEADING_STEP + HEADING_COUNT) % HEADING_COUNT;
+}
+
+function pathAheadEntersHighTide(
+  position: { x: number; y: number },
+  tide: TideState,
+  speedState: SurfboardState['speedState'],
+): boolean {
+  if (speedState !== 'riding') {
+    return false;
+  }
+
+  const { angle, radius } = polarFromIsland(position.x, position.y);
+  const cautionThreshold =
+    tide.sweepRadians * DEMO_SURFER_CAUTION_LEADING_FRACTION + tideLeadingBuffer(tide);
+
+  if (effectiveToLeading(angle, tide) > cautionThreshold * 1.15) {
+    return false;
+  }
+
+  const tilesPerTick = 2.5;
+  const angleStep = tilesPerTick / Math.max(radius, 1);
+
+  for (let step = 1; step <= DEMO_SURFER_PATH_LOOKAHEAD_STEPS; step += 1) {
+    const futureAngle = angle + angleStep * step;
+    const future = idealReefPoint(futureAngle);
+    if (isPointInTideSweep(future.x, future.y, tide)) {
+      return true;
+    }
+    if (effectiveToLeading(futureAngle, tide) < cautionThreshold) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 function chooseSpeedState(
   position: { x: number; y: number },
   tide: TideState | null,
   approachingZone: TrickZone | null,
 ): SurfboardInput {
   if (!tide) {
-    return approachingZone ? { standUp: true } : { standUp: true };
+    return { standUp: true };
   }
 
   const { angle } = polarFromIsland(position.x, position.y);
   const submerged = isPointInTideSweep(position.x, position.y, tide);
   const { fromTrailing, toLeading } = dryZoneMargins(angle, tide);
-  const slowThreshold = tide.sweepRadians * DEMO_SURFER_SLOW_AHEAD_FRACTION;
-  const fastThreshold = tide.sweepRadians * DEMO_SURFER_FAST_LEADING_FRACTION;
+  const slowAheadThreshold = tide.sweepRadians * DEMO_SURFER_SLOW_AHEAD_FRACTION;
+  const cautionThreshold =
+    tide.sweepRadians * DEMO_SURFER_CAUTION_LEADING_FRACTION + tideLeadingBuffer(tide);
+  if (submerged) {
+    return { lieDown: true };
+  }
+
+  if (toLeading < cautionThreshold) {
+    return { lieDown: true };
+  }
 
   if (approachingZone) {
     return { standUp: true };
   }
 
-  if (submerged || toLeading < fastThreshold) {
-    return { standUp: true };
-  }
-
-  if (fromTrailing > slowThreshold) {
+  if (fromTrailing > slowAheadThreshold) {
     return { lieDown: true };
   }
 

@@ -12,6 +12,7 @@
         <div class="osrs-scale-wrap" id="osrs-scale-wrap">
           <div class="osrs-client" id="osrs-client">
             <div class="osrs-window-top"></div>
+            <div class="osrs-top-right-corner" aria-hidden="true"></div>
             <div class="osrs-client-grid">
               <div class="osrs-viewport-wrap">
                 <div id="game-root"></div>
@@ -19,7 +20,16 @@
               <div id="chatbox-root"></div>
               <aside class="osrs-sidebar">
                 <div class="osrs-minimap" id="minimap-root">
-                  <div class="osrs-minimap-inner" id="minimap-canvas"></div>
+                  <div class="osrs-minimap-map" id="minimap-map"></div>
+                  <button
+                    type="button"
+                    class="osrs-minimap-compass"
+                    id="minimap-compass"
+                    title="Face north"
+                  >
+                    <img alt="" />
+                  </button>
+                  <img class="osrs-minimap-frame" id="minimap-frame" alt="" />
                 </div>
                 <div class="osrs-tab-strip" id="tab-strip"></div>
                 <div class="osrs-interface-panel">

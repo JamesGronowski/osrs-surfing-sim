@@ -96,7 +96,9 @@ export class OsrsClient {
     const debugPanelRoot = document.getElementById('debug-panel');
     const chatboxRoot = document.getElementById('chatbox-root');
     const tabStripRoot = document.getElementById('tab-strip');
-    const minimapRoot = document.getElementById('minimap-canvas');
+    const minimapMapRoot = document.getElementById('minimap-map');
+    const minimapCompass = document.getElementById('minimap-compass') as HTMLButtonElement | null;
+    const minimapFrame = document.getElementById('minimap-frame') as HTMLImageElement | null;
 
     if (
       !gameRoot ||
@@ -106,7 +108,9 @@ export class OsrsClient {
       !debugPanelRoot ||
       !chatboxRoot ||
       !tabStripRoot ||
-      !minimapRoot
+      !minimapMapRoot ||
+      !minimapCompass ||
+      !minimapFrame
     ) {
       throw new Error('Missing required DOM elements');
     }
@@ -114,7 +118,9 @@ export class OsrsClient {
     const renderer = new ThreeRenderer();
     await renderer.init(gameRoot, 1);
 
-    const minimap = new OsrsMinimap(minimapRoot);
+    const minimap = new OsrsMinimap(minimapMapRoot, minimapCompass, minimapFrame, () =>
+      renderer.snapCameraNorth(),
+    );
     const chatbox = new OsrsChatbox(chatboxRoot);
     for (const line of HELP_LINES) {
       chatbox.push(line, 'game');
@@ -338,6 +344,7 @@ export class OsrsClient {
     this.lastDisplayPosition = { ...displaySnapshot.surfboard.position };
     this.lastTickBlend = tickBlend;
     this.renderer.render(displaySnapshot, map, visualTimeMs, tickBlend);
+    this.minimap.setCompassRotation(this.renderer.getCompassRotationRadians());
   }
 
   private renderFrame(): void {

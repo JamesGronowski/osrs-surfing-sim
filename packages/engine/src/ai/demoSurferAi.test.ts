@@ -7,7 +7,9 @@ import {
   computeDemoSurferAi,
   demoSurferSpawnOnReef,
   DEMO_SURFER_RING_DEPTH,
+  DEMO_SURFER_SPIN_LEADING_FRACTION,
   reefRideClockwiseRadians,
+  shouldStartTideSpin,
 } from './demoSurferAi.js';
 import { headingToDegrees } from '../movement/heading.js';
 import {
@@ -31,7 +33,7 @@ describe('demoSurferAi', () => {
     );
   });
 
-  it('rides fast when submerged and paddles when far ahead of the dry zone', () => {
+  it('paddles when submerged and slows near the approaching high-tide front', () => {
     const arena = createCoralParkSlice();
     const tide = createTideState(arena.tide!);
     const spawn = demoSurferSpawnOnReef(0);
@@ -47,7 +49,7 @@ describe('demoSurferAi', () => {
       tide,
       map: arena.map,
     });
-    expect(submergedAi.standUp).toBe(true);
+    expect(submergedAi.lieDown).toBe(true);
     expect(isPointInTideSweep(submerged.x, submerged.y, tide)).toBe(true);
 
     const dryAngle = tide.phaseRadians + tide.sweepRadians + tide.sweepRadians * 0.35;
@@ -71,5 +73,34 @@ describe('demoSurferAi', () => {
     });
     expect(slowAi.lieDown).toBe(true);
     expect(isPointInTideSweep(ahead.x, ahead.y, tide)).toBe(false);
+
+    const nearLeadingAngle =
+      tide.phaseRadians - tide.sweepRadians * DEMO_SURFER_SPIN_LEADING_FRACTION * 0.45;
+    const nearInner = coralParkReefInnerRadius(nearLeadingAngle);
+    const nearOuter = coralParkReefOuterRadius(nearLeadingAngle);
+    const nearRadius = nearInner + (nearOuter - nearInner) * DEMO_SURFER_RING_DEPTH;
+    const nearLeading = {
+      x: CORAL_PARK_ISLAND_CX + Math.cos(nearLeadingAngle) * nearRadius,
+      y: CORAL_PARK_ISLAND_CY + Math.sin(nearLeadingAngle) * nearRadius,
+    };
+
+    const cautiousAi = computeDemoSurferAi({
+      surfboard: {
+        ...createSurfboard(nearLeading.x, nearLeading.y, spawn.heading),
+        speedState: 'riding',
+      },
+      trickPrepare: null,
+      trickZones: [],
+      tide,
+      map: arena.map,
+    });
+    expect(cautiousAi.lieDown).toBe(true);
+    expect(
+      shouldStartTideSpin(
+        nearLeading,
+        createSurfboard(nearLeading.x, nearLeading.y, spawn.heading),
+        tide,
+      ),
+    ).toBe(true);
   });
 });

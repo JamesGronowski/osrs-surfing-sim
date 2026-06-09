@@ -197,6 +197,14 @@ export class ThreeRenderer implements IRenderer {
     this.renderer.render(this.scene, this.orbitCamera.camera);
   }
 
+  getCompassRotationRadians(): number {
+    return this.orbitCamera?.getCompassRotationRadians() ?? 0;
+  }
+
+  snapCameraNorth(): void {
+    this.orbitCamera?.snapNorth();
+  }
+
   showXpDrop(text: string, worldX: number, worldY: number): void {
     if (!this.xpContainer) {
       return;

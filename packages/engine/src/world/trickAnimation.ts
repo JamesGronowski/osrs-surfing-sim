@@ -63,47 +63,55 @@ export function trickFeatureRideUnitVector(zone: TrickZone): { x: number; y: num
   const cos = Math.cos(r);
   const sin = Math.sin(r);
 
-  switch (zone.type) {
-    case 'jump':
-      return { x: -cos, y: -sin };
-    case 'tunnel':
-      return { x: cos, y: sin };
-    case 'rail':
-    case 'wall_ride':
-    case 'brain_coral':
-    default:
-      return { x: cos, y: sin };
+  if (zone.type === 'jump') {
+    return { x: -cos, y: -sin };
   }
+  return { x: cos, y: sin };
 }
 
 function dot(ax: number, ay: number, bx: number, by: number): number {
   return ax * bx + ay * by;
 }
 
-/** Ride direction through the feature — sign picks the entry→exit side. */
+const RIDE_AXIS_ENTRY_THRESHOLD = 0.08;
+
+/** Ride direction through the feature. */
 export function signedFeatureRideVector(
   zone: TrickZone,
   entryPosition: WorldPos,
   startHeading: HeadingIndex,
 ): { x: number; y: number } {
   const axis = trickFeatureRideUnitVector(zone);
+  const travel = headingToUnitVector(startHeading);
+  const travelDot = dot(travel.x, travel.y, axis.x, axis.y);
   const offset = {
     x: entryPosition.x - zone.center.x,
     y: entryPosition.y - zone.center.y,
   };
   const along = dot(offset.x, offset.y, axis.x, axis.y);
+  const entryThreshold = zone.radius * RIDE_AXIS_ENTRY_THRESHOLD;
 
-  if (Math.abs(along) >= zone.radius * 0.08) {
-    return along < 0 ? axis : { x: -axis.x, y: -axis.y };
+  if (along <= -entryThreshold) {
+    return axis;
   }
 
-  const travel = headingToUnitVector(startHeading);
-  const travelDot = dot(travel.x, travel.y, axis.x, axis.y);
+  if (along >= entryThreshold) {
+    if (Math.abs(travelDot) >= 0.05) {
+      return travelDot >= 0 ? axis : { x: -axis.x, y: -axis.y };
+    }
+    return { x: -axis.x, y: -axis.y };
+  }
+
   if (Math.abs(travelDot) >= 0.05) {
     return travelDot >= 0 ? axis : { x: -axis.x, y: -axis.y };
   }
 
   return axis;
+}
+
+/** World normal from the ride line toward the wall_ride mesh face. */
+export function trickFeatureWallNormal(rotationRadians: number): { x: number; y: number } {
+  return { x: -Math.sin(rotationRadians), y: -Math.cos(rotationRadians) };
 }
 
 export function snapToFeatureCenterline(

@@ -1,13 +1,52 @@
 import { describe, expect, it } from 'vitest';
 
+import {
+  DEMO_SURFER_RING_DEPTH,
+  DEMO_SURFER_SPIN_LEADING_FRACTION,
+  demoSurferSpawnOnReef,
+} from '../ai/demoSurferAi.js';
 import { GameSimulation } from '../game/simulation.js';
-import { CORAL_PARK_ISLAND_CX, CORAL_PARK_ISLAND_CY } from './coralParkCoast.js';
+import {
+  CORAL_PARK_ISLAND_CX,
+  CORAL_PARK_ISLAND_CY,
+  coralParkReefInnerRadius,
+  coralParkReefOuterRadius,
+} from './coralParkCoast.js';
 import { createTideState } from './features.js';
 import { getTile, isTileSurfable } from './collision.js';
 import { createDemoSurfer, tickDemoSurfer } from './demoSurfer.js';
 import { createCoralParkSlice } from './maps.js';
 
 describe('demoSurfer', () => {
+  it('carves a tide spin instead of stopping when the swell is too close', () => {
+    const arena = createCoralParkSlice();
+    const tide = createTideState(arena.tide!);
+    const spawn = demoSurferSpawnOnReef(0);
+    const nearLeadingAngle =
+      tide.phaseRadians - tide.sweepRadians * DEMO_SURFER_SPIN_LEADING_FRACTION * 0.45;
+    const nearInner = coralParkReefInnerRadius(nearLeadingAngle);
+    const nearOuter = coralParkReefOuterRadius(nearLeadingAngle);
+    const nearRadius = nearInner + (nearOuter - nearInner) * DEMO_SURFER_RING_DEPTH;
+    const nearLeading = {
+      x: CORAL_PARK_ISLAND_CX + Math.cos(nearLeadingAngle) * nearRadius,
+      y: CORAL_PARK_ISLAND_CY + Math.sin(nearLeadingAngle) * nearRadius,
+    };
+
+    let runtime = createDemoSurfer({
+      ...arena.demoSurfer!,
+      startX: nearLeading.x,
+      startY: nearLeading.y,
+      startHeading: spawn.heading,
+    });
+    const beforeHeading = runtime.surfboard.currentHeading;
+
+    runtime = tickDemoSurfer(runtime, arena.map, arena.trickZones, tide);
+
+    expect(runtime.tideSpinTicksRemaining).toBeGreaterThan(0);
+    expect(runtime.surfboard.speedState).not.toBe('seated');
+    expect(runtime.surfboard.currentHeading).not.toBe(beforeHeading);
+  });
+
   it('rides the reef loop without leaving surfable water', () => {
     const arena = createCoralParkSlice();
     expect(arena.demoSurfer).not.toBeNull();
@@ -28,7 +67,7 @@ describe('demoSurfer', () => {
     const arena = createCoralParkSlice();
     const sim = new GameSimulation({ arena });
 
-    for (let i = 0; i < 5; i += 1) {
+    for (let i = 0; i < 40; i += 1) {
       sim.tick();
     }
 

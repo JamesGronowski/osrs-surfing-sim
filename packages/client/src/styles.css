@@ -48,6 +48,18 @@ body,
   background-size: auto 4px;
 }
 
+.osrs-top-right-corner {
+  position: absolute;
+  top: 4px;
+  right: 0;
+  width: 48px;
+  height: 4px;
+  background: var(--osrs-url-top-right-corner) no-repeat right top;
+  image-rendering: pixelated;
+  pointer-events: none;
+  z-index: 5;
+}
+
 .osrs-client-grid {
   display: grid;
   grid-template-columns: 512px 253px;
@@ -140,27 +152,64 @@ body,
   flex-shrink: 0;
   background:
     var(--osrs-url-minimap-left) no-repeat left top,
-    var(--osrs-url-minimap-right) no-repeat right top,
-    var(--osrs-url-minimap-frame) no-repeat center top;
+    var(--osrs-url-minimap-right) no-repeat right top;
   background-size:
     29px 156px,
-    48px 156px,
-    172px 156px;
+    48px 156px;
 }
 
-.osrs-minimap-inner {
+.osrs-minimap-map {
   position: absolute;
   left: 54px;
   top: 8px;
   width: 146px;
   height: 146px;
+  border-radius: 50%;
   overflow: hidden;
+  z-index: 1;
+  background: #000;
 }
 
 .osrs-minimap-canvas {
+  display: block;
   width: 146px;
   height: 146px;
   image-rendering: pixelated;
+}
+
+.osrs-minimap-compass {
+  position: absolute;
+  left: 47px;
+  top: 6px;
+  width: 28px;
+  height: 28px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.osrs-minimap-compass img {
+  width: 16px;
+  height: 16px;
+  image-rendering: pixelated;
+  transform-origin: center center;
+  pointer-events: none;
+}
+
+.osrs-minimap-frame {
+  position: absolute;
+  left: 41px;
+  top: 0;
+  width: 172px;
+  height: 156px;
+  z-index: 3;
+  image-rendering: pixelated;
+  pointer-events: none;
 }
 
 .osrs-minimap::after {
@@ -175,17 +224,32 @@ body,
 
 .osrs-tab-strip {
   width: 253px;
-  height: 37px;
   flex-shrink: 0;
-  background: var(--osrs-url-tabs-top) no-repeat center;
-  background-size: 249px 38px;
+  display: flex;
+  flex-direction: column;
+}
+
+.osrs-tab-strip-row {
+  height: 37px;
   padding: 2px 4px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 249px 38px;
+}
+
+.osrs-tab-strip-top {
+  background-image: var(--osrs-url-tabs-top);
+}
+
+.osrs-tab-strip-bottom {
+  background-image: var(--osrs-url-tabs-bottom);
 }
 
 .osrs-tab-strip-inner {
   display: flex;
   gap: 1px;
   align-items: center;
+  justify-content: center;
   height: 100%;
 }
 

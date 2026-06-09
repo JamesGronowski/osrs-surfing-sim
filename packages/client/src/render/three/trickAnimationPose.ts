@@ -1,3 +1,5 @@
+import { trickFeatureWallNormal } from '@osrs-surfing/engine';
+
 import type { DisplayTrickAnimation } from '../visualSnapshot.js';
 
 /** Visual offsets in engine tile space (x = east, y = south). */
@@ -18,15 +20,6 @@ function clamp01(value: number): number {
 function easeInOutSine(t: number): number {
   const x = clamp01(t);
   return 0.5 - 0.5 * Math.cos(Math.PI * x);
-}
-
-function rideNormal(animation: DisplayTrickAnimation): { x: number; y: number } {
-  const angle = animation.rotationRadians;
-  const side = animation.rideSide;
-  return {
-    x: -Math.sin(angle) * side,
-    y: Math.cos(angle) * side,
-  };
 }
 
 function railPose(animation: DisplayTrickAnimation, progress: number): TrickBoardPose {
@@ -93,7 +86,7 @@ function tunnelPose(animation: DisplayTrickAnimation, progress: number): TrickBo
 
 function wallRidePose(animation: DisplayTrickAnimation, progress: number): TrickBoardPose {
   const radius = animation.zoneRadius;
-  const normal = rideNormal(animation);
+  const wallNormal = trickFeatureWallNormal(animation.rotationRadians);
   const lateral = radius * 0.34;
   const arc = Math.sin(progress * Math.PI);
 
@@ -102,8 +95,8 @@ function wallRidePose(animation: DisplayTrickAnimation, progress: number): Trick
     pitch: arc * 0.2 * animation.rideSide,
     roll: -animation.rideSide * (0.38 + arc * 0.12),
     yawOffset: 0,
-    offsetX: normal.x * lateral,
-    offsetY: normal.y * lateral,
+    offsetX: wallNormal.x * lateral,
+    offsetY: wallNormal.y * lateral,
     riderLean: -animation.rideSide * arc * 0.18,
   };
 }
@@ -121,6 +114,19 @@ function jumpPose(animation: DisplayTrickAnimation, progress: number): TrickBoar
     offsetX: 0,
     offsetY: 0,
     riderLean: Math.sin(progress * Math.PI * 2) * 0.15,
+  };
+}
+
+export function tideSpinBoardPose(progress: number): TrickBoardPose {
+  const spin = clamp01(progress) * Math.PI * 2;
+  return {
+    liftY: 0.06 + Math.sin(progress * Math.PI) * 0.1,
+    pitch: Math.sin(spin) * 0.06,
+    roll: Math.sin(spin) * 0.35,
+    yawOffset: spin * 0.12,
+    offsetX: 0,
+    offsetY: 0,
+    riderLean: Math.cos(spin) * 0.18,
   };
 }
 

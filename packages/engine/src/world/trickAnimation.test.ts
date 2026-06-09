@@ -10,6 +10,7 @@ import {
   TRICK_ANIMATION_TICKS,
   trickAnimationPositionAtProgress,
   trickFeatureRideUnitVector,
+  trickFeatureWallNormal,
   toTrickAnimationSnapshot,
 } from './trickAnimation.js';
 import { createCoralParkSlice } from './maps.js';
@@ -85,6 +86,59 @@ describe('trick animation', () => {
     const tunnelRide = trickFeatureRideUnitVector(tunnelZone);
     expect(tunnelRide.x).toBeCloseTo(1);
     expect(tunnelRide.y).toBeCloseTo(0);
+
+    const jumpZone: TrickZone = { ...zone, type: 'jump', prepareSlot: 2, rotationRadians: 0 };
+    const jumpRide = trickFeatureRideUnitVector(jumpZone);
+    expect(jumpRide.x).toBeCloseTo(-1);
+    expect(jumpRide.y).toBeCloseTo(0);
+  });
+
+  it('rides jumps along the clockwise reef tangent', () => {
+    const jumpZone: TrickZone = {
+      ...zone,
+      type: 'jump',
+      prepareSlot: 2,
+      rotationRadians: Math.PI / 2,
+    };
+    const ride = signedFeatureRideVector(jumpZone, { x: 30, y: 13 }, 12);
+    expect(ride.x).toBeCloseTo(0);
+    expect(ride.y).toBeCloseTo(-1);
+
+    const anim = createTrickAnimationState(arena.map, jumpZone, { x: 30, y: 13 }, 12);
+    expect(anim.end.y).toBeLessThan(anim.start.y);
+  });
+
+  it('follows rider heading when picking ride direction past feature centre', () => {
+    const wallZone: TrickZone = {
+      ...zone,
+      type: 'wall_ride',
+      prepareSlot: 1,
+      rotationRadians: 0,
+    };
+    const pastCentre = { x: 32, y: 11 };
+    const ride = signedFeatureRideVector(wallZone, pastCentre, 0);
+    expect(ride.x).toBeCloseTo(1);
+    expect(ride.y).toBeCloseTo(0);
+
+    const anim = createTrickAnimationState(arena.map, wallZone, pastCentre, 0);
+    expect(anim.end.x).toBeGreaterThan(anim.start.x);
+  });
+
+  it('offsets wall rides toward the mesh wall face from either approach side', () => {
+    const wallZone: TrickZone = {
+      ...zone,
+      type: 'wall_ride',
+      prepareSlot: 1,
+      rotationRadians: 0,
+    };
+    const wallNormal = trickFeatureWallNormal(0);
+    expect(wallNormal.y).toBeLessThan(0);
+
+    const fromSouth = createTrickAnimationState(arena.map, wallZone, { x: 28, y: 12.5 }, 0);
+    const fromNorth = createTrickAnimationState(arena.map, wallZone, { x: 28, y: 9.5 }, 0);
+    expect(fromSouth.rideSide).not.toBe(fromNorth.rideSide);
+    expect(fromSouth.end.x).toBeGreaterThan(fromSouth.start.x);
+    expect(fromNorth.end.x).toBeGreaterThan(fromNorth.start.x);
   });
 
   it('records ride side and zone orientation for client pose offsets', () => {

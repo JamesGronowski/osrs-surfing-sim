@@ -1,4 +1,10 @@
-import { computeDemoSurferAi } from '../ai/demoSurferAi.js';
+import {
+  DEMO_SURFER_TIDE_SPIN_TICKS,
+  DEMO_SURFER_TIDE_SPIN_TURN_RATE,
+  computeDemoSurferAi,
+  shouldStartTideSpin,
+  tideSpinTargetHeading,
+} from '../ai/demoSurferAi.js';
 import { DEFAULT_SURFBOARD_STATS } from '../constants/movement.js';
 import type { HeadingIndex } from '../movement/heading.js';
 import {
@@ -37,6 +43,8 @@ export interface DemoSurferSnapshot {
   surfboard: SurfboardState;
   trickPrepare: TrickPrepareState | null;
   trickAnimation: TrickAnimationSnapshot | null;
+  /** 0–1 progress through an active tide spin, or null when not spinning. */
+  tideSpinProgress: number | null;
 }
 
 interface DemoSurferRuntime {
@@ -45,6 +53,7 @@ interface DemoSurferRuntime {
   trickPrepare: TrickPrepareState | null;
   trickAnimation: TrickAnimationState | null;
   activeTrickZoneId: string | null;
+  tideSpinTicksRemaining: number;
   stats: SurfboardStats;
 }
 
@@ -62,8 +71,16 @@ export function createDemoSurfer(
     trickPrepare: null,
     trickAnimation: null,
     activeTrickZoneId: null,
+    tideSpinTicksRemaining: 0,
     stats: stats ?? { ...DEFAULT_SURFBOARD_STATS },
   };
+}
+
+function tideSpinProgress(runtime: DemoSurferRuntime): number | null {
+  if (runtime.tideSpinTicksRemaining <= 0) {
+    return null;
+  }
+  return 1 - runtime.tideSpinTicksRemaining / DEMO_SURFER_TIDE_SPIN_TICKS;
 }
 
 export function toDemoSurferSnapshot(runtime: DemoSurferRuntime): DemoSurferSnapshot {
@@ -73,6 +90,7 @@ export function toDemoSurferSnapshot(runtime: DemoSurferRuntime): DemoSurferSnap
     surfboard: { ...runtime.surfboard, position: { ...runtime.surfboard.position } },
     trickPrepare: runtime.trickPrepare ? { ...runtime.trickPrepare } : null,
     trickAnimation: toTrickAnimationSnapshot(runtime.trickAnimation),
+    tideSpinProgress: tideSpinProgress(runtime),
   };
 }
 
@@ -93,12 +111,34 @@ function resolveDemoTrickEntry(
     trickPrepare: null,
     trickAnimation,
     activeTrickZoneId: null,
+    tideSpinTicksRemaining: 0,
     surfboard: {
       ...runtime.surfboard,
       speedState: 'riding',
       intendedHeading: trickAnimation.endHeading,
       isRotating: false,
     },
+  };
+}
+
+function tickTideSpin(runtime: DemoSurferRuntime, map: WorldMap): DemoSurferRuntime {
+  const spinStats = { ...runtime.stats, turnRateDegPerTick: DEMO_SURFER_TIDE_SPIN_TURN_RATE };
+  const moveResult = tickSurfboard(
+    runtime.surfboard,
+    map,
+    {
+      lieDown: true,
+      setIntendedHeading: tideSpinTargetHeading(runtime.surfboard.currentHeading),
+    },
+    spinStats,
+  );
+
+  return {
+    ...runtime,
+    surfboard: moveResult.state,
+    tideSpinTicksRemaining: Math.max(0, runtime.tideSpinTicksRemaining - 1),
+    trickPrepare: advanceTrickPrepare(runtime.trickPrepare),
+    activeTrickZoneId: null,
   };
 }
 
@@ -122,6 +162,14 @@ export function tickDemoSurfer(
       },
       trickPrepare: advanceTrickPrepare(runtime.trickPrepare),
     };
+  }
+
+  if (runtime.tideSpinTicksRemaining > 0) {
+    return tickTideSpin(runtime, map);
+  }
+
+  if (tide && shouldStartTideSpin(runtime.surfboard.position, runtime.surfboard, tide)) {
+    return tickTideSpin({ ...runtime, tideSpinTicksRemaining: DEMO_SURFER_TIDE_SPIN_TICKS }, map);
   }
 
   const ai = computeDemoSurferAi({

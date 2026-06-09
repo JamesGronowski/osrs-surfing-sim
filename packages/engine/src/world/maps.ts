@@ -19,7 +19,6 @@ import type { DemoSurferConfig } from './demoSurfer.js';
 import type { TideConfig, TrickZone } from './features.js';
 import type { NpcDefinition } from './npc.js';
 import {
-  clockwiseTangent,
   CORAL_PARK_TRICK_ZONE_RADIUS,
   isFarEnoughFromZones,
   randomRingDepth,
@@ -29,6 +28,7 @@ import {
   TRICK_FEATURE_TYPES,
   TRICK_TYPE_TO_PREPARE_SLOT,
   trickSlotAngle,
+  trickZoneRotationRadians,
 } from './trickZonePlacement.js';
 
 export {
@@ -73,7 +73,7 @@ function buildTrickZones(map: WorldMap): TrickZone[] {
 
     const type = TRICK_FEATURE_TYPES[i % TRICK_FEATURE_TYPES.length];
     const counterRide = i % 5 === 0;
-    const rotation = counterRide ? positionAngle + Math.PI / 2 : clockwiseTangent(positionAngle);
+    const rotation = trickZoneRotationRadians(positionAngle, counterRide, type);
 
     zones.push({
       id: `${type}-${i}`,

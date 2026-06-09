@@ -1,5 +1,6 @@
 import { PerspectiveCamera, Vector3 } from 'three';
 
+import { CAMERA_YAW_NORTH } from '../../ui/minimapLayout.js';
 import { tileToWorld3 } from './worldCoords.js';
 
 const DEFAULT_YAW = Math.PI * 0.75;
@@ -167,5 +168,14 @@ export class OsrsOrbitCamera {
   onWheel(deltaY: number): void {
     const factor = 1 + deltaY * ZOOM_SPEED * 0.001;
     this.distance = Math.max(MIN_DISTANCE, Math.min(MAX_DISTANCE, this.distance * factor));
+  }
+
+  /** Radians to rotate the minimap compass needle so north stays world-up on screen. */
+  getCompassRotationRadians(): number {
+    return CAMERA_YAW_NORTH - this.yaw;
+  }
+
+  snapNorth(): void {
+    this.yaw = CAMERA_YAW_NORTH;
   }
 }
