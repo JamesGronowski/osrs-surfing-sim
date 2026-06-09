@@ -13,6 +13,7 @@ export interface SurfTestControls {
   getTickBlend?: () => number;
   onSimulationTick?: (before: SimulationSnapshot, after: SimulationSnapshot) => void;
   afterTick?: () => void;
+  resetTickBlendTimer?: () => void;
 }
 
 export interface SurfTestApi {
@@ -60,6 +61,7 @@ export function installSurfTestBridge(
         controls.onSimulationTick?.(before, after);
         controls.afterTick?.();
       }
+      controls.resetTickBlendTimer?.();
     },
     getSnapshot: () => simulation.getSnapshot(),
     consumeDialogue: () => simulation.consumeDialogue(),

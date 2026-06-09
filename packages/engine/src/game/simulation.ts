@@ -28,6 +28,7 @@ import {
 import type { TrickPrepareSlot } from '../constants/tricks.js';
 import {
   advanceTrickPrepare,
+  advanceTrickZoneTideVisuals,
   createTideState,
   findTrickZoneAt,
   isTrickPrepareTimingValid,
@@ -37,6 +38,12 @@ import {
   type TrickPrepareState,
   type TrickZone,
 } from '../world/features.js';
+import {
+  createDemoSurfer,
+  tickDemoSurfer,
+  toDemoSurferSnapshot,
+  type DemoSurferSnapshot,
+} from '../world/demoSurfer.js';
 import { CORAL_PARK_TRICK_ZONE_COUNT, type GameArena } from '../world/maps.js';
 import {
   createTrickAnimationState,
@@ -78,6 +85,7 @@ export interface SimulationSnapshot {
   onFootMoving: boolean;
   trickPrepare: TrickPrepareState | null;
   trickAnimation: TrickAnimationSnapshot | null;
+  demoSurfer: DemoSurferSnapshot | null;
 }
 
 export interface XpDropEvent {
@@ -118,6 +126,7 @@ export class GameSimulation {
   private tideFrozen = false;
   private movementFrozen = false;
   private readonly boardInteractRadius = 1.3;
+  private demoSurfer: ReturnType<typeof createDemoSurfer> | null = null;
 
   constructor(config: SimulationConfig) {
     this.arena = config.arena;
@@ -135,6 +144,9 @@ export class GameSimulation {
     this.trickZones = config.arena.trickZones.map((zone) => ({ ...zone }));
     this.tide = config.arena.tide ? createTideState(config.arena.tide) : null;
     this.trickZoneTideSync = createTrickZoneTideSyncState();
+    this.demoSurfer = config.arena.demoSurfer
+      ? createDemoSurfer(config.arena.demoSurfer, this.stats)
+      : null;
   }
 
   getSnapshot(): SimulationSnapshot {
@@ -163,6 +175,7 @@ export class GameSimulation {
       onFootMoving: this.walk !== null,
       trickPrepare: this.trickPrepare ? { ...this.trickPrepare } : null,
       trickAnimation: toTrickAnimationSnapshot(this.trickAnimation),
+      demoSurfer: this.demoSurfer ? toDemoSurferSnapshot(this.demoSurfer) : null,
     };
   }
 
@@ -560,9 +573,14 @@ export class GameSimulation {
         this.trickZoneTideSync,
         CORAL_PARK_TRICK_ZONE_COUNT,
       );
+      this.trickZones = advanceTrickZoneTideVisuals(this.trickZones, this.tide);
     }
 
     this.checkProximityDialogue();
+
+    if (this.demoSurfer) {
+      this.demoSurfer = tickDemoSurfer(this.demoSurfer, this.arena.map, this.trickZones, this.tide);
+    }
 
     this.tickCount += 1;
   }

@@ -14,6 +14,8 @@ import {
   coralParkTileAngle,
   coralParkTileDistance,
 } from './coralParkCoast.js';
+import { demoSurferSpawnOnReef } from '../ai/demoSurferAi.js';
+import type { DemoSurferConfig } from './demoSurfer.js';
 import type { TideConfig, TrickZone } from './features.js';
 import type { NpcDefinition } from './npc.js';
 import {
@@ -47,6 +49,7 @@ export interface GameArena {
   trickZones: TrickZone[];
   tide: TideConfig | null;
   npcs: NpcDefinition[];
+  demoSurfer: DemoSurferConfig | null;
 }
 
 export const CORAL_PARK_TRICK_ZONE_COUNT = 15;
@@ -122,6 +125,7 @@ export function createCoralParkSlice(): GameArena {
   const spawnY = boardDockY - 1.8;
   const guruX = boardDockX + 1.2;
   const guruY = boardDockY - 1.5;
+  const demoSurferSpawn = demoSurferSpawnOnReef(-Math.PI / 4);
 
   return {
     map,
@@ -155,9 +159,17 @@ export function createCoralParkSlice(): GameArena {
           'Yellow chevrons show which way to ride through each feature.',
           'Prime a trick button 1–4 ticks before you hit the matching coral.',
           "Tai'ura's tide submerges features — they fade underwater, then fresh coral rises as the swell passes.",
+          'Watch Nalu ride the reef loop — she times the swell to hit every feature in the dry zone.',
         ],
       },
     ],
+    demoSurfer: {
+      id: 'nalu',
+      name: 'Nalu',
+      startX: demoSurferSpawn.x,
+      startY: demoSurferSpawn.y,
+      startHeading: demoSurferSpawn.heading,
+    },
     trickZones: buildTrickZones(map),
   };
 }

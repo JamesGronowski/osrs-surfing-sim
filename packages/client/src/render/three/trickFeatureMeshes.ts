@@ -1,6 +1,7 @@
 import {
   isTrickZoneSubmerged,
   trickZoneVisualAlpha,
+  trickZoneVisualSubmergeProgress,
   type SimulationSnapshot,
   type TrickFeatureType,
 } from '@osrs-surfing/engine';
@@ -17,18 +18,52 @@ import {
 
 import { radiansToRotationY, tileToWorld3 } from './worldCoords.js';
 
-/** How far features sink below the water plane when fully submerged (fraction of zone radius). */
-const TRICK_FEATURE_SUBMERGE_DEPTH = 0.55;
+/** Reef overlay tile top in world Y (see MapMeshBuilder OVERLAY_TILE_HEIGHT). */
+const REEF_OVERLAY_TOP_Y = 0.06;
+
+/** Extra clearance below reef geometry when fully submerged. */
+const TRICK_FEATURE_SUBMERGE_BELOW_FLOOR = 0.2;
+
+/** Narrow half-torus so a low stance visibly clips through the arch. */
+const TUNNEL_TORUS_MAJOR_RADIUS_FACTOR = 0.5;
+const TUNNEL_TORUS_TUBE_RADIUS_FACTOR = 0.065;
+
+/** Tallest mesh extent above group origin per feature type (fraction of zone radius). */
+function trickFeatureHeightAboveSurface(type: TrickFeatureType, radius: number): number {
+  switch (type) {
+    case 'tunnel':
+      return radius * (TUNNEL_TORUS_MAJOR_RADIUS_FACTOR + TUNNEL_TORUS_TUBE_RADIUS_FACTOR + 0.06);
+    case 'wall_ride':
+      return radius * 1.125;
+    case 'brain_coral':
+      return radius * 0.8;
+    case 'jump':
+      return radius * 0.4;
+    case 'rail':
+    default:
+      return radius * 0.57;
+  }
+}
+
+function trickFeatureFullSubmergeDepth(type: TrickFeatureType, radius: number): number {
+  return (
+    trickFeatureHeightAboveSurface(type, radius) +
+    REEF_OVERLAY_TOP_Y +
+    TRICK_FEATURE_SUBMERGE_BELOW_FLOOR
+  );
+}
 
 function trickFeatureSurfaceY(
   zone: SimulationSnapshot['trickZones'][number],
-  alpha: number,
+  tide: SimulationSnapshot['tide'],
+  tickBlend: number,
   interactionDisabled: boolean,
 ): number {
   if (!interactionDisabled) {
     return 0;
   }
-  return -(1 - alpha) * zone.radius * TRICK_FEATURE_SUBMERGE_DEPTH;
+  const submerge = trickZoneVisualSubmergeProgress(zone, tide, tickBlend);
+  return -submerge * trickFeatureFullSubmergeDepth(zone.type, zone.radius);
 }
 
 function paletteFor(type: TrickFeatureType): { base: number; accent: number } {
@@ -65,15 +100,15 @@ function buildRailGroup(
 ): Group {
   const group = new Group();
   const rail = new Mesh(
-    new BoxGeometry(radius * 2.3, radius * 0.12, radius * 0.24),
+    new BoxGeometry(radius * 2.3, radius * 0.1, radius * 0.2),
     makeMaterial(palette.base, alpha),
   );
-  rail.position.y = radius * 0.2;
+  rail.position.y = radius * 0.22;
   const post = new Mesh(
-    new BoxGeometry(radius * 0.36, radius * 0.44, radius * 0.36),
+    new BoxGeometry(radius * 0.32, radius * 0.4, radius * 0.32),
     makeMaterial(palette.accent, alpha),
   );
-  post.position.set(0, radius * 0.35, 0);
+  post.position.set(0, radius * 0.34, 0);
   group.add(rail, post);
   return group;
 }
@@ -85,12 +120,18 @@ function buildTunnelGroup(
 ): Group {
   const group = new Group();
   const arch = new Mesh(
-    new TorusGeometry(radius * 0.9, radius * 0.13, 12, 24, Math.PI),
+    new TorusGeometry(
+      radius * TUNNEL_TORUS_MAJOR_RADIUS_FACTOR,
+      radius * TUNNEL_TORUS_TUBE_RADIUS_FACTOR,
+      10,
+      20,
+      Math.PI,
+    ),
     makeMaterial(palette.accent, alpha),
   );
   // Half-torus in the XZ plane — tube arches upward over the ride path (+Z local).
   arch.rotation.x = 0;
-  arch.position.y = radius * 0.13;
+  arch.position.y = radius * 0.08;
   group.add(arch);
   // Meshes are built along +Z; align with reef tangent (rails use +X).
   group.rotation.y = Math.PI / 2;
@@ -147,15 +188,15 @@ function buildWallRideGroup(
 ): Group {
   const group = new Group();
   const wall = new Mesh(
-    new BoxGeometry(radius * 0.35, radius * 1.2, radius * 1.4),
+    new BoxGeometry(radius * 0.24, radius * 1.15, radius * 1.35),
     makeMaterial(palette.base, alpha),
   );
-  wall.position.y = radius * 0.5;
+  wall.position.set(0, radius * 0.48, 0);
   const crest = new Mesh(
-    new BoxGeometry(radius * 0.45, radius * 0.15, radius * 1.5),
+    new BoxGeometry(radius * 0.34, radius * 0.14, radius * 1.45),
     makeMaterial(palette.accent, alpha),
   );
-  crest.position.y = radius * 1.05;
+  crest.position.y = radius * 1.02;
   group.add(wall, crest);
   // Meshes are built along +Z; ride direction matches rails along +X.
   group.rotation.y = Math.PI / 2;
@@ -259,7 +300,7 @@ export class TrickFeatureLayer {
   private pool: Group[] = [];
   private meshKeys: string[] = [];
 
-  sync(snapshot: SimulationSnapshot): void {
+  sync(snapshot: SimulationSnapshot, tickBlend = 0): void {
     const tide = snapshot.tide;
     const zones = snapshot.trickZones;
 
@@ -281,8 +322,8 @@ export class TrickFeatureLayer {
       group.visible = true;
 
       const interactionDisabled = tide ? isTrickZoneSubmerged(zone, tide) : false;
-      const alpha = trickZoneVisualAlpha(zone, tide);
-      const featureAlpha = interactionDisabled ? alpha * 0.5 : alpha;
+      const alpha = trickZoneVisualAlpha(zone, tide, tickBlend);
+      const featureAlpha = alpha;
       const meshKey = zoneMeshKey(zone, snapshot, interactionDisabled);
 
       if (this.meshKeys[i] !== meshKey) {
@@ -305,7 +346,11 @@ export class TrickFeatureLayer {
       }
 
       const pos = tileToWorld3(zone.center.x, zone.center.y);
-      group.position.set(pos.x, trickFeatureSurfaceY(zone, alpha, interactionDisabled), pos.z);
+      group.position.set(
+        pos.x,
+        trickFeatureSurfaceY(zone, tide, tickBlend, interactionDisabled),
+        pos.z,
+      );
       group.rotation.y = radiansToRotationY(
         zone.rotationRadians + (zone.rotationJitterRadians ?? 0),
       );

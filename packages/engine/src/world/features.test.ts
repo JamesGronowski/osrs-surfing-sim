@@ -2,16 +2,18 @@ import { describe, expect, it } from 'vitest';
 
 import { getTile } from './collision.js';
 import {
+  advanceTrickZoneTideVisuals,
   createTideState,
   findTrickZoneAt,
   highTideEntryPhaseForAngle,
   highTideRerollPhaseForAngle,
   isApproachHeadingValid,
-  phaseAtProgress,
+  isInTideEmergeWindow,
   isPointInTideSweep,
   isTrickZoneSubmerged,
   lowTidePhaseForAngle,
   tideTrailingEdgeRadians,
+  TRICK_TIDE_ANIMATION_TICKS,
   trickZoneVisualAlpha,
   type TrickZone,
 } from './features.js';
@@ -34,39 +36,46 @@ const tide = createTideState({
 });
 
 describe('trickZoneVisualAlpha', () => {
-  it('fades out to transparent before reroll and in to opaque at low tide', () => {
+  it('submerges and emerges over two ticks when disabled or enabled', () => {
     const arena = createCoralParkSlice();
     const tideState = createTideState(arena.tide!);
     const zone = arena.trickZones[0];
     const zoneAngle = zonePolarAngle(zone, tideState);
     const entryPhase = highTideEntryPhaseForAngle(zoneAngle, tideState);
-    const rerollPhase = highTideRerollPhaseForAngle(zoneAngle, tideState);
     const lowTidePhase = lowTidePhaseForAngle(zoneAngle);
 
     const exposedTide = { ...tideState, phaseRadians: lowTidePhase + 0.05 };
     expect(trickZoneVisualAlpha(zone, exposedTide)).toBe(1);
 
-    const midFadeTide = {
-      ...tideState,
-      phaseRadians: phaseAtProgress(entryPhase, rerollPhase, 0.5),
-    };
-    const midAlpha = trickZoneVisualAlpha(zone, midFadeTide);
-    expect(midAlpha).toBeGreaterThan(0);
-    expect(midAlpha).toBeLessThan(1);
+    const submergedTide = { ...tideState, phaseRadians: entryPhase + 0.01 };
+    expect(isTrickZoneSubmerged(zone, submergedTide)).toBe(true);
+    expect(trickZoneVisualAlpha(zone, submergedTide, 0)).toBe(1);
 
-    const rerollTide = { ...tideState, phaseRadians: rerollPhase };
-    expect(trickZoneVisualAlpha(zone, rerollTide)).toBe(0);
+    let fading = advanceTrickZoneTideVisuals([zone], submergedTide)[0];
+    expect(trickZoneVisualAlpha(fading, submergedTide, 0)).toBe(1);
+    expect(trickZoneVisualAlpha(fading, submergedTide, 1)).toBe(0.5);
+
+    fading = advanceTrickZoneTideVisuals([fading], submergedTide)[0];
+    expect(trickZoneVisualAlpha(fading, submergedTide, 0)).toBe(0.5);
+    expect(trickZoneVisualAlpha(fading, submergedTide, 1)).toBe(0);
+
+    fading = advanceTrickZoneTideVisuals([fading], submergedTide)[0];
+    expect(trickZoneVisualAlpha(fading, submergedTide, 1)).toBe(0);
 
     const replacement: TrickZone = { ...zone, spawnedAtHighTide: true };
-    expect(trickZoneVisualAlpha(replacement, rerollTide)).toBe(0);
+    const midSubmergedTide = { ...tideState, phaseRadians: entryPhase + 0.2 };
+    expect(trickZoneVisualAlpha(replacement, midSubmergedTide)).toBe(0);
 
-    const midRiseTide = {
+    const emergeTide = {
       ...tideState,
-      phaseRadians: phaseAtProgress(rerollPhase, lowTidePhase, 0.5),
+      phaseRadians: lowTidePhase - tideState.advancePerTick * (TRICK_TIDE_ANIMATION_TICKS - 0.5),
     };
-    const riseAlpha = trickZoneVisualAlpha(replacement, midRiseTide);
-    expect(riseAlpha).toBeGreaterThan(0);
-    expect(riseAlpha).toBeLessThan(1);
+    expect(isInTideEmergeWindow(zoneAngle, emergeTide)).toBe(true);
+
+    let rising = advanceTrickZoneTideVisuals([replacement], emergeTide)[0];
+    rising = advanceTrickZoneTideVisuals([rising], emergeTide)[0];
+    expect(trickZoneVisualAlpha(rising, emergeTide, 0.5)).toBeGreaterThan(0);
+    expect(trickZoneVisualAlpha(rising, emergeTide, 0.5)).toBeLessThan(1);
 
     expect(trickZoneVisualAlpha(replacement, exposedTide)).toBe(1);
   });
@@ -226,6 +235,7 @@ describe('syncTrickZonesWithTide', () => {
         syncState,
         arena.trickZones.length,
       );
+      zones = advanceTrickZoneTideVisuals(zones, tideState);
     }
 
     expect(zones.length).toBeGreaterThan(0);

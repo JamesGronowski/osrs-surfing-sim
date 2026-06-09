@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   createTrickAnimationState,
+  featureRideSide,
   signedFeatureRideVector,
   snapToFeatureCenterline,
   tickTrickAnimation,
@@ -9,6 +10,7 @@ import {
   TRICK_ANIMATION_TICKS,
   trickAnimationPositionAtProgress,
   trickFeatureRideUnitVector,
+  toTrickAnimationSnapshot,
 } from './trickAnimation.js';
 import { createCoralParkSlice } from './maps.js';
 import type { TrickZone } from './features.js';
@@ -83,6 +85,25 @@ describe('trick animation', () => {
     const tunnelRide = trickFeatureRideUnitVector(tunnelZone);
     expect(tunnelRide.x).toBeCloseTo(1);
     expect(tunnelRide.y).toBeCloseTo(0);
+  });
+
+  it('records ride side and zone orientation for client pose offsets', () => {
+    const wallZone: TrickZone = {
+      ...zone,
+      type: 'wall_ride',
+      prepareSlot: 1,
+      rotationRadians: 0,
+    };
+    const ride = signedFeatureRideVector(wallZone, { x: 28, y: 11 }, 0);
+    const fromNorth = featureRideSide(wallZone, { x: 30, y: 9.5 }, ride);
+    const fromSouth = featureRideSide(wallZone, { x: 30, y: 12.5 }, ride);
+    expect(fromNorth).not.toBe(fromSouth);
+
+    const anim = createTrickAnimationState(arena.map, wallZone, { x: 28, y: 9.5 }, 0);
+    const snapshot = toTrickAnimationSnapshot(anim);
+    expect(snapshot?.rideSide).toBe(fromNorth);
+    expect(snapshot?.rotationRadians).toBe(0);
+    expect(snapshot?.zoneCenter).toEqual(wallZone.center);
   });
 
   it('completes in exactly two ticks', () => {

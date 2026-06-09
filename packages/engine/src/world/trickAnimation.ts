@@ -25,10 +25,16 @@ export const TRICK_ANIMATION_TRAVEL_FACTOR: Record<TrickFeatureType, number> = {
 /** Half-width of the locked ride path from feature centre (fraction of full travel). */
 const LOCKED_PATH_HALF_SPAN_FACTOR = 0.46;
 
+/** +1 / −1: which side of the feature ride axis the rider entered from (wall face, grind lean). */
+export type TrickRideSide = 1 | -1;
+
 export interface TrickAnimationState {
   zoneId: string;
   type: TrickFeatureType;
   zoneRadius: number;
+  zoneCenter: WorldPos;
+  rotationRadians: number;
+  rideSide: TrickRideSide;
   entry: WorldPos;
   entryHeading: HeadingIndex;
   start: WorldPos;
@@ -41,6 +47,9 @@ export interface TrickAnimationState {
 export interface TrickAnimationSnapshot {
   type: TrickFeatureType;
   zoneRadius: number;
+  zoneCenter: WorldPos;
+  rotationRadians: number;
+  rideSide: TrickRideSide;
   entry: WorldPos;
   start: WorldPos;
   end: WorldPos;
@@ -117,6 +126,29 @@ export function headingFromRideVector(rideVector: { x: number; y: number }): Hea
   return snapAngleToHeading(Math.atan2(rideVector.y, rideVector.x));
 }
 
+/** Unit normal perpendicular to the ride axis (left side when riding forward). */
+export function featureRideNormal(rideVector: { x: number; y: number }): { x: number; y: number } {
+  return { x: -rideVector.y, y: rideVector.x };
+}
+
+/** Which side of the ride centreline the rider approached from. */
+export function featureRideSide(
+  zone: TrickZone,
+  entryPosition: WorldPos,
+  rideVector: { x: number; y: number },
+): TrickRideSide {
+  const normal = featureRideNormal(rideVector);
+  const offset = {
+    x: entryPosition.x - zone.center.x,
+    y: entryPosition.y - zone.center.y,
+  };
+  const alignment = dot(offset.x, offset.y, normal.x, normal.y);
+  if (Math.abs(alignment) < 0.01) {
+    return 1;
+  }
+  return alignment >= 0 ? 1 : -1;
+}
+
 function lerpPosition(from: WorldPos, to: WorldPos, t: number): WorldPos {
   return {
     x: from.x + (to.x - from.x) * t,
@@ -140,6 +172,9 @@ export function toTrickAnimationSnapshot(
   return {
     type: state.type,
     zoneRadius: state.zoneRadius,
+    zoneCenter: { ...state.zoneCenter },
+    rotationRadians: state.rotationRadians,
+    rideSide: state.rideSide,
     entry: { ...state.entry },
     start: { ...state.start },
     end: { ...state.end },
@@ -213,6 +248,9 @@ export function createTrickAnimationState(
     zoneId: zone.id,
     type: zone.type,
     zoneRadius: zone.radius,
+    zoneCenter: { ...zone.center },
+    rotationRadians: zone.rotationRadians,
+    rideSide: featureRideSide(zone, entryPosition, rideVector),
     entry: { ...entryPosition },
     entryHeading: startHeading,
     start,

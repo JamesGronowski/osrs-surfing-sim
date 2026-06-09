@@ -11,6 +11,8 @@ export * from './world/trickAnimation.js';
 export * from './world/maps.js';
 export * from './world/trickZonePlacement.js';
 export * from './world/npc.js';
+export * from './world/demoSurfer.js';
+export * from './ai/demoSurferAi.js';
 export * from './progression/types.js';
 export * from './progression/progression.js';
 export * from './game/simulation.js';

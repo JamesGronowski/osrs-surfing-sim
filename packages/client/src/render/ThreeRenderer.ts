@@ -11,6 +11,8 @@ import {
 
 import type { SimulationSnapshot, WorldMap } from '@osrs-surfing/engine';
 
+import type { DisplaySimulationSnapshot } from './visualSnapshot.js';
+
 import { VIEWPORT_HEIGHT, VIEWPORT_WIDTH } from '../ui/fixedLayout.js';
 import { bindPointerEvents } from './bindPointerEvents.js';
 import type { IRenderer, RenderSize } from './IRenderer.js';
@@ -159,7 +161,12 @@ export class ThreeRenderer implements IRenderer {
     return world3ToTile(HIT_POINT);
   }
 
-  render(snapshot: SimulationSnapshot, map: WorldMap, visualTimeMs = performance.now()): void {
+  render(
+    snapshot: DisplaySimulationSnapshot,
+    map: WorldMap,
+    visualTimeMs = performance.now(),
+    tickBlend = 0,
+  ): void {
     if (
       !this.renderer ||
       !this.scene ||
@@ -182,7 +189,7 @@ export class ThreeRenderer implements IRenderer {
     this.orbitCamera.setFocus(snapshot.surfboard.position.x, snapshot.surfboard.position.y);
     this.orbitCamera.update(deltaSeconds);
 
-    this.tricks.sync(snapshot);
+    this.tricks.sync(snapshot, tickBlend);
     this.entities.sync(snapshot, map);
     this.overlays.sync(snapshot, map);
 

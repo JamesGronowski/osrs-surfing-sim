@@ -41,8 +41,8 @@ export class OsrsClient {
   private unbindPointer: (() => void) | null = null;
   private visualFrameId: number | null = null;
   private lastVisualFrameMs = 0;
-  /** Ms elapsed within the current tick period (0 … tickMs). */
-  private tickAccumulatorMs = 0;
+  /** Wall-clock time when the latest simulation tick completed. */
+  private lastSimTickTimeMs = 0;
   readonly motion = new SurfboardMotionInterpolator();
   private tidePhaseFrom: number | null = null;
   private paused = false;
@@ -189,6 +189,7 @@ export class OsrsClient {
         const snapshot = simulation.getSnapshot();
         renderer.syncMapAfterTick(snapshot, simulation.getArena().map);
       },
+      resetTickBlendTimer: () => client.resetTickBlendTimer(),
     });
 
     window.addEventListener('keydown', client.onKeyDown);
@@ -234,13 +235,22 @@ export class OsrsClient {
   private setPaused(value: boolean): void {
     this.paused = value;
     if (!value) {
-      this.lastVisualFrameMs = performance.now();
+      const now = performance.now();
+      this.lastVisualFrameMs = now;
+      this.lastSimTickTimeMs = now;
     }
   }
 
+  /** Keeps display interpolation aligned after manual ticks (e.g. test bridge). */
+  resetTickBlendTimer(): void {
+    this.lastSimTickTimeMs = performance.now();
+    this.lastTickBlend = 0;
+  }
+
   private startTickLoop(): void {
-    this.lastVisualFrameMs = performance.now();
-    this.tickAccumulatorMs = 0;
+    const now = performance.now();
+    this.lastVisualFrameMs = now;
+    this.lastSimTickTimeMs = now;
     this.visualFrameId = requestAnimationFrame((frameNow) => this.onVisualFrame(frameNow));
   }
 
@@ -282,22 +292,14 @@ export class OsrsClient {
   private onVisualFrame(now: number): void {
     if (!this.paused) {
       const tickMs = this.simulation.tickMs;
-      const deltaMs =
-        this.lastVisualFrameMs > 0
-          ? Math.min(tickMs, Math.max(0, now - this.lastVisualFrameMs))
-          : 0;
 
-      if (deltaMs > 0) {
-        this.tickAccumulatorMs += deltaMs;
-
-        if (this.tickAccumulatorMs >= tickMs) {
-          this.tickAccumulatorMs -= tickMs;
-          this.onGameTick();
-        }
-
-        const tickBlend = this.tickAccumulatorMs / tickMs;
-        this.renderVisuals(now, tickBlend);
+      if (now - this.lastSimTickTimeMs >= tickMs) {
+        this.onGameTick();
+        this.lastSimTickTimeMs = now;
       }
+
+      const tickBlend = Math.min(1, Math.max(0, (now - this.lastSimTickTimeMs) / tickMs));
+      this.renderVisuals(now, tickBlend);
     }
 
     this.lastVisualFrameMs = now;
@@ -315,7 +317,7 @@ export class OsrsClient {
     );
     this.lastDisplayPosition = { ...displaySnapshot.surfboard.position };
     this.lastTickBlend = tickBlend;
-    this.renderer.render(displaySnapshot, map, visualTimeMs);
+    this.renderer.render(displaySnapshot, map, visualTimeMs, tickBlend);
   }
 
   private renderFrame(): void {

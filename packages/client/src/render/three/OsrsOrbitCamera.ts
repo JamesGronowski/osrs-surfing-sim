@@ -17,13 +17,17 @@ const MIDDLE_MOUSE_SENSITIVITY = 0.004;
 const ZOOM_SPEED = 0.08;
 
 const FOCUS_HEIGHT = 0.6;
+/** Higher = snappier follow; lower = smoother camera glide. */
+const FOCUS_SMOOTH_RATE = 10;
 
 export class OsrsOrbitCamera {
   readonly camera: PerspectiveCamera;
   private yaw = DEFAULT_YAW;
   private pitch = DEFAULT_PITCH;
   private distance = DEFAULT_DISTANCE;
-  private focus = new Vector3();
+  private readonly focusTarget = new Vector3();
+  private readonly focusCurrent = new Vector3();
+  private focusInitialized = false;
   private readonly scratch = new Vector3();
   private middleMouseDragging = false;
   private lastPointerX = 0;
@@ -44,10 +48,16 @@ export class OsrsOrbitCamera {
 
   setFocus(tileX: number, tileY: number): void {
     const pos = tileToWorld3(tileX, tileY, FOCUS_HEIGHT);
-    this.focus.set(pos.x, pos.y, pos.z);
+    this.focusTarget.set(pos.x, pos.y, pos.z);
+    if (!this.focusInitialized) {
+      this.focusCurrent.copy(this.focusTarget);
+      this.focusInitialized = true;
+    }
   }
 
   update(deltaSeconds: number): void {
+    const focusBlend = 1 - Math.exp(-FOCUS_SMOOTH_RATE * deltaSeconds);
+    this.focusCurrent.lerp(this.focusTarget, focusBlend);
     if (this.arrowLeft) {
       this.yaw -= ARROW_YAW_SPEED * deltaSeconds;
     }
@@ -72,8 +82,8 @@ export class OsrsOrbitCamera {
       this.distance * cosPitch * sinYaw,
     );
 
-    this.camera.position.copy(this.focus).add(this.scratch);
-    this.camera.lookAt(this.focus);
+    this.camera.position.copy(this.focusCurrent).add(this.scratch);
+    this.camera.lookAt(this.focusCurrent);
   }
 
   handleKeyDown(code: string): boolean {

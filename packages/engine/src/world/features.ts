@@ -11,14 +11,11 @@ export const TRICK_APPROACH_TOLERANCE_DEG = 70;
 
 export type TrickFeatureType = 'rail' | 'tunnel' | 'brain_coral' | 'wall_ride' | 'jump';
 
-/** Render alpha when a feature is fully submerged (legacy tick-based fade fallback). */
-export const TRICK_SUBMERGED_ALPHA = 0.28;
-
 /** Fade-out completes and reroll happens this far along entry→center (just before midpoint). */
 export const HIGH_TIDE_REROLL_PROGRESS = 0.92;
 
-/** Ticks to ease alpha when submerging or resurfacing. */
-export const TRICK_SUBMERGE_FADE_TICKS = 10;
+/** Sim ticks for submerge/emerge visuals (2 × 600ms = 1200ms). */
+export const TRICK_TIDE_ANIMATION_TICKS = 2;
 
 export interface TrickZone {
   id: string;
@@ -34,43 +31,107 @@ export interface TrickZone {
   tricked: boolean;
   /** Spawned at high-tide center — kept submerged until low tide, not re-rolled each tick. */
   spawnedAtHighTide?: boolean;
-  /** Ticks spent submerged this cycle — drives fade-out (set by tide sync). */
+  /** Submerge animation progress (0…TRICK_TIDE_ANIMATION_TICKS), advanced each sim tick. */
   submergedRenderTicks?: number;
-  /** Ticks since resurfacing — drives fade-in (set by tide sync). */
+  /** Emerge animation progress (0…TRICK_TIDE_ANIMATION_TICKS), advanced each sim tick. */
   emergedRenderTicks?: number;
 }
 
-export function trickZoneVisualAlpha(zone: TrickZone, tide?: TideState | null): number {
-  if (tide) {
-    if (!isTrickZoneSubmerged(zone, tide)) {
-      return 1;
-    }
-    const zoneAngle = Math.atan2(zone.center.y - tide.centerY, zone.center.x - tide.centerX);
-    const entry = highTideEntryPhaseForAngle(zoneAngle, tide);
-    const reroll = highTideRerollPhaseForAngle(zoneAngle, tide);
-    const lowTide = lowTidePhaseForAngle(zoneAngle);
+/** Clockwise angular distance from `from` to `to`. */
+export function phaseDistanceClockwise(from: number, to: number): number {
+  const f = normalizeAngle(from);
+  const t = normalizeAngle(to);
+  if (f <= t) {
+    return t - f;
+  }
+  return TAU - f + t;
+}
 
-    if (zone.spawnedAtHighTide) {
-      if (phaseInProgressRange(tide.phaseRadians, reroll, lowTide)) {
-        return progressInPhaseRange(tide.phaseRadians, reroll, lowTide);
-      }
+/** True when tide phase is within the emerge animation window before low tide. */
+export function isInTideEmergeWindow(zoneAngle: number, tide: TideState): boolean {
+  const lowTide = lowTidePhaseForAngle(zoneAngle);
+  const dist = phaseDistanceClockwise(tide.phaseRadians, lowTide);
+  return dist <= tide.advancePerTick * TRICK_TIDE_ANIMATION_TICKS + 1e-9;
+}
+
+export function trickZoneVisualAlpha(
+  zone: TrickZone,
+  tide?: TideState | null,
+  tickBlend = 0,
+): number {
+  if (!tide || !isTrickZoneSubmerged(zone, tide)) {
+    return 1;
+  }
+
+  const zoneAngle = Math.atan2(zone.center.y - tide.centerY, zone.center.x - tide.centerX);
+
+  if (zone.spawnedAtHighTide) {
+    if (!isInTideEmergeWindow(zoneAngle, tide)) {
       return 0;
     }
+    const ticks = (zone.emergedRenderTicks ?? 0) + tickBlend;
+    return Math.min(1, ticks / TRICK_TIDE_ANIMATION_TICKS);
+  }
 
-    if (phaseInProgressRange(tide.phaseRadians, entry, reroll)) {
-      return 1 - progressInPhaseRange(tide.phaseRadians, entry, reroll);
-    }
+  const ticks = (zone.submergedRenderTicks ?? 0) + tickBlend;
+  return Math.max(0, 1 - Math.min(1, ticks / TRICK_TIDE_ANIMATION_TICKS));
+}
+
+/** 0 = surfaced, 1 = fully sunk — inverse of visual alpha while submerged. */
+export function trickZoneVisualSubmergeProgress(
+  zone: TrickZone,
+  tide?: TideState | null,
+  tickBlend = 0,
+): number {
+  if (!tide || !isTrickZoneSubmerged(zone, tide)) {
     return 0;
   }
-  if (zone.submergedRenderTicks !== undefined) {
-    const t = Math.min(1, zone.submergedRenderTicks / TRICK_SUBMERGE_FADE_TICKS);
-    return 1 - t * (1 - TRICK_SUBMERGED_ALPHA);
-  }
-  if (zone.emergedRenderTicks !== undefined) {
-    const t = Math.min(1, zone.emergedRenderTicks / TRICK_SUBMERGE_FADE_TICKS);
-    return TRICK_SUBMERGED_ALPHA + t * (1 - TRICK_SUBMERGED_ALPHA);
-  }
-  return 1;
+  return 1 - trickZoneVisualAlpha(zone, tide, tickBlend);
+}
+
+/** Advance per-tick submerge/emerge counters after tide sync. */
+export function advanceTrickZoneTideVisuals(zones: TrickZone[], tide: TideState): TrickZone[] {
+  return zones.map((zone) => {
+    if (!isTrickZoneSubmerged(zone, tide)) {
+      if (zone.submergedRenderTicks === undefined && zone.emergedRenderTicks === undefined) {
+        return zone;
+      }
+      return {
+        ...zone,
+        submergedRenderTicks: undefined,
+        emergedRenderTicks: undefined,
+      };
+    }
+
+    const zoneAngle = Math.atan2(zone.center.y - tide.centerY, zone.center.x - tide.centerX);
+
+    if (zone.spawnedAtHighTide) {
+      if (!isInTideEmergeWindow(zoneAngle, tide)) {
+        if (zone.emergedRenderTicks === undefined) {
+          return zone;
+        }
+        return { ...zone, emergedRenderTicks: undefined };
+      }
+
+      const emerged = zone.emergedRenderTicks;
+      if (emerged === undefined) {
+        return { ...zone, emergedRenderTicks: 0, submergedRenderTicks: undefined };
+      }
+      if (emerged >= TRICK_TIDE_ANIMATION_TICKS) {
+        return zone;
+      }
+      return { ...zone, emergedRenderTicks: emerged + 1 };
+    }
+
+    const submerged = zone.submergedRenderTicks;
+    if (submerged === undefined) {
+      return { ...zone, submergedRenderTicks: 0, emergedRenderTicks: undefined };
+    }
+    if (submerged >= TRICK_TIDE_ANIMATION_TICKS) {
+      return zone;
+    }
+    return { ...zone, submergedRenderTicks: submerged + 1, emergedRenderTicks: undefined };
+  });
 }
 
 export interface TrickPrepareState {
