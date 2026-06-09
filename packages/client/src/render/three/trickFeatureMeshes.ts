@@ -33,8 +33,8 @@ const REEF_OVERLAY_TOP_Y = 0.06;
 /** Extra clearance below reef geometry when fully submerged. */
 const TRICK_FEATURE_SUBMERGE_BELOW_FLOOR = 0.2;
 
-/** Toggle semi-transparent hitbox overlays (sizes from engine trickHitbox.ts). */
-const SHOW_TRICK_HITBOXES = true;
+/** Set true to draw green trick hitbox overlays (sizes from engine trickHitbox.ts). */
+const SHOW_TRICK_HITBOXES = false;
 /** Hitbox overlay colour (edit here). */
 const TRICK_HITBOX_COLOR = 0x22ff66;
 /** Opacity (0–1); not faded with tide so debug boxes stay visible. */

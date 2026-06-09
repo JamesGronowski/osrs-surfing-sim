@@ -1,10 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  CORAL_PARK_GRASS_EDGE_SURFACE_Y,
+  CORAL_PARK_GRASS_PEAK_SURFACE_Y,
   CORAL_PARK_ISLAND_CX,
   CORAL_PARK_ISLAND_CY,
   CORAL_PARK_MAP_HEIGHT,
   CORAL_PARK_MAP_WIDTH,
+  CORAL_PARK_SAND_OUTER_SURFACE_Y,
+  coralParkGrassRadius,
+  coralParkLandSurfaceY,
   coralParkReefInnerRadius,
   coralParkReefOuterRadius,
   coralParkSandRadius,
@@ -12,6 +17,31 @@ import {
 } from './coralParkCoast.js';
 import { getTile } from './collision.js';
 import { createCoralParkSlice } from './maps.js';
+
+describe('coralParkLandSurfaceY', () => {
+  it('peaks at the island centre and stays low on the sand ring', () => {
+    const centreY = coralParkLandSurfaceY(CORAL_PARK_ISLAND_CX, CORAL_PARK_ISLAND_CY, 'grass');
+    const east = 0;
+    const grassEdge = coralParkGrassRadius(east);
+    const sandOuter = coralParkSandRadius(east);
+    const grassRimY = coralParkLandSurfaceY(
+      CORAL_PARK_ISLAND_CX + grassEdge,
+      CORAL_PARK_ISLAND_CY,
+      'grass',
+    );
+    const sandShoreY = coralParkLandSurfaceY(
+      CORAL_PARK_ISLAND_CX + sandOuter,
+      CORAL_PARK_ISLAND_CY,
+      'sand',
+    );
+
+    expect(centreY).toBeCloseTo(CORAL_PARK_GRASS_PEAK_SURFACE_Y, 5);
+    expect(grassRimY).toBeCloseTo(CORAL_PARK_GRASS_EDGE_SURFACE_Y, 5);
+    expect(sandShoreY).toBeCloseTo(CORAL_PARK_SAND_OUTER_SURFACE_Y, 5);
+    expect(centreY).toBeGreaterThan(grassRimY);
+    expect(grassRimY).toBeGreaterThan(sandShoreY);
+  });
+});
 
 describe('createCoralParkSlice', () => {
   it('places an organic island, sand ring, shallow channel, and wide reef loop', () => {

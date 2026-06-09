@@ -1,4 +1,6 @@
 import {
+  coralParkLandElevationKey,
+  coralParkLandSurfaceY,
   TIDE_LEADING_WASH_HEIGHT,
   TIDE_REEF_SINK_Y,
   tideWaveSurfaceY,
@@ -21,8 +23,6 @@ import { TILE_PALETTE } from '../tilePalette.js';
 import { paletteHex } from './hexColor.js';
 import { TideEdgeLayer } from './tideVisualMeshes.js';
 
-const LAND_TILE_HEIGHT = 0.12;
-const LAND_TILE_CENTER_Y = LAND_TILE_HEIGHT / 2;
 const OVERLAY_TILE_HEIGHT = 0.06;
 const OVERLAY_TILE_CENTER_Y = OVERLAY_TILE_HEIGHT / 2;
 const TIDE_WATER_COLUMN_MIN_HEIGHT = 0.35;
@@ -74,12 +74,18 @@ function groupInstancesByColor(
   return groups;
 }
 
+function landTileSurfaceY(tx: number, ty: number, tile: TileType): number {
+  if (tile === 'grass' || tile === 'sand') {
+    return coralParkLandSurfaceY(tx + 0.5, ty + 0.5, tile);
+  }
+  return OVERLAY_TILE_HEIGHT;
+}
+
 function buildInstancedLayer(
   groups: Map<number, TileInstance[]>,
-  tileHeight: number,
-  centerY: number,
   map: WorldMap,
   tideAnimInstances: TideAnimInstance[],
+  options: { landElevation: boolean; flatHeight: number; flatCenterY: number },
 ): InstancedMesh[] {
   const meshes: InstancedMesh[] = [];
 
@@ -95,6 +101,10 @@ function buildInstancedLayer(
     for (let i = 0; i < instances.length; i += 1) {
       const { tx, ty } = instances[i];
       const tile = map.tiles[ty][tx];
+      const tileHeight = options.landElevation
+        ? landTileSurfaceY(tx, ty, tile)
+        : options.flatHeight;
+      const centerY = options.landElevation ? tileHeight / 2 : options.flatCenterY;
       MATRIX.makeScale(1, tileHeight, 1);
       MATRIX.setPosition(tx + 0.5, centerY, ty + 0.5);
       mesh.setMatrixAt(i, MATRIX);
@@ -139,7 +149,8 @@ export class MapMeshBuilder {
   }
 
   build(map: WorldMap, tide: TideState | null): void {
-    if (this.mapKey === `${map.widthTiles}x${map.heightTiles}`) {
+    const nextKey = `${map.widthTiles}x${map.heightTiles}:${coralParkLandElevationKey()}`;
+    if (this.mapKey === nextKey) {
       this.updateTideVisuals(map, tide);
       return;
     }
@@ -157,19 +168,17 @@ export class MapMeshBuilder {
     this.root.add(this.water);
 
     const landGroups = groupInstancesByColor(map, tide, true);
-    this.landMeshes = buildInstancedLayer(
-      landGroups,
-      LAND_TILE_HEIGHT,
-      LAND_TILE_CENTER_Y,
-      map,
-      [],
-    );
+    this.landMeshes = buildInstancedLayer(landGroups, map, [], {
+      landElevation: true,
+      flatHeight: OVERLAY_TILE_HEIGHT,
+      flatCenterY: OVERLAY_TILE_CENTER_Y,
+    });
     for (const mesh of this.landMeshes) {
       this.root.add(mesh);
     }
 
     this.rebuildOverlay(map, tide);
-    this.mapKey = `${map.widthTiles}x${map.heightTiles}`;
+    this.mapKey = nextKey;
   }
 
   rebuildOverlay(map: WorldMap, tide: TideState | null): void {
@@ -188,13 +197,11 @@ export class MapMeshBuilder {
 
     this.tideAnimInstances = [];
     const overlayGroups = groupInstancesByColor(map, tide, false);
-    this.overlayMeshes = buildInstancedLayer(
-      overlayGroups,
-      OVERLAY_TILE_HEIGHT,
-      OVERLAY_TILE_CENTER_Y,
-      map,
-      this.tideAnimInstances,
-    );
+    this.overlayMeshes = buildInstancedLayer(overlayGroups, map, this.tideAnimInstances, {
+      landElevation: false,
+      flatHeight: OVERLAY_TILE_HEIGHT,
+      flatCenterY: OVERLAY_TILE_CENTER_Y,
+    });
     for (const mesh of this.overlayMeshes) {
       this.root.add(mesh);
     }

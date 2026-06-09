@@ -1,4 +1,5 @@
 import {
+  coralParkLandSurfaceY,
   getTile,
   headingToDegrees,
   tideRideSurfaceY,
@@ -23,7 +24,6 @@ const NPC_HAIR = 0x5c3a1e;
 const WAKE_PINK = 0xf4a7b9;
 const WAKE_WHITE = 0xffffff;
 
-const SURFACE_Y = 0.12;
 const RIDER_ABOVE_BOARD = 0.22;
 
 interface BoardRiderPose {
@@ -218,16 +218,30 @@ export class EntityLayer {
     this.ridingBoard.visible = snapshot.boardMounted;
     this.dockBoard.visible = !snapshot.boardMounted;
     this.player.visible = true;
-    this.syncNpcs(snapshot);
+    this.syncNpcs(snapshot, map);
     this.syncDemoSurfer(snapshot);
 
     if (!snapshot.boardMounted) {
       const dockPos = tileToWorld3(snapshot.boardDockX, snapshot.boardDockY);
       const walkPos = tileToWorld3(snapshot.surfboard.position.x, snapshot.surfboard.position.y);
-      this.dockBoard.position.set(dockPos.x, SURFACE_Y, dockPos.z);
+      const dockY = coralParkLandSurfaceY(snapshot.boardDockX, snapshot.boardDockY, 'sand');
+      const walkTile = getTile(
+        map,
+        Math.floor(snapshot.surfboard.position.x),
+        Math.floor(snapshot.surfboard.position.y),
+      );
+      const walkY =
+        walkTile === 'grass' || walkTile === 'sand'
+          ? coralParkLandSurfaceY(
+              snapshot.surfboard.position.x,
+              snapshot.surfboard.position.y,
+              walkTile,
+            )
+          : dockY;
+      this.dockBoard.position.set(dockPos.x, dockY, dockPos.z);
       this.dockBoard.rotation.set(0, 0, 0);
 
-      this.player.position.set(walkPos.x, SURFACE_Y, walkPos.z);
+      this.player.position.set(walkPos.x, walkY, walkPos.z);
       this.player.rotation.set(0, headingToRotationY(snapshot.surfboard.currentHeading), 0);
       this.ridingBoard.position.set(0, -100, 0);
       return;
@@ -288,7 +302,7 @@ export class EntityLayer {
     }
   }
 
-  private syncNpcs(snapshot: DisplaySimulationSnapshot): void {
+  private syncNpcs(snapshot: DisplaySimulationSnapshot, map: WorldMap): void {
     while (this.npcPool.length < snapshot.npcs.length) {
       const npc = makeNpcMesh();
       this.npcPool.push(npc);
@@ -304,7 +318,12 @@ export class EntityLayer {
       const npc = snapshot.npcs[i];
       mesh.visible = true;
       const npcPos = tileToWorld3(npc.x, npc.y);
-      mesh.position.set(npcPos.x, SURFACE_Y, npcPos.z);
+      const npcTile = getTile(map, Math.floor(npc.x), Math.floor(npc.y));
+      const npcY =
+        npcTile === 'grass' || npcTile === 'sand'
+          ? coralParkLandSurfaceY(npc.x, npc.y, npcTile)
+          : coralParkLandSurfaceY(npc.x, npc.y, 'sand');
+      mesh.position.set(npcPos.x, npcY, npcPos.z);
     }
   }
 

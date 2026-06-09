@@ -32,10 +32,15 @@ import {
 } from './trickZonePlacement.js';
 
 export {
+  CORAL_PARK_GRASS_EDGE_SURFACE_Y,
+  CORAL_PARK_GRASS_PEAK_SURFACE_Y,
   CORAL_PARK_ISLAND_CX,
   CORAL_PARK_ISLAND_CY,
   CORAL_PARK_MAP_HEIGHT,
   CORAL_PARK_MAP_WIDTH,
+  CORAL_PARK_SAND_OUTER_SURFACE_Y,
+  coralParkLandElevationKey,
+  coralParkLandSurfaceY,
 } from './coralParkCoast.js';
 
 export interface GameArena {
