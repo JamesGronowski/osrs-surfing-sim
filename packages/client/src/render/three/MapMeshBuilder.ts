@@ -10,6 +10,7 @@ import {
 } from '@osrs-surfing/engine';
 import {
   BoxGeometry,
+  Color,
   Group,
   InstancedMesh,
   Matrix4,
@@ -42,11 +43,14 @@ interface TideAnimInstance {
 
 const TIDE_ANIM_TILES: ReadonlySet<TileType> = new Set(['coral_rideable', 'shallow']);
 
-function groupInstancesByColor(
-  map: WorldMap,
-  tide: TideState | null,
-  includeLand: boolean,
-): Map<number, TileInstance[]> {
+const CORAL_EXPOSED_COLOR = new Color(paletteHex(TILE_PALETTE.reefExposed));
+const CORAL_SUBMERGED_COLOR = new Color(paletteHex(TILE_PALETTE.reefSubmerged));
+
+/**
+ * Coral tiles flip between exposed/submerged colors with the tide, so they get
+ * their own instanced mesh with per-instance colors; everything else is static.
+ */
+function groupInstancesByColor(map: WorldMap, includeLand: boolean): Map<number, TileInstance[]> {
   const groups = new Map<number, TileInstance[]>();
 
   for (let ty = 0; ty < map.heightTiles; ty += 1) {
@@ -56,8 +60,14 @@ function groupInstancesByColor(
 
       if (includeLand && (tile === 'grass' || tile === 'sand')) {
         color = renderVariantColor(tile);
-      } else if (!includeLand && tile !== 'deep_water' && tile !== 'grass' && tile !== 'sand') {
-        const variant = resolveRenderTileVariant(tile, tx + 0.5, ty + 0.5, tide);
+      } else if (
+        !includeLand &&
+        tile !== 'deep_water' &&
+        tile !== 'grass' &&
+        tile !== 'sand' &&
+        tile !== 'coral_rideable'
+      ) {
+        const variant = resolveRenderTileVariant(tile, tx + 0.5, ty + 0.5, null);
         color = renderVariantColor(variant);
       }
 
@@ -72,6 +82,18 @@ function groupInstancesByColor(
   }
 
   return groups;
+}
+
+function collectCoralTiles(map: WorldMap): TileInstance[] {
+  const tiles: TileInstance[] = [];
+  for (let ty = 0; ty < map.heightTiles; ty += 1) {
+    for (let tx = 0; tx < map.widthTiles; tx += 1) {
+      if (map.tiles[ty][tx] === 'coral_rideable') {
+        tiles.push({ tx, ty });
+      }
+    }
+  }
+  return tiles;
 }
 
 function landTileSurfaceY(tx: number, ty: number, tile: TileType): number {
@@ -142,6 +164,9 @@ export class MapMeshBuilder {
   private overlayMeshes: InstancedMesh[] = [];
   private tideAnimInstances: TideAnimInstance[] = [];
   private waterCaps: InstancedMesh | null = null;
+  private coralMesh: InstancedMesh | null = null;
+  private coralTiles: TileInstance[] = [];
+  private coralSubmerged: Uint8Array = new Uint8Array(0);
   private mapKey: string | null = null;
 
   constructor() {
@@ -151,7 +176,6 @@ export class MapMeshBuilder {
   build(map: WorldMap, tide: TideState | null): void {
     const nextKey = `${map.widthTiles}x${map.heightTiles}:${coralParkLandElevationKey()}`;
     if (this.mapKey === nextKey) {
-      this.updateTideVisuals(map, tide);
       return;
     }
     this.destroy();
@@ -167,7 +191,7 @@ export class MapMeshBuilder {
     this.water.receiveShadow = true;
     this.root.add(this.water);
 
-    const landGroups = groupInstancesByColor(map, tide, true);
+    const landGroups = groupInstancesByColor(map, true);
     this.landMeshes = buildInstancedLayer(landGroups, map, [], {
       landElevation: true,
       flatHeight: OVERLAY_TILE_HEIGHT,
@@ -194,9 +218,15 @@ export class MapMeshBuilder {
       (this.waterCaps.material as MeshStandardMaterial).dispose();
       this.waterCaps = null;
     }
+    if (this.coralMesh) {
+      this.root.remove(this.coralMesh);
+      this.coralMesh.geometry.dispose();
+      (this.coralMesh.material as MeshStandardMaterial).dispose();
+      this.coralMesh = null;
+    }
 
     this.tideAnimInstances = [];
-    const overlayGroups = groupInstancesByColor(map, tide, false);
+    const overlayGroups = groupInstancesByColor(map, false);
     this.overlayMeshes = buildInstancedLayer(overlayGroups, map, this.tideAnimInstances, {
       landElevation: false,
       flatHeight: OVERLAY_TILE_HEIGHT,
@@ -205,6 +235,8 @@ export class MapMeshBuilder {
     for (const mesh of this.overlayMeshes) {
       this.root.add(mesh);
     }
+
+    this.buildCoralMesh(map);
 
     if (this.tideAnimInstances.length > 0) {
       this.waterCaps = new InstancedMesh(
@@ -225,8 +257,66 @@ export class MapMeshBuilder {
     this.updateTideVisuals(map, tide);
   }
 
+  private buildCoralMesh(map: WorldMap): void {
+    this.coralTiles = collectCoralTiles(map);
+    this.coralSubmerged = new Uint8Array(this.coralTiles.length).fill(255);
+    if (this.coralTiles.length === 0) {
+      return;
+    }
+
+    const mesh = new InstancedMesh(
+      new BoxGeometry(1, 1, 1),
+      new MeshStandardMaterial({ color: 0xffffff }),
+      this.coralTiles.length,
+    );
+    mesh.castShadow = false;
+    mesh.receiveShadow = false;
+
+    for (let i = 0; i < this.coralTiles.length; i += 1) {
+      const { tx, ty } = this.coralTiles[i];
+      MATRIX.makeScale(1, OVERLAY_TILE_HEIGHT, 1);
+      MATRIX.setPosition(tx + 0.5, OVERLAY_TILE_CENTER_Y, ty + 0.5);
+      mesh.setMatrixAt(i, MATRIX);
+      mesh.setColorAt(i, CORAL_EXPOSED_COLOR);
+      this.tideAnimInstances.push({
+        tx,
+        ty,
+        mesh,
+        index: i,
+        baseCenterY: OVERLAY_TILE_CENTER_Y,
+        tileHeight: OVERLAY_TILE_HEIGHT,
+      });
+    }
+    mesh.instanceMatrix.needsUpdate = true;
+
+    this.coralMesh = mesh;
+    this.root.add(mesh);
+  }
+
+  private updateCoralColors(tide: TideState | null): void {
+    if (!this.coralMesh) {
+      return;
+    }
+    let dirty = false;
+    for (let i = 0; i < this.coralTiles.length; i += 1) {
+      const { tx, ty } = this.coralTiles[i];
+      const variant = resolveRenderTileVariant('coral_rideable', tx + 0.5, ty + 0.5, tide);
+      const submerged = variant === 'reef_submerged' ? 1 : 0;
+      if (this.coralSubmerged[i] !== submerged) {
+        this.coralSubmerged[i] = submerged;
+        this.coralMesh.setColorAt(i, submerged ? CORAL_SUBMERGED_COLOR : CORAL_EXPOSED_COLOR);
+        dirty = true;
+      }
+    }
+    if (dirty && this.coralMesh.instanceColor) {
+      this.coralMesh.instanceColor.needsUpdate = true;
+    }
+  }
+
   updateTideVisuals(map: WorldMap, tide: TideState | null): void {
     void map;
+
+    this.updateCoralColors(tide);
 
     for (const ref of this.tideAnimInstances) {
       const worldX = ref.tx + 0.5;
@@ -301,6 +391,14 @@ export class MapMeshBuilder {
       (this.waterCaps.material as MeshStandardMaterial).dispose();
       this.waterCaps = null;
     }
+    if (this.coralMesh) {
+      this.root.remove(this.coralMesh);
+      this.coralMesh.geometry.dispose();
+      (this.coralMesh.material as MeshStandardMaterial).dispose();
+      this.coralMesh = null;
+    }
+    this.coralTiles = [];
+    this.coralSubmerged = new Uint8Array(0);
     this.tideAnimInstances = [];
     this.tideEdges.sync(null);
     this.mapKey = null;

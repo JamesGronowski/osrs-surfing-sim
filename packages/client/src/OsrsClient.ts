@@ -298,7 +298,6 @@ export class OsrsClient {
     this.shopPanel.update(snapshot.progression);
     this.persistProgressionIfChanged(snapshot.progression);
     this.debugPanel.update(snapshot);
-    this.minimap.update(snapshot, map);
 
     for (const line of this.simulation.consumeDialogue()) {
       this.chatbox.push(line, 'game');
@@ -325,7 +324,12 @@ export class OsrsClient {
 
       if (now - this.lastSimTickTimeMs >= tickMs) {
         this.onGameTick();
-        this.lastSimTickTimeMs = now;
+        // Keep a fixed 600 ms cadence: carry the frame overshoot into the next
+        // tick instead of letting it accumulate as a stall at full tick blend.
+        this.lastSimTickTimeMs += tickMs;
+        if (now - this.lastSimTickTimeMs >= tickMs) {
+          this.lastSimTickTimeMs = now;
+        }
       }
 
       const tickBlend = Math.min(1, Math.max(0, (now - this.lastSimTickTimeMs) / tickMs));
@@ -348,6 +352,7 @@ export class OsrsClient {
     this.lastDisplayPosition = { ...displaySnapshot.surfboard.position };
     this.lastTickBlend = tickBlend;
     this.renderer.render(displaySnapshot, map, visualTimeMs, tickBlend);
+    this.minimap.update(displaySnapshot, map);
     this.minimap.setCompassRotation(this.renderer.getCompassRotationRadians());
   }
 

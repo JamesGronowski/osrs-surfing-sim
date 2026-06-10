@@ -231,7 +231,7 @@ export class ThreeRenderer implements IRenderer {
   }
 
   syncMapAfterTick(snapshot: SimulationSnapshot, map: WorldMap): void {
-    this.mapMeshes?.rebuildOverlay(map, snapshot.tide);
+    this.mapMeshes?.updateTideVisuals(map, snapshot.tide);
   }
 
   destroy(): void {

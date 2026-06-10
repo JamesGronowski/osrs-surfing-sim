@@ -4,10 +4,18 @@ import { renderVariantColor, resolveRenderTileVariant } from '../render/tileAppe
 import { MINIMAP_MAP_SIZE } from './minimapLayout.js';
 import { OSRS_ASSETS } from './osrsAssets.js';
 
+interface TileCoord {
+  tx: number;
+  ty: number;
+}
+
 export class OsrsMinimap {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private compassNeedle: HTMLImageElement;
+  private baseCanvas: HTMLCanvasElement | null = null;
+  private baseMap: WorldMap | null = null;
+  private coralTiles: TileCoord[] = [];
 
   constructor(
     mapRoot: HTMLElement,
@@ -47,7 +55,45 @@ export class OsrsMinimap {
     this.compassNeedle.style.transform = `rotate(${degrees}deg)`;
   }
 
+  /** Pre-renders all static tiles once; only coral flips color with the tide. */
+  private ensureBaseCanvas(map: WorldMap): void {
+    if (this.baseMap === map && this.baseCanvas) {
+      return;
+    }
+    const size = MINIMAP_MAP_SIZE;
+    const base = document.createElement('canvas');
+    base.width = size;
+    base.height = size;
+    const ctx = base.getContext('2d');
+    if (!ctx) {
+      throw new Error('Minimap base canvas unsupported');
+    }
+
+    const scaleX = size / map.widthTiles;
+    const scaleY = size / map.heightTiles;
+    this.coralTiles = [];
+
+    for (let ty = 0; ty < map.heightTiles; ty += 1) {
+      for (let tx = 0; tx < map.widthTiles; tx += 1) {
+        const tile = map.tiles[ty][tx];
+        let variant = resolveRenderTileVariant(tile, tx + 0.5, ty + 0.5, null);
+        if (tile === 'coral_rideable') {
+          this.coralTiles.push({ tx, ty });
+          variant = 'reef_exposed';
+        }
+        const color = renderVariantColor(variant);
+        ctx.fillStyle = `#${color.toString(16).padStart(6, '0')}`;
+        ctx.fillRect(tx * scaleX, ty * scaleY, Math.ceil(scaleX), Math.ceil(scaleY));
+      }
+    }
+
+    this.baseCanvas = base;
+    this.baseMap = map;
+  }
+
   update(snapshot: SimulationSnapshot, map: WorldMap): void {
+    this.ensureBaseCanvas(map);
+
     const ctx = this.ctx;
     const size = MINIMAP_MAP_SIZE;
     const radius = size / 2;
@@ -60,12 +106,15 @@ export class OsrsMinimap {
     ctx.arc(radius, radius, radius, 0, Math.PI * 2);
     ctx.clip();
 
-    for (let ty = 0; ty < map.heightTiles; ty += 1) {
-      for (let tx = 0; tx < map.widthTiles; tx += 1) {
-        const tile = map.tiles[ty][tx];
-        const variant = resolveRenderTileVariant(tile, tx + 0.5, ty + 0.5, snapshot.tide);
-        const color = renderVariantColor(variant);
-        ctx.fillStyle = `#${color.toString(16).padStart(6, '0')}`;
+    if (this.baseCanvas) {
+      ctx.drawImage(this.baseCanvas, 0, 0);
+    }
+
+    const submergedColor = renderVariantColor('reef_submerged');
+    ctx.fillStyle = `#${submergedColor.toString(16).padStart(6, '0')}`;
+    for (const { tx, ty } of this.coralTiles) {
+      const variant = resolveRenderTileVariant('coral_rideable', tx + 0.5, ty + 0.5, snapshot.tide);
+      if (variant === 'reef_submerged') {
         ctx.fillRect(tx * scaleX, ty * scaleY, Math.ceil(scaleX), Math.ceil(scaleY));
       }
     }
