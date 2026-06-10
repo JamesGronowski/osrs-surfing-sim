@@ -23,7 +23,7 @@ import { OsrsSailingPanel } from './ui/OsrsSailingPanel.js';
 import { OsrsShopPanel } from './ui/OsrsShopPanel.js';
 import { OsrsSkillsPanel } from './ui/OsrsSkillsPanel.js';
 import { OsrsTabStrip, type ControlPanelTabId } from './ui/OsrsTabStrip.js';
-import { applyIntegerScale } from './ui/scaleLayout.js';
+import { applyDisplayScale } from './ui/scaleLayout.js';
 
 const HELP_LINES = [
   'Click the ground to walk. Click Kaulu to talk.',
@@ -79,8 +79,8 @@ export class OsrsClient {
     const scaleShell = document.getElementById('osrs-scale-shell');
     const scaleWrap = document.getElementById('osrs-scale-wrap');
     if (scaleShell && scaleWrap) {
-      applyIntegerScale(scaleShell, scaleWrap);
-      window.addEventListener('resize', () => applyIntegerScale(scaleShell, scaleWrap));
+      applyDisplayScale(scaleShell, scaleWrap);
+      window.addEventListener('resize', () => applyDisplayScale(scaleShell, scaleWrap));
     }
 
     const savedProgression = loadSavedProgression();
