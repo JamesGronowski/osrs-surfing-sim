@@ -5,7 +5,7 @@ Sprites in this folder are sourced from the [melkypie/resource-packs](https://gi
 - Repository: https://github.com/melkypie/resource-packs/tree/sample-vanilla
 - License: BSD-2-Clause
 
-Used folders: `sailing/`, `fixed_mode/`, `chatbox/`, `tab/`, `skill/`, `button/`, `chevron/`
+Used folders: `sailing/`, `fixed_mode/`, `chatbox/`, `tab/`, `skill/`, `button/`, `chevron/`, `other/`
 
 Wave-themed movement icons in `../surf/` are original art for this project (MIT, same as repo).
 
