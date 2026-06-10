@@ -6,25 +6,36 @@ import {
   type TideState,
   type WorldMap,
 } from '@osrs-surfing/engine';
-import { CapsuleGeometry, CylinderGeometry, Group, Mesh, MeshStandardMaterial } from 'three';
+import {
+  BoxGeometry,
+  CylinderGeometry,
+  ExtrudeGeometry,
+  Group,
+  Mesh,
+  MeshStandardMaterial,
+  Shape,
+} from 'three';
 
 import type { DisplaySimulationSnapshot, DisplayTrickAnimation } from '../visualSnapshot.js';
 import { tideSpinBoardPose, trickBoardPose } from './trickAnimationPose.js';
 import { headingToRotationY, tileToWorld3 } from './worldCoords.js';
 
-const PLAYER_SKIN = 0xffcc66;
+const PLAYER_SKIN = 0xc8945e;
 const PLAYER_SHIRT = 0x3a6ea5;
+const PLAYER_HAIR = 0x4a2c12;
+const PLAYER_PANTS = 0x5a4a36;
 const BOARD_WOOD = 0xc9a066;
 const BOARD_STRIPE = 0xf4c542;
 const DEMO_SURFER_SHIRT = 0x2d8a6e;
 const DEMO_SURFER_HAIR = 0x2a1810;
 const DEMO_BOARD_WOOD = 0xb8884a;
 const DEMO_BOARD_STRIPE = 0xe8d44a;
+const NPC_SHIRT = 0xa8442c;
 const NPC_HAIR = 0x5c3a1e;
 const WAKE_PINK = 0xf4a7b9;
 const WAKE_WHITE = 0xffffff;
 
-const RIDER_ABOVE_BOARD = 0.22;
+const RIDER_ABOVE_BOARD = 0.05;
 
 interface BoardRiderPose {
   worldX: number;
@@ -69,79 +80,93 @@ function applyBoardRiderPose(board: Group, rider: Group, pose: BoardRiderPose): 
   rider.rotation.set(pose.riderLean, pose.rotationY, pose.roll * 0.35);
 }
 
+function flatMaterial(color: number, roughness = 0.9): MeshStandardMaterial {
+  return new MeshStandardMaterial({ color, roughness, flatShading: true });
+}
+
+function boxMesh(
+  width: number,
+  height: number,
+  depth: number,
+  color: number,
+  x: number,
+  y: number,
+  z: number,
+): Mesh {
+  const mesh = new Mesh(new BoxGeometry(width, height, depth), flatMaterial(color));
+  mesh.position.set(x, y, z);
+  return mesh;
+}
+
+interface HumanoidColors {
+  shirt: number;
+  pants: number;
+  hair: number | null;
+}
+
+/** Low-poly flat-shaded humanoid in the blocky OSRS proportions, facing +X. */
+function makeHumanoidMesh(colors: HumanoidColors, scale = 1): Group {
+  const group = new Group();
+  group.add(
+    boxMesh(0.09, 0.18, 0.08, colors.pants, 0, 0.09, -0.055),
+    boxMesh(0.09, 0.18, 0.08, colors.pants, 0, 0.09, 0.055),
+    boxMesh(0.13, 0.24, 0.22, colors.shirt, 0, 0.3, 0),
+    boxMesh(0.08, 0.2, 0.07, colors.shirt, 0, 0.32, -0.145),
+    boxMesh(0.08, 0.2, 0.07, colors.shirt, 0, 0.32, 0.145),
+    boxMesh(0.06, 0.05, 0.06, PLAYER_SKIN, 0, 0.195, -0.145),
+    boxMesh(0.06, 0.05, 0.06, PLAYER_SKIN, 0, 0.195, 0.145),
+    boxMesh(0.12, 0.13, 0.12, PLAYER_SKIN, 0, 0.485, 0),
+  );
+  if (colors.hair !== null) {
+    group.add(boxMesh(0.13, 0.05, 0.13, colors.hair, -0.005, 0.565, 0));
+  }
+  group.scale.setScalar(scale);
+  return group;
+}
+
+/** Low-poly board outline: rounded tail, pointed nose, nose along +X. */
+function surfboardDeckGeometry(): ExtrudeGeometry {
+  const outline = new Shape();
+  outline.moveTo(-0.62, -0.13);
+  outline.lineTo(-0.3, -0.22);
+  outline.lineTo(0.22, -0.2);
+  outline.lineTo(0.58, -0.08);
+  outline.lineTo(0.68, 0);
+  outline.lineTo(0.58, 0.08);
+  outline.lineTo(0.22, 0.2);
+  outline.lineTo(-0.3, 0.22);
+  outline.lineTo(-0.62, 0.13);
+  outline.closePath();
+
+  const geometry = new ExtrudeGeometry(outline, { depth: 0.07, bevelEnabled: false });
+  geometry.rotateX(-Math.PI / 2);
+  geometry.translate(0, -0.035, 0);
+  return geometry;
+}
+
 function makeSurfboardMesh(woodColor = BOARD_WOOD, stripeColor = BOARD_STRIPE): Group {
   const group = new Group();
-  const deck = new Mesh(
-    new CylinderGeometry(0.45, 0.45, 0.08, 24),
-    new MeshStandardMaterial({ color: woodColor, roughness: 0.8 }),
-  );
-  deck.scale.set(1.6, 1, 0.55);
-  const stripe = new Mesh(
-    new CylinderGeometry(0.08, 0.08, 0.09, 12),
-    new MeshStandardMaterial({ color: stripeColor, roughness: 0.7 }),
-  );
-  stripe.scale.set(1.2, 1, 0.5);
-  stripe.position.y = 0.02;
-  group.add(deck, stripe);
+  const deck = new Mesh(surfboardDeckGeometry(), flatMaterial(woodColor, 0.8));
+  const stripe = boxMesh(0.95, 0.02, 0.09, stripeColor, 0, 0.04, 0);
+  const fin = boxMesh(0.1, 0.12, 0.03, woodColor, -0.48, -0.08, 0);
+  group.add(deck, stripe, fin);
   return group;
 }
 
 function makePlayerMesh(): Group {
-  const group = new Group();
-  const body = new Mesh(
-    new CapsuleGeometry(0.14, 0.28, 4, 8),
-    new MeshStandardMaterial({ color: PLAYER_SHIRT, roughness: 0.85 }),
-  );
-  body.position.y = 0.28;
-  const head = new Mesh(
-    new CapsuleGeometry(0.1, 0.08, 4, 8),
-    new MeshStandardMaterial({ color: PLAYER_SKIN, roughness: 0.85 }),
-  );
-  head.position.y = 0.52;
-  group.add(body, head);
-  return group;
+  return makeHumanoidMesh({ shirt: PLAYER_SHIRT, pants: PLAYER_PANTS, hair: PLAYER_HAIR });
 }
 
 function makeDemoSurferMesh(): Group {
-  const group = new Group();
-  const body = new Mesh(
-    new CapsuleGeometry(0.14, 0.26, 4, 8),
-    new MeshStandardMaterial({ color: DEMO_SURFER_SHIRT, roughness: 0.85 }),
-  );
-  body.position.y = 0.27;
-  const head = new Mesh(
-    new CapsuleGeometry(0.1, 0.08, 4, 8),
-    new MeshStandardMaterial({ color: PLAYER_SKIN, roughness: 0.85 }),
-  );
-  head.position.y = 0.51;
-  const hair = new Mesh(
-    new CapsuleGeometry(0.12, 0.14, 4, 8),
-    new MeshStandardMaterial({ color: DEMO_SURFER_HAIR, roughness: 0.9 }),
-  );
-  hair.position.y = 0.66;
-  group.add(body, head, hair);
-  return group;
+  return makeHumanoidMesh({
+    shirt: DEMO_SURFER_SHIRT,
+    pants: PLAYER_PANTS,
+    hair: DEMO_SURFER_HAIR,
+  });
 }
 
 function makeNpcMesh(): Group {
-  const group = new Group();
-  const body = new Mesh(
-    new CapsuleGeometry(0.16, 0.3, 4, 8),
-    new MeshStandardMaterial({ color: PLAYER_SHIRT, roughness: 0.85 }),
-  );
-  body.position.y = 0.3;
-  const head = new Mesh(
-    new CapsuleGeometry(0.11, 0.1, 4, 8),
-    new MeshStandardMaterial({ color: PLAYER_SKIN, roughness: 0.85 }),
-  );
-  head.position.y = 0.56;
-  const hair = new Mesh(
-    new CapsuleGeometry(0.12, 0.04, 4, 8),
-    new MeshStandardMaterial({ color: NPC_HAIR, roughness: 0.9 }),
-  );
-  hair.position.y = 0.68;
-  group.add(body, head, hair);
-  return group;
+  return makeHumanoidMesh({ shirt: NPC_SHIRT, pants: PLAYER_PANTS, hair: NPC_HAIR }, 1.1);
 }
 
 export class EntityLayer {
