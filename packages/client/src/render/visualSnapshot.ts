@@ -19,10 +19,10 @@ export type DisplayDemoSurferSnapshot = Omit<DemoSurferSnapshot, 'trickAnimation
 
 export type DisplaySimulationSnapshot = Omit<
   SimulationSnapshot,
-  'trickAnimation' | 'demoSurfer'
+  'trickAnimation' | 'demoSurfers'
 > & {
   trickAnimation: DisplayTrickAnimation | null;
-  demoSurfer: DisplayDemoSurferSnapshot | null;
+  demoSurfers: DisplayDemoSurferSnapshot[];
 };
 
 interface EntityMotionSegment {
@@ -177,7 +177,7 @@ export class SurfboardMotionInterpolator {
     },
     null,
   );
-  private demoSurfer: EntityMotionSegment | null = null;
+  private readonly demoSurfers = new Map<string, EntityMotionSegment>();
 
   reset(snapshot: SimulationSnapshot): void {
     onEntitySimulationTick(
@@ -187,7 +187,13 @@ export class SurfboardMotionInterpolator {
       snapshot.trickAnimation,
       snapshot.trickAnimation,
     );
-    this.resetDemoSurfer(snapshot);
+    this.demoSurfers.clear();
+    for (const surfer of snapshot.demoSurfers) {
+      this.demoSurfers.set(
+        surfer.id,
+        createEntityMotionSegment(surfer.surfboard, surfer.trickAnimation),
+      );
+    }
   }
 
   onSimulationTick(before: SimulationSnapshot, after: SimulationSnapshot): void {
@@ -199,33 +205,37 @@ export class SurfboardMotionInterpolator {
       after.trickAnimation,
     );
 
-    if (after.demoSurfer) {
-      if (!this.demoSurfer) {
-        this.demoSurfer = createEntityMotionSegment(
-          after.demoSurfer.surfboard,
-          after.demoSurfer.trickAnimation,
-        );
+    const liveIds = new Set<string>();
+    for (const surfer of after.demoSurfers) {
+      liveIds.add(surfer.id);
+      let segment = this.demoSurfers.get(surfer.id);
+      if (!segment) {
+        segment = createEntityMotionSegment(surfer.surfboard, surfer.trickAnimation);
+        this.demoSurfers.set(surfer.id, segment);
       }
+      const beforeSurfer = before.demoSurfers.find((entry) => entry.id === surfer.id);
       onEntitySimulationTick(
-        this.demoSurfer,
-        before.demoSurfer?.surfboard ?? after.demoSurfer.surfboard,
-        after.demoSurfer.surfboard,
-        before.demoSurfer?.trickAnimation ?? null,
-        after.demoSurfer.trickAnimation,
+        segment,
+        beforeSurfer?.surfboard ?? surfer.surfboard,
+        surfer.surfboard,
+        beforeSurfer?.trickAnimation ?? null,
+        surfer.trickAnimation,
       );
-    } else {
-      this.demoSurfer = null;
+    }
+    for (const id of this.demoSurfers.keys()) {
+      if (!liveIds.has(id)) {
+        this.demoSurfers.delete(id);
+      }
     }
   }
 
   ensureSynced(snapshot: SimulationSnapshot): void {
     ensureEntitySegmentSynced(this.player, snapshot.surfboard, snapshot.trickAnimation);
-    if (snapshot.demoSurfer && this.demoSurfer) {
-      ensureEntitySegmentSynced(
-        this.demoSurfer,
-        snapshot.demoSurfer.surfboard,
-        snapshot.demoSurfer.trickAnimation,
-      );
+    for (const surfer of snapshot.demoSurfers) {
+      const segment = this.demoSurfers.get(surfer.id);
+      if (segment) {
+        ensureEntitySegmentSynced(segment, surfer.surfboard, surfer.trickAnimation);
+      }
     }
   }
 
@@ -248,38 +258,39 @@ export class SurfboardMotionInterpolator {
       displayTide = { ...snapshot.tide, phaseRadians };
     }
 
-    let demoSurfer: DisplayDemoSurferSnapshot | null = null;
-    if (snapshot.demoSurfer && this.demoSurfer) {
+    const demoSurfers: DisplayDemoSurferSnapshot[] = snapshot.demoSurfers.map((surfer) => {
+      const segment = this.demoSurfers.get(surfer.id);
+      if (!segment) {
+        return { ...surfer, trickAnimation: trickAnimationWithProgress(surfer.trickAnimation) };
+      }
       const interpolated = interpolateSurfEntity(
-        this.demoSurfer,
-        snapshot.demoSurfer.surfboard,
-        snapshot.demoSurfer.trickAnimation,
+        segment,
+        surfer.surfboard,
+        surfer.trickAnimation,
         tickBlend,
       );
-      demoSurfer = {
-        ...snapshot.demoSurfer,
+      return {
+        ...surfer,
         surfboard: interpolated.surfboard,
         trickAnimation: interpolated.trickAnimation,
       };
-    }
+    });
 
     return {
       ...snapshot,
       surfboard: player.surfboard,
       trickAnimation: player.trickAnimation,
       tide: displayTide,
-      demoSurfer,
+      demoSurfers,
     };
   }
+}
 
-  private resetDemoSurfer(snapshot: SimulationSnapshot): void {
-    if (!snapshot.demoSurfer) {
-      this.demoSurfer = null;
-      return;
-    }
-    this.demoSurfer = createEntityMotionSegment(
-      snapshot.demoSurfer.surfboard,
-      snapshot.demoSurfer.trickAnimation,
-    );
+function trickAnimationWithProgress(
+  animation: TrickAnimationSnapshot | null,
+): DisplayTrickAnimation | null {
+  if (!animation) {
+    return null;
   }
+  return { ...animation, progress: trickAnimationProgress(animation) };
 }

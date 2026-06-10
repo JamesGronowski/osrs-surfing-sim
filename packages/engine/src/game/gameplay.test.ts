@@ -53,7 +53,10 @@ describe('Coral Park gameplay flow', () => {
     const beforeTricks = sim.getSnapshot().progression.session.tricksLanded;
     let tricked = false;
 
-    for (let i = 0; i < 400; i += 1) {
+    for (let i = 0; i < 600; i += 1) {
+      if (sim.getSnapshot().surfboard.speedState === 'seated') {
+        sim.setSpeedState('riding');
+      }
       const pos = sim.getSnapshot().surfboard.position;
       const dist = Math.hypot(pos.x - rail.center.x, pos.y - rail.center.y);
       if (dist > 10) {

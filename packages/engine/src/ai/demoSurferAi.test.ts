@@ -57,7 +57,7 @@ describe('demoSurferAi', () => {
       tide,
       map: arena.map,
     });
-    expect(submergedAi.lieDown).toBe(true);
+    expect(submergedAi.input.lieDown).toBe(true);
     expect(isPointInTideSweep(submerged.x, submerged.y, tide)).toBe(true);
 
     const dryAngle = tide.phaseRadians + tide.sweepRadians + tide.sweepRadians * 0.35;
@@ -79,7 +79,7 @@ describe('demoSurferAi', () => {
       tide,
       map: arena.map,
     });
-    expect(midDryAi.standUp).toBe(true);
+    expect(midDryAi.input.standUp).toBe(true);
     expect(isPointInTideSweep(ahead.x, ahead.y, tide)).toBe(false);
 
     const nearLeadingAngle =
@@ -102,7 +102,7 @@ describe('demoSurferAi', () => {
       tide,
       map: arena.map,
     });
-    expect(cautiousAi.lieDown).toBe(true);
+    expect(cautiousAi.input.lieDown).toBe(true);
     expect(
       shouldStartTideSpin(
         nearLeading,
@@ -169,7 +169,7 @@ describe('demoSurferAi', () => {
       map: arena.map,
     });
 
-    expect(ai.standUp).toBe(true);
+    expect(ai.input.standUp).toBe(true);
     expect(
       Math.hypot(approach.x - exposedZone!.center.x, approach.y - exposedZone!.center.y),
     ).toBeLessThan(30);

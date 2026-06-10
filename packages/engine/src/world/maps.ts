@@ -14,7 +14,11 @@ import {
   coralParkTileAngle,
   coralParkTileDistance,
 } from './coralParkCoast.js';
-import { demoSurferSpawnOnReef } from '../ai/demoSurferAi.js';
+import {
+  DEMO_SURFER_RING_DEPTH,
+  demoSurferSpawnOnReef,
+  type DemoSurferBehavior,
+} from '../ai/demoSurferAi.js';
 import type { DemoSurferConfig } from './demoSurfer.js';
 import type { TideConfig, TrickZone } from './features.js';
 import type { NpcDefinition } from './npc.js';
@@ -55,7 +59,7 @@ export interface GameArena {
   trickZones: TrickZone[];
   tide: TideConfig | null;
   npcs: NpcDefinition[];
-  demoSurfer: DemoSurferConfig | null;
+  demoSurfers: DemoSurferConfig[];
 }
 
 export const CORAL_PARK_TRICK_ZONE_COUNT = 28;
@@ -96,6 +100,63 @@ function buildTrickZones(map: WorldMap): TrickZone[] {
   return zones;
 }
 
+/** Kai patrols the reef sector off the south-west headland. */
+const KAI_SECTOR_CENTER_RADIANS = 2.3;
+const KAI_SECTOR_HALF_WIDTH_RADIANS = 0.9;
+const KAI_RING_DEPTH = 0.45;
+
+/** Hina cruises the outer reef line without chasing tricks. */
+const HINA_RING_DEPTH = 0.82;
+
+function buildDemoSurfers(): DemoSurferConfig[] {
+  const surfers: { id: string; name: string; spawnAngle: number; behavior: DemoSurferBehavior }[] =
+    [
+      {
+        id: 'nalu',
+        name: 'Nalu',
+        spawnAngle: -Math.PI / 4,
+        behavior: { kind: 'loop', ringDepth: DEMO_SURFER_RING_DEPTH, doesTricks: true },
+      },
+      {
+        id: 'kai',
+        name: 'Kai',
+        spawnAngle: KAI_SECTOR_CENTER_RADIANS,
+        behavior: {
+          kind: 'sector',
+          centerRadians: KAI_SECTOR_CENTER_RADIANS,
+          halfWidthRadians: KAI_SECTOR_HALF_WIDTH_RADIANS,
+          ringDepth: KAI_RING_DEPTH,
+          doesTricks: true,
+        },
+      },
+      {
+        id: 'hina',
+        name: 'Hina',
+        spawnAngle: (-Math.PI * 3) / 4,
+        behavior: { kind: 'loop', ringDepth: HINA_RING_DEPTH, doesTricks: false },
+      },
+      {
+        id: 'tama',
+        name: 'Tama',
+        spawnAngle: Math.PI,
+        behavior: { kind: 'explorer' },
+      },
+    ];
+
+  return surfers.map((surfer) => {
+    const ringDepth = surfer.behavior.kind === 'explorer' ? undefined : surfer.behavior.ringDepth;
+    const spawn = demoSurferSpawnOnReef(surfer.spawnAngle, ringDepth);
+    return {
+      id: surfer.id,
+      name: surfer.name,
+      startX: spawn.x,
+      startY: spawn.y,
+      startHeading: spawn.heading,
+      behavior: surfer.behavior,
+    };
+  });
+}
+
 export function createCoralParkSlice(): GameArena {
   const width = CORAL_PARK_MAP_WIDTH;
   const height = CORAL_PARK_MAP_HEIGHT;
@@ -131,7 +192,6 @@ export function createCoralParkSlice(): GameArena {
   const spawnY = boardDockY - 1.8;
   const guruX = boardDockX + 1.2;
   const guruY = boardDockY - 1.5;
-  const demoSurferSpawn = demoSurferSpawnOnReef(-Math.PI / 4);
 
   return {
     map,
@@ -149,7 +209,7 @@ export function createCoralParkSlice(): GameArena {
       innerRadiusAtAngle: coralParkReefInnerRadius,
       outerRadiusAtAngle: coralParkReefOuterRadius,
       sweepRadians: Math.PI / 1.35,
-      advancePerTick: 0.044,
+      advancePerTick: 0.022,
     },
     npcs: [
       {
@@ -165,17 +225,11 @@ export function createCoralParkSlice(): GameArena {
           'Yellow chevrons show which way to ride through each feature.',
           'Prime a trick button 1–4 ticks before you hit the matching coral.',
           "Tai'ura's tide submerges features — they fade underwater, then fresh coral rises as the swell passes.",
-          'Watch Nalu ride the reef loop — she times the swell to hit every feature in the dry zone.',
+          'Watch Nalu and her friends ride the reef — they time the swell to hit features in the dry zone.',
         ],
       },
     ],
-    demoSurfer: {
-      id: 'nalu',
-      name: 'Nalu',
-      startX: demoSurferSpawn.x,
-      startY: demoSurferSpawn.y,
-      startHeading: demoSurferSpawn.heading,
-    },
+    demoSurfers: buildDemoSurfers(),
     trickZones: buildTrickZones(map),
   };
 }

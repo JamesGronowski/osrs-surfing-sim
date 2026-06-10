@@ -85,7 +85,7 @@ export interface SimulationSnapshot {
   onFootMoving: boolean;
   trickPrepare: TrickPrepareState | null;
   trickAnimation: TrickAnimationSnapshot | null;
-  demoSurfer: DemoSurferSnapshot | null;
+  demoSurfers: DemoSurferSnapshot[];
 }
 
 export interface XpDropEvent {
@@ -126,7 +126,7 @@ export class GameSimulation {
   private tideFrozen = false;
   private movementFrozen = false;
   private readonly boardInteractRadius = 1.3;
-  private demoSurfer: ReturnType<typeof createDemoSurfer> | null = null;
+  private demoSurfers: ReturnType<typeof createDemoSurfer>[] = [];
 
   constructor(config: SimulationConfig) {
     this.arena = config.arena;
@@ -144,9 +144,9 @@ export class GameSimulation {
     this.trickZones = config.arena.trickZones.map((zone) => ({ ...zone }));
     this.tide = config.arena.tide ? createTideState(config.arena.tide) : null;
     this.trickZoneTideSync = createTrickZoneTideSyncState();
-    this.demoSurfer = config.arena.demoSurfer
-      ? createDemoSurfer(config.arena.demoSurfer, this.stats)
-      : null;
+    this.demoSurfers = config.arena.demoSurfers.map((surfer) =>
+      createDemoSurfer(surfer, this.stats),
+    );
   }
 
   getSnapshot(): SimulationSnapshot {
@@ -175,7 +175,7 @@ export class GameSimulation {
       onFootMoving: this.walk !== null,
       trickPrepare: this.trickPrepare ? { ...this.trickPrepare } : null,
       trickAnimation: toTrickAnimationSnapshot(this.trickAnimation),
-      demoSurfer: this.demoSurfer ? toDemoSurferSnapshot(this.demoSurfer) : null,
+      demoSurfers: this.demoSurfers.map((surfer) => toDemoSurferSnapshot(surfer)),
     };
   }
 
@@ -589,9 +589,9 @@ export class GameSimulation {
 
     this.checkProximityDialogue();
 
-    if (this.demoSurfer) {
-      this.demoSurfer = tickDemoSurfer(this.demoSurfer, this.arena.map, this.trickZones, this.tide);
-    }
+    this.demoSurfers = this.demoSurfers.map((surfer) =>
+      tickDemoSurfer(surfer, this.arena.map, this.trickZones, this.tide),
+    );
 
     this.tickCount += 1;
   }

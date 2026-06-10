@@ -26,14 +26,25 @@ const PLAYER_HAIR = 0x4a2c12;
 const PLAYER_PANTS = 0x5a4a36;
 const BOARD_WOOD = 0xc9a066;
 const BOARD_STRIPE = 0xf4c542;
-const DEMO_SURFER_SHIRT = 0x2d8a6e;
-const DEMO_SURFER_HAIR = 0x2a1810;
-const DEMO_BOARD_WOOD = 0xb8884a;
-const DEMO_BOARD_STRIPE = 0xe8d44a;
 const NPC_SHIRT = 0xa8442c;
 const NPC_HAIR = 0x5c3a1e;
 const WAKE_PINK = 0xf4a7b9;
 const WAKE_WHITE = 0xffffff;
+
+interface DemoSurferStyle {
+  shirt: number;
+  hair: number;
+  boardWood: number;
+  boardStripe: number;
+}
+
+/** Distinct outfits per demo surfer, assigned by snapshot order. */
+const DEMO_SURFER_STYLES: DemoSurferStyle[] = [
+  { shirt: 0x2d8a6e, hair: 0x2a1810, boardWood: 0xb8884a, boardStripe: 0xe8d44a },
+  { shirt: 0x8a2d4e, hair: 0x1c120c, boardWood: 0xc9a066, boardStripe: 0x66c2e8 },
+  { shirt: 0x6a5fb5, hair: 0x3a2a18, boardWood: 0x9a7a4a, boardStripe: 0xf4a7b9 },
+  { shirt: 0xc2a23c, hair: 0x241a10, boardWood: 0xb8884a, boardStripe: 0x8fe07a },
+];
 
 const RIDER_ABOVE_BOARD = 0.05;
 
@@ -166,12 +177,37 @@ function makePlayerMesh(): Group {
   return makeHumanoidMesh({ shirt: PLAYER_SHIRT, pants: PLAYER_PANTS, hair: PLAYER_HAIR });
 }
 
-function makeDemoSurferMesh(): Group {
-  return makeHumanoidMesh({
-    shirt: DEMO_SURFER_SHIRT,
-    pants: PLAYER_PANTS,
-    hair: DEMO_SURFER_HAIR,
-  });
+function makeWakeMesh(outerOpacity: number, innerOpacity: number): Group {
+  const wake = new Group();
+  const outer = new Mesh(
+    new CylinderGeometry(0.5, 0.5, 0.02, 16),
+    new MeshStandardMaterial({ color: WAKE_PINK, transparent: true, opacity: outerOpacity }),
+  );
+  outer.scale.set(1.9, 1, 0.8);
+  const inner = new Mesh(
+    new CylinderGeometry(0.42, 0.42, 0.02, 16),
+    new MeshStandardMaterial({ color: WAKE_WHITE, transparent: true, opacity: innerOpacity }),
+  );
+  inner.scale.set(1.6, 1, 0.65);
+  wake.add(outer, inner);
+  wake.visible = false;
+  return wake;
+}
+
+interface DemoSurferVisual {
+  board: Group;
+  rider: Group;
+  wake: Group;
+}
+
+function makeDemoSurferVisual(style: DemoSurferStyle): DemoSurferVisual {
+  const board = makeSurfboardMesh(style.boardWood, style.boardStripe);
+  const rider = makeHumanoidMesh({ shirt: style.shirt, pants: PLAYER_PANTS, hair: style.hair });
+  board.rotation.order = 'YXZ';
+  rider.rotation.order = 'YXZ';
+  board.visible = false;
+  rider.visible = false;
+  return { board, rider, wake: makeWakeMesh(0.32, 0.28) };
 }
 
 function makeNpcMesh(): Group {
@@ -183,53 +219,15 @@ export class EntityLayer {
   readonly ridingBoard = makeSurfboardMesh();
   readonly dockBoard = makeSurfboardMesh();
   readonly player = makePlayerMesh();
-  readonly wake = new Group();
-  readonly demoSurferBoard = makeSurfboardMesh(DEMO_BOARD_WOOD, DEMO_BOARD_STRIPE);
-  readonly demoSurfer = makeDemoSurferMesh();
-  readonly demoSurferWake = new Group();
+  readonly wake = makeWakeMesh(0.4, 0.35);
+  private readonly demoSurferPool: DemoSurferVisual[] = [];
   private readonly npcPool: Group[] = [];
 
   constructor() {
-    this.root.add(
-      this.ridingBoard,
-      this.dockBoard,
-      this.player,
-      this.wake,
-      this.demoSurferBoard,
-      this.demoSurfer,
-      this.demoSurferWake,
-    );
-    for (const posed of [this.ridingBoard, this.player, this.demoSurferBoard, this.demoSurfer]) {
+    this.root.add(this.ridingBoard, this.dockBoard, this.player, this.wake);
+    for (const posed of [this.ridingBoard, this.player]) {
       posed.rotation.order = 'YXZ';
     }
-
-    const wakeOuter = new Mesh(
-      new CylinderGeometry(0.5, 0.5, 0.02, 16),
-      new MeshStandardMaterial({ color: WAKE_PINK, transparent: true, opacity: 0.4 }),
-    );
-    wakeOuter.scale.set(1.9, 1, 0.8);
-    const wakeInner = new Mesh(
-      new CylinderGeometry(0.42, 0.42, 0.02, 16),
-      new MeshStandardMaterial({ color: WAKE_WHITE, transparent: true, opacity: 0.35 }),
-    );
-    wakeInner.scale.set(1.6, 1, 0.65);
-    this.wake.add(wakeOuter, wakeInner);
-    this.wake.visible = false;
-
-    const demoWakeOuter = new Mesh(
-      new CylinderGeometry(0.5, 0.5, 0.02, 16),
-      new MeshStandardMaterial({ color: WAKE_PINK, transparent: true, opacity: 0.32 }),
-    );
-    demoWakeOuter.scale.set(1.9, 1, 0.8);
-    const demoWakeInner = new Mesh(
-      new CylinderGeometry(0.42, 0.42, 0.02, 16),
-      new MeshStandardMaterial({ color: WAKE_WHITE, transparent: true, opacity: 0.28 }),
-    );
-    demoWakeInner.scale.set(1.6, 1, 0.65);
-    this.demoSurferWake.add(demoWakeOuter, demoWakeInner);
-    this.demoSurferWake.visible = false;
-    this.demoSurferBoard.visible = false;
-    this.demoSurfer.visible = false;
   }
 
   sync(snapshot: DisplaySimulationSnapshot, map: WorldMap): void {
@@ -256,7 +254,7 @@ export class EntityLayer {
     this.dockBoard.visible = !snapshot.boardMounted;
     this.player.visible = true;
     this.syncNpcs(snapshot, map);
-    this.syncDemoSurfer(snapshot);
+    this.syncDemoSurfers(snapshot);
 
     if (!snapshot.boardMounted) {
       const dockPos = tileToWorld3(snapshot.boardDockX, snapshot.boardDockY);
@@ -301,41 +299,51 @@ export class EntityLayer {
     }
   }
 
-  private syncDemoSurfer(snapshot: DisplaySimulationSnapshot): void {
-    const demo = snapshot.demoSurfer;
-    if (!demo) {
-      this.demoSurferBoard.visible = false;
-      this.demoSurfer.visible = false;
-      this.demoSurferWake.visible = false;
-      return;
+  private syncDemoSurfers(snapshot: DisplaySimulationSnapshot): void {
+    while (this.demoSurferPool.length < snapshot.demoSurfers.length) {
+      const style = DEMO_SURFER_STYLES[this.demoSurferPool.length % DEMO_SURFER_STYLES.length];
+      const visual = makeDemoSurferVisual(style);
+      this.demoSurferPool.push(visual);
+      this.root.add(visual.board, visual.rider, visual.wake);
     }
 
-    const riderPose = boardRiderPose(
-      demo.surfboard.position.x,
-      demo.surfboard.position.y,
-      demo.surfboard.currentHeading,
-      demo.trickAnimation,
-      snapshot.tide,
-      demo.tideSpinProgress,
-    );
-    const headingRad = (headingToDegrees(demo.surfboard.currentHeading) * Math.PI) / 180;
+    for (let i = 0; i < this.demoSurferPool.length; i += 1) {
+      const visual = this.demoSurferPool[i];
+      const demo = snapshot.demoSurfers[i];
+      if (!demo) {
+        visual.board.visible = false;
+        visual.rider.visible = false;
+        visual.wake.visible = false;
+        continue;
+      }
 
-    this.demoSurferBoard.visible = true;
-    this.demoSurfer.visible = true;
-    applyBoardRiderPose(this.demoSurferBoard, this.demoSurfer, riderPose);
-
-    const showWake =
-      demo.trickAnimation === null &&
-      (demo.surfboard.speedState === 'riding' || demo.tideSpinProgress !== null);
-    this.demoSurferWake.visible = showWake;
-    if (showWake) {
-      const behind = headingRad + Math.PI;
-      this.demoSurferWake.position.set(
-        riderPose.worldX + Math.cos(behind) * 0.85,
-        riderPose.boardY + 0.02,
-        riderPose.worldZ + Math.sin(behind) * 0.85,
+      const riderPose = boardRiderPose(
+        demo.surfboard.position.x,
+        demo.surfboard.position.y,
+        demo.surfboard.currentHeading,
+        demo.trickAnimation,
+        snapshot.tide,
+        demo.tideSpinProgress,
       );
-      this.demoSurferWake.rotation.set(0, riderPose.rotationY, 0);
+      const headingRad = (headingToDegrees(demo.surfboard.currentHeading) * Math.PI) / 180;
+
+      visual.board.visible = true;
+      visual.rider.visible = true;
+      applyBoardRiderPose(visual.board, visual.rider, riderPose);
+
+      const showWake =
+        demo.trickAnimation === null &&
+        (demo.surfboard.speedState === 'riding' || demo.tideSpinProgress !== null);
+      visual.wake.visible = showWake;
+      if (showWake) {
+        const behind = headingRad + Math.PI;
+        visual.wake.position.set(
+          riderPose.worldX + Math.cos(behind) * 0.85,
+          riderPose.boardY + 0.02,
+          riderPose.worldZ + Math.sin(behind) * 0.85,
+        );
+        visual.wake.rotation.set(0, riderPose.rotationY, 0);
+      }
     }
   }
 

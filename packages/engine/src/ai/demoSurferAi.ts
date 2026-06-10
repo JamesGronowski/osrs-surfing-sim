@@ -6,8 +6,10 @@ import {
   CORAL_PARK_ISLAND_CY,
   coralParkReefInnerRadius,
   coralParkReefOuterRadius,
+  coralParkSandRadius,
 } from '../world/coralParkCoast.js';
-import type { WorldMap } from '../world/collision.js';
+import { isWorldPointSailingTarget, type WorldMap } from '../world/collision.js';
+import type { WorldPos } from '../world/coords.js';
 import {
   clockwiseAngleDelta,
   isPointInTideSweep,
@@ -66,6 +68,81 @@ export const DEMO_SURFER_ZONE_PRIME_DISTANCE = 12;
 /** Polar angle step (radians) when scouting the next point along the reef loop. */
 export const DEMO_SURFER_AHEAD_ANGLE_STEP = 0.18;
 
+/** Explorer wander tuning. */
+export const EXPLORER_TARGET_REACHED_DISTANCE = 4;
+export const EXPLORER_RIDE_DISTANCE = 18;
+export const EXPLORER_LOUNGE_CHANCE = 0.3;
+export const EXPLORER_LOUNGE_MIN_TICKS = 25;
+export const EXPLORER_LOUNGE_SPAN_TICKS = 30;
+/** Chance to lie down and let the swell roll over instead of spinning away. */
+export const EXPLORER_SWELL_LOUNGE_CHANCE = 0.5;
+export const EXPLORER_SWELL_LOUNGE_TICKS = 70;
+const EXPLORER_WANDER_ATTEMPTS = 8;
+/** Straight-line sample spacing when checking a wander path for land. */
+const EXPLORER_PATH_SAMPLE_TILES = 4;
+/** Ticks without movement before abandoning the current wander target. */
+const EXPLORER_STUCK_TICK_LIMIT = 10;
+
+export type DemoSurferBehavior =
+  | { kind: 'loop'; ringDepth: number; doesTricks: boolean }
+  | {
+      kind: 'sector';
+      centerRadians: number;
+      halfWidthRadians: number;
+      ringDepth: number;
+      doesTricks: boolean;
+    }
+  | { kind: 'explorer' };
+
+export const DEFAULT_DEMO_SURFER_BEHAVIOR: DemoSurferBehavior = {
+  kind: 'loop',
+  ringDepth: DEMO_SURFER_RING_DEPTH,
+  doesTricks: true,
+};
+
+/** Per-surfer AI memory carried between ticks. */
+export interface DemoSurferAiState {
+  /** +1 rides clockwise, −1 counter-clockwise (sector patrols flip at edges). */
+  direction: 1 | -1;
+  wanderTarget: WorldPos | null;
+  loungeTicksRemaining: number;
+  lastPosition: WorldPos | null;
+  stuckTicks: number;
+  rngState: number;
+}
+
+export function createDemoSurferAiState(seed: number): DemoSurferAiState {
+  return {
+    direction: 1,
+    wanderTarget: null,
+    loungeTicksRemaining: 0,
+    lastPosition: null,
+    stuckTicks: 0,
+    rngState: seed >>> 0 || 1,
+  };
+}
+
+/** xorshift32 over the state's seed → [0, 1); deterministic per surfer. */
+function nextRandom(aiState: DemoSurferAiState): number {
+  let x = aiState.rngState;
+  x ^= (x << 13) >>> 0;
+  x ^= x >>> 17;
+  x ^= (x << 5) >>> 0;
+  aiState.rngState = x >>> 0;
+  return aiState.rngState / 0x100000000;
+}
+
+function signedAngleDelta(from: number, to: number): number {
+  let delta = (to - from) % TAU;
+  if (delta > Math.PI) {
+    delta -= TAU;
+  }
+  if (delta < -Math.PI) {
+    delta += TAU;
+  }
+  return delta;
+}
+
 export interface DemoSurferAiInput extends SurfboardInput {
   prepareSlot?: TrickPrepareState['slot'];
 }
@@ -76,6 +153,13 @@ export interface DemoSurferAiContext {
   trickZones: TrickZone[];
   tide: TideState | null;
   map: WorldMap;
+  behavior?: DemoSurferBehavior;
+  aiState?: DemoSurferAiState;
+}
+
+export interface DemoSurferAiResult {
+  input: DemoSurferAiInput;
+  aiState: DemoSurferAiState;
 }
 
 function polarFromIsland(x: number, y: number): { angle: number; radius: number } {
@@ -119,7 +203,11 @@ function isNearTideEdgeForTricks(angle: number, tide: TideState): boolean {
   return fromTrailing < trailingCaution || toLeading < leadingCaution;
 }
 
-export function targetRingDepth(angle: number, tide: TideState): number {
+export function targetRingDepth(
+  angle: number,
+  tide: TideState,
+  baseDepth = DEMO_SURFER_RING_DEPTH,
+): number {
   const toLeading = effectiveToLeading(angle, tide);
   const cautionThreshold =
     tide.sweepRadians * DEMO_SURFER_CAUTION_LEADING_FRACTION + tideLeadingBuffer(tide);
@@ -127,16 +215,14 @@ export function targetRingDepth(angle: number, tide: TideState): number {
     tide.sweepRadians * DEMO_SURFER_SPIN_LEADING_FRACTION + tideLeadingBuffer(tide);
 
   if (toLeading >= cautionThreshold) {
-    return DEMO_SURFER_RING_DEPTH;
+    return baseDepth;
   }
 
+  const innerDepth = Math.min(baseDepth, DEMO_SURFER_INNER_RING_DEPTH);
   const pressure =
     1 - (toLeading - spinThreshold) / Math.max(cautionThreshold - spinThreshold, 0.01);
   const clampedPressure = Math.min(1, Math.max(0, pressure));
-  return (
-    DEMO_SURFER_RING_DEPTH +
-    (DEMO_SURFER_INNER_RING_DEPTH - DEMO_SURFER_RING_DEPTH) * clampedPressure
-  );
+  return baseDepth + (innerDepth - baseDepth) * clampedPressure;
 }
 
 function reefPointAtDepth(angle: number, depth: number): { x: number; y: number } {
@@ -149,8 +235,12 @@ function reefPointAtDepth(angle: number, depth: number): { x: number; y: number 
   };
 }
 
-function idealReefPoint(angle: number, tide: TideState | null = null): { x: number; y: number } {
-  const depth = tide ? targetRingDepth(angle, tide) : DEMO_SURFER_RING_DEPTH;
+function idealReefPoint(
+  angle: number,
+  tide: TideState | null = null,
+  baseDepth = DEMO_SURFER_RING_DEPTH,
+): { x: number; y: number } {
+  const depth = tide ? targetRingDepth(angle, tide, baseDepth) : baseDepth;
   return reefPointAtDepth(angle, depth);
 }
 
@@ -159,11 +249,13 @@ function courseHeading(
   steerX: number,
   steerY: number,
   tide: TideState | null,
+  baseDepth = DEMO_SURFER_RING_DEPTH,
+  direction: 1 | -1 = 1,
 ): HeadingIndex {
   const { angle, radius } = polarFromIsland(position.x, position.y);
-  const ideal = idealReefPoint(angle, tide);
+  const ideal = idealReefPoint(angle, tide, baseDepth);
   const idealRadius = Math.hypot(ideal.x - CORAL_PARK_ISLAND_CX, ideal.y - CORAL_PARK_ISLAND_CY);
-  const tangent = reefRideClockwiseRadians(angle);
+  const tangent = reefRideClockwiseRadians(angle) + (direction === 1 ? 0 : Math.PI);
 
   const washClose =
     tide !== null &&
@@ -206,6 +298,7 @@ export function shouldStartTideSpin(
   position: { x: number; y: number },
   surfboard: SurfboardState,
   tide: TideState,
+  ringDepth = DEMO_SURFER_RING_DEPTH,
 ): boolean {
   if (isPointInTideSweep(position.x, position.y, tide)) {
     return false;
@@ -215,7 +308,7 @@ export function shouldStartTideSpin(
   const toLeading = effectiveToLeading(angle, tide);
   const spinThreshold =
     tide.sweepRadians * DEMO_SURFER_SPIN_LEADING_FRACTION + tideLeadingBuffer(tide);
-  const pathRisk = pathAheadEntersHighTide(position, tide, surfboard.speedState);
+  const pathRisk = pathAheadEntersHighTide(position, tide, surfboard.speedState, ringDepth);
   return toLeading < spinThreshold || pathRisk;
 }
 
@@ -227,6 +320,7 @@ function pathAheadEntersHighTide(
   position: { x: number; y: number },
   tide: TideState,
   speedState: SurfboardState['speedState'],
+  ringDepth = DEMO_SURFER_RING_DEPTH,
 ): boolean {
   if (speedState !== 'riding') {
     return false;
@@ -245,7 +339,7 @@ function pathAheadEntersHighTide(
 
   for (let step = 1; step <= DEMO_SURFER_PATH_LOOKAHEAD_STEPS; step += 1) {
     const futureAngle = angle + angleStep * step;
-    const future = idealReefPoint(futureAngle);
+    const future = idealReefPoint(futureAngle, null, ringDepth);
     if (isPointInTideSweep(future.x, future.y, tide)) {
       return true;
     }
@@ -287,6 +381,7 @@ function selectTrickZone(
   position: { x: number; y: number },
   trickZones: TrickZone[],
   tide: TideState | null,
+  sector: { centerRadians: number; halfWidthRadians: number } | null = null,
 ): TrickZone | null {
   if (!tide) {
     return null;
@@ -308,6 +403,12 @@ function selectTrickZone(
     }
 
     const zoneAngle = Math.atan2(zone.center.y - tide.centerY, zone.center.x - tide.centerX);
+    if (
+      sector &&
+      Math.abs(signedAngleDelta(sector.centerRadians, zoneAngle)) > sector.halfWidthRadians
+    ) {
+      continue;
+    }
     const ahead = clockwiseAngleDelta(riderAngle, zoneAngle);
     const justBehind =
       clockwiseAngleDelta(zoneAngle, riderAngle) <= DEMO_SURFER_TRICK_BEHIND_RADIANS;
@@ -369,21 +470,126 @@ function shouldPrimeTrick(
   return undefined;
 }
 
-export function computeDemoSurferAi(context: DemoSurferAiContext): DemoSurferAiInput {
-  const { surfboard, trickPrepare, trickZones, tide } = context;
+/** True when the straight line between two water points stays off the island. */
+function isWanderPathClear(map: WorldMap, from: WorldPos, to: WorldPos): boolean {
+  const distance = Math.hypot(to.x - from.x, to.y - from.y);
+  const steps = Math.max(1, Math.ceil(distance / EXPLORER_PATH_SAMPLE_TILES));
+  for (let step = 1; step <= steps; step += 1) {
+    const t = step / steps;
+    const x = from.x + (to.x - from.x) * t;
+    const y = from.y + (to.y - from.y) * t;
+    if (!isWorldPointSailingTarget(map, x, y)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function pickWanderTarget(map: WorldMap, from: WorldPos, aiState: DemoSurferAiState): WorldPos {
+  for (let attempt = 0; attempt < EXPLORER_WANDER_ATTEMPTS; attempt += 1) {
+    const angle = nextRandom(aiState) * TAU - Math.PI;
+    const minRadius = coralParkSandRadius(angle) + 2;
+    const maxRadius = coralParkReefOuterRadius(angle) + 10;
+    const radius = minRadius + nextRandom(aiState) * (maxRadius - minRadius);
+    const x = CORAL_PARK_ISLAND_CX + Math.cos(angle) * radius;
+    const y = CORAL_PARK_ISLAND_CY + Math.sin(angle) * radius;
+    if (isWorldPointSailingTarget(map, x, y) && isWanderPathClear(map, from, { x, y })) {
+      return { x, y };
+    }
+  }
+  return idealReefPoint(polarFromIsland(from.x, from.y).angle + 0.6);
+}
+
+/** Roll whether the explorer lounges through an approaching swell instead of spinning. */
+export function rollExplorerSwellLounge(aiState: DemoSurferAiState): {
+  aiState: DemoSurferAiState;
+  lounge: boolean;
+} {
+  const next = { ...aiState };
+  if (nextRandom(next) < EXPLORER_SWELL_LOUNGE_CHANCE) {
+    next.loungeTicksRemaining = EXPLORER_SWELL_LOUNGE_TICKS;
+    next.wanderTarget = null;
+    return { aiState: next, lounge: true };
+  }
+  return { aiState: next, lounge: false };
+}
+
+/** Roams the whole park; sometimes lies down to lounge — even in the swell. */
+function computeExplorerAi(
+  context: DemoSurferAiContext,
+  aiState: DemoSurferAiState,
+): DemoSurferAiInput {
+  const { surfboard, map } = context;
   const position = surfboard.position;
 
-  if (surfboard.speedState === 'seated') {
-    return {
-      startPaddle: true,
-      standUp: true,
-      setIntendedHeading: surfboard.currentHeading,
-    };
+  if (aiState.loungeTicksRemaining > 0) {
+    aiState.loungeTicksRemaining -= 1;
+    // Sit still and bob on the water (lieDown would keep paddling forward).
+    return { stop: true, setIntendedHeading: surfboard.currentHeading };
   }
 
+  const last = aiState.lastPosition;
+  const moved = !last || Math.hypot(position.x - last.x, position.y - last.y) > 0.01;
+  aiState.lastPosition = { ...position };
+  aiState.stuckTicks = moved ? 0 : aiState.stuckTicks + 1;
+  if (aiState.stuckTicks > EXPLORER_STUCK_TICK_LIMIT) {
+    aiState.wanderTarget = null;
+    aiState.stuckTicks = 0;
+  }
+
+  const target = aiState.wanderTarget;
+  const targetDistance = target
+    ? Math.hypot(target.x - position.x, target.y - position.y)
+    : Infinity;
+
+  if (!target || targetDistance < EXPLORER_TARGET_REACHED_DISTANCE) {
+    if (nextRandom(aiState) < EXPLORER_LOUNGE_CHANCE) {
+      aiState.loungeTicksRemaining =
+        EXPLORER_LOUNGE_MIN_TICKS + Math.floor(nextRandom(aiState) * EXPLORER_LOUNGE_SPAN_TICKS);
+      aiState.wanderTarget = null;
+      return { stop: true, setIntendedHeading: surfboard.currentHeading };
+    }
+    aiState.wanderTarget = pickWanderTarget(map, position, aiState);
+  }
+
+  const destination = aiState.wanderTarget as WorldPos;
+  const heading = snapAngleToHeading(
+    Math.atan2(destination.y - position.y, destination.x - position.x),
+  );
+  const speed: SurfboardInput =
+    targetDistance > EXPLORER_RIDE_DISTANCE ? { standUp: true } : { lieDown: true };
+  return { ...speed, setIntendedHeading: heading };
+}
+
+function computeReefRiderAi(
+  context: DemoSurferAiContext,
+  behavior: Exclude<DemoSurferBehavior, { kind: 'explorer' }>,
+  aiState: DemoSurferAiState,
+): DemoSurferAiInput {
+  const { surfboard, trickPrepare, trickZones, tide } = context;
+  const position = surfboard.position;
   const riderAngle = polarFromIsland(position.x, position.y).angle;
+
+  if (behavior.kind === 'sector') {
+    const delta = signedAngleDelta(behavior.centerRadians, riderAngle);
+    if (delta > behavior.halfWidthRadians) {
+      aiState.direction = -1;
+    } else if (delta < -behavior.halfWidthRadians) {
+      aiState.direction = 1;
+    }
+  }
+  const direction = behavior.kind === 'sector' ? aiState.direction : 1;
+
   const inFrontHalf = tide !== null && isDryZoneFrontHalf(riderAngle, tide);
-  const targetZone = selectTrickZone(position, trickZones, tide);
+  const sector =
+    behavior.kind === 'sector'
+      ? { centerRadians: behavior.centerRadians, halfWidthRadians: behavior.halfWidthRadians }
+      : null;
+  // Trick targeting assumes a clockwise approach; skip while patrolling back.
+  const targetZone =
+    behavior.doesTricks && direction === 1
+      ? selectTrickZone(position, trickZones, tide, sector)
+      : null;
   let steerX = position.x;
   let steerY = position.y;
 
@@ -392,8 +598,8 @@ export function computeDemoSurferAi(context: DemoSurferAiContext): DemoSurferAiI
     steerX = steer.steerX;
     steerY = steer.steerY;
   } else {
-    const aheadAngle = riderAngle + DEMO_SURFER_AHEAD_ANGLE_STEP;
-    const ideal = idealReefPoint(aheadAngle, tide);
+    const aheadAngle = riderAngle + direction * DEMO_SURFER_AHEAD_ANGLE_STEP;
+    const ideal = idealReefPoint(aheadAngle, tide, behavior.ringDepth);
     steerX = ideal.x;
     steerY = ideal.y;
   }
@@ -403,7 +609,14 @@ export function computeDemoSurferAi(context: DemoSurferAiContext): DemoSurferAiI
   const speed = chooseSpeedState(position, tide, pursuingTrick);
   const input: DemoSurferAiInput = {
     ...speed,
-    setIntendedHeading: courseHeading(position, steerX, steerY, tide),
+    setIntendedHeading: courseHeading(
+      position,
+      steerX,
+      steerY,
+      tide,
+      behavior.ringDepth,
+      direction,
+    ),
   };
 
   if (targetZone) {
@@ -416,12 +629,39 @@ export function computeDemoSurferAi(context: DemoSurferAiContext): DemoSurferAiI
   return input;
 }
 
-export function demoSurferSpawnOnReef(angle: number): {
+export function computeDemoSurferAi(context: DemoSurferAiContext): DemoSurferAiResult {
+  const behavior = context.behavior ?? DEFAULT_DEMO_SURFER_BEHAVIOR;
+  const aiState = { ...(context.aiState ?? createDemoSurferAiState(1)) };
+  const { surfboard } = context;
+
+  const lounging = behavior.kind === 'explorer' && aiState.loungeTicksRemaining > 0;
+  if (surfboard.speedState === 'seated' && !lounging) {
+    return {
+      input: {
+        startPaddle: true,
+        standUp: true,
+        setIntendedHeading: surfboard.currentHeading,
+      },
+      aiState,
+    };
+  }
+
+  const input =
+    behavior.kind === 'explorer'
+      ? computeExplorerAi(context, aiState)
+      : computeReefRiderAi(context, behavior, aiState);
+  return { input, aiState };
+}
+
+export function demoSurferSpawnOnReef(
+  angle: number,
+  ringDepth = DEMO_SURFER_RING_DEPTH,
+): {
   x: number;
   y: number;
   heading: HeadingIndex;
 } {
-  const point = idealReefPoint(angle);
+  const point = idealReefPoint(angle, null, ringDepth);
   return {
     x: point.x,
     y: point.y,
