@@ -70,10 +70,15 @@ function dot(ax: number, ay: number, bx: number, by: number): number {
   return ax * bx + ay * by;
 }
 
-const RIDE_AXIS_ENTRY_THRESHOLD = 0.08;
+/** Travel must project at least this strongly on the axis to dictate ride direction. */
+const RIDE_DIRECTION_TRAVEL_EPSILON = 0.05;
 
-/** Pick jump travel direction from rider heading along the feature axis. */
-function signedJumpRideVector(
+/**
+ * Ride direction through the feature: follow the rider's travel along the
+ * feature axis so the exit always continues their momentum; only a near
+ * perpendicular entry falls back to riding away from the side entered.
+ */
+export function signedFeatureRideVector(
   zone: TrickZone,
   entryPosition: WorldPos,
   startHeading: HeadingIndex,
@@ -82,7 +87,7 @@ function signedJumpRideVector(
   const travel = headingToUnitVector(startHeading);
   const travelDot = dot(travel.x, travel.y, axis.x, axis.y);
 
-  if (Math.abs(travelDot) >= 0.05) {
+  if (Math.abs(travelDot) >= RIDE_DIRECTION_TRAVEL_EPSILON) {
     return travelDot >= 0 ? axis : { x: -axis.x, y: -axis.y };
   }
 
@@ -92,44 +97,6 @@ function signedJumpRideVector(
   };
   const along = dot(offset.x, offset.y, axis.x, axis.y);
   return along <= 0 ? axis : { x: -axis.x, y: -axis.y };
-}
-
-/** Ride direction through the feature. */
-export function signedFeatureRideVector(
-  zone: TrickZone,
-  entryPosition: WorldPos,
-  startHeading: HeadingIndex,
-): { x: number; y: number } {
-  if (zone.type === 'jump') {
-    return signedJumpRideVector(zone, entryPosition, startHeading);
-  }
-
-  const axis = trickFeatureRideUnitVector(zone);
-  const travel = headingToUnitVector(startHeading);
-  const travelDot = dot(travel.x, travel.y, axis.x, axis.y);
-  const offset = {
-    x: entryPosition.x - zone.center.x,
-    y: entryPosition.y - zone.center.y,
-  };
-  const along = dot(offset.x, offset.y, axis.x, axis.y);
-  const entryThreshold = zone.radius * RIDE_AXIS_ENTRY_THRESHOLD;
-
-  if (along <= -entryThreshold) {
-    return axis;
-  }
-
-  if (along >= entryThreshold) {
-    if (Math.abs(travelDot) >= 0.05) {
-      return travelDot >= 0 ? axis : { x: -axis.x, y: -axis.y };
-    }
-    return { x: -axis.x, y: -axis.y };
-  }
-
-  if (Math.abs(travelDot) >= 0.05) {
-    return travelDot >= 0 ? axis : { x: -axis.x, y: -axis.y };
-  }
-
-  return axis;
 }
 
 /** World normal from the ride line toward the wall_ride mesh face. */

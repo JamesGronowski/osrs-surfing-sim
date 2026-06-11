@@ -169,6 +169,31 @@ describe('trick animation', () => {
     expect(snapshot?.zoneCenter).toEqual(wallZone.center);
   });
 
+  it('never exits against the rider travel direction, for any feature type', () => {
+    const types = ['rail', 'tunnel', 'brain_coral', 'wall_ride', 'jump'] as const;
+    // Heading 8 = west; entering an east-facing feature from its west side
+    // while traveling west must ride west, not flip the rider 180°.
+    for (const type of types) {
+      const directional: TrickZone = { ...zone, id: `dir-${type}`, type };
+      const ride = signedFeatureRideVector(directional, { x: 27, y: 11 }, 8);
+      expect(ride.x).toBeCloseTo(-1);
+      expect(ride.y).toBeCloseTo(0);
+
+      const anim = createTrickAnimationState(arena.map, directional, { x: 27, y: 11 }, 8);
+      expect(anim.end.x).toBeLessThanOrEqual(anim.start.x);
+      expect(anim.endHeading).toBe(8);
+    }
+  });
+
+  it('rides away from the entered side on a perpendicular entry', () => {
+    // Heading 4 = south, perpendicular to the east-facing axis.
+    const fromWest = signedFeatureRideVector(zone, { x: 27, y: 11 }, 4);
+    expect(fromWest.x).toBeCloseTo(1);
+
+    const fromEast = signedFeatureRideVector(zone, { x: 33, y: 11 }, 4);
+    expect(fromEast.x).toBeCloseTo(-1);
+  });
+
   it('completes in exactly two ticks', () => {
     let anim = createTrickAnimationState(arena.map, zone, start, 0);
     expect(anim.ticksTotal).toBe(TRICK_ANIMATION_TICKS);

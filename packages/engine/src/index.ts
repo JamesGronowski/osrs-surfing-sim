@@ -11,6 +11,7 @@ export * from './world/tideVisuals.js';
 export * from './world/trickAnimation.js';
 export * from './world/trickHitbox.js';
 export * from './world/maps.js';
+export * from './world/animationTestArena.js';
 export * from './world/trickZonePlacement.js';
 export * from './world/npc.js';
 export * from './world/demoSurfer.js';

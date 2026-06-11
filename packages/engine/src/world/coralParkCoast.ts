@@ -7,7 +7,9 @@ const GRASS_BASE = 20;
 const SAND_BASE = 26;
 const SHALLOW_BASE = 30;
 const REEF_INNER_BASE = 33;
-const REEF_OUTER_BASE = 60;
+/** Radial thickness of the rideable reef ring (tiles). Original band was 27 tiles. */
+const REEF_RING_WIDTH = 36;
+const REEF_OUTER_BASE = REEF_INNER_BASE + REEF_RING_WIDTH;
 
 const GRASS_WOBBLE = 8;
 const SAND_WOBBLE = 8.25;

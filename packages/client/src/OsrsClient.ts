@@ -1,4 +1,5 @@
 import {
+  createAnimationTestSlice,
   createCoralParkSlice,
   DEFAULT_SURFBOARD_STATS,
   GameSimulation,
@@ -83,9 +84,11 @@ export class OsrsClient {
       window.addEventListener('resize', () => applyDisplayScale(scaleShell, scaleWrap));
     }
 
-    const savedProgression = loadSavedProgression();
+    // `?arena=animtest` loads the minimal deterministic scene for animation debugging.
+    const animTestArena = new URLSearchParams(window.location.search).get('arena') === 'animtest';
+    const savedProgression = animTestArena ? null : loadSavedProgression();
     const simulation = new GameSimulation({
-      arena: createCoralParkSlice(),
+      arena: animTestArena ? createAnimationTestSlice() : createCoralParkSlice(),
       initialProgression: savedProgression ?? undefined,
     });
 
@@ -119,6 +122,7 @@ export class OsrsClient {
 
     const renderer = new ThreeRenderer();
     await renderer.init(gameRoot, 1);
+    renderer.setVillageVisible(!animTestArena);
 
     const minimap = new OsrsMinimap(minimapMapRoot, minimapCompass, minimapFrame, () =>
       renderer.snapCameraNorth(),

@@ -47,7 +47,10 @@ const DEMO_SURFER_STYLES: DemoSurferStyle[] = [
   { shirt: 0xe05038, hair: 0x14100c, boardWood: 0xf2ead8, boardStripe: 0xe04848 },
 ];
 
-const RIDER_ABOVE_BOARD = 0.05;
+/** Deck surface height within the rig — rider feet rest here. */
+const DECK_TOP_Y = 0.05;
+/** Full rider squash at crouch 1; keeps the blocky OSRS look while ducking. */
+const RIDER_CROUCH_SQUASH = 0.35;
 
 interface BoardRiderPose {
   worldX: number;
@@ -57,6 +60,7 @@ interface BoardRiderPose {
   pitch: number;
   roll: number;
   riderLean: number;
+  riderCrouch: number;
 }
 
 function boardRiderPose(
@@ -86,19 +90,43 @@ function boardRiderPose(
     pitch: pose?.pitch ?? 0,
     roll: pose?.roll ?? 0,
     riderLean: pose?.riderLean ?? 0,
+    riderCrouch: pose?.riderCrouch ?? 0,
   };
 }
 
 /**
- * Meshes face +X, so with 'YXZ' Euler order: y = yaw, z = nose pitch (up
- * positive), x = bank about the board's length axis — all in the local frame
- * for any travel direction.
+ * Board-and-rider hierarchy: the rig carries world position and yaw, the tilt
+ * group carries board pitch/roll, and the rider anchor sits on the deck so the
+ * rider inherits the full board attitude instead of being transformed apart
+ * from it (which made the deck rotate through the rider's body).
  */
-function applyBoardRiderPose(board: Group, rider: Group, pose: BoardRiderPose): void {
-  board.position.set(pose.worldX, pose.boardY, pose.worldZ);
-  board.rotation.set(pose.roll, pose.rotationY, pose.pitch);
-  rider.position.set(pose.worldX, pose.boardY + RIDER_ABOVE_BOARD, pose.worldZ);
-  rider.rotation.set(pose.roll * 0.35, pose.rotationY, pose.riderLean);
+interface SurferRig {
+  rig: Group;
+  tilt: Group;
+  riderAnchor: Group;
+  wake: Group;
+}
+
+function makeSurferRig(woodColor: number, stripeColor: number, wake: Group): SurferRig {
+  const rig = new Group();
+  const tilt = new Group();
+  // Meshes face +X; rig y = yaw, tilt x = bank about the length axis,
+  // tilt z = nose pitch (up positive) — matches the previous 'YXZ' transform.
+  tilt.rotation.order = 'YXZ';
+  const riderAnchor = new Group();
+  riderAnchor.position.y = DECK_TOP_Y;
+  tilt.add(makeSurfboardMesh(woodColor, stripeColor), riderAnchor);
+  rig.add(tilt);
+  return { rig, tilt, riderAnchor, wake };
+}
+
+function applySurferPose(parts: SurferRig, rider: Group, pose: BoardRiderPose): void {
+  parts.rig.position.set(pose.worldX, pose.boardY, pose.worldZ);
+  parts.rig.rotation.y = pose.rotationY;
+  parts.tilt.rotation.set(pose.roll, 0, pose.pitch);
+  rider.position.set(0, 0, 0);
+  rider.rotation.set(0, 0, pose.riderLean);
+  rider.scale.y = 1 - pose.riderCrouch * RIDER_CROUCH_SQUASH;
 }
 
 function flatMaterial(color: number, roughness = 0.9): MeshStandardMaterial {
@@ -196,19 +224,16 @@ function makeWakeMesh(outerOpacity: number, innerOpacity: number): Group {
 }
 
 interface DemoSurferVisual {
-  board: Group;
+  parts: SurferRig;
   rider: Group;
-  wake: Group;
 }
 
 function makeDemoSurferVisual(style: DemoSurferStyle): DemoSurferVisual {
-  const board = makeSurfboardMesh(style.boardWood, style.boardStripe);
+  const parts = makeSurferRig(style.boardWood, style.boardStripe, makeWakeMesh(0.32, 0.28));
   const rider = makeHumanoidMesh({ shirt: style.shirt, pants: PLAYER_PANTS, hair: style.hair });
-  board.rotation.order = 'YXZ';
-  rider.rotation.order = 'YXZ';
-  board.visible = false;
-  rider.visible = false;
-  return { board, rider, wake: makeWakeMesh(0.32, 0.28) };
+  parts.riderAnchor.add(rider);
+  parts.rig.visible = false;
+  return { parts, rider };
 }
 
 function makeNpcMesh(): Group {
@@ -217,18 +242,14 @@ function makeNpcMesh(): Group {
 
 export class EntityLayer {
   readonly root = new Group();
-  readonly ridingBoard = makeSurfboardMesh();
-  readonly dockBoard = makeSurfboardMesh();
-  readonly player = makePlayerMesh();
-  readonly wake = makeWakeMesh(0.4, 0.35);
+  private readonly playerParts = makeSurferRig(BOARD_WOOD, BOARD_STRIPE, makeWakeMesh(0.4, 0.35));
+  private readonly dockBoard = makeSurfboardMesh();
+  private readonly player = makePlayerMesh();
   private readonly demoSurferPool: DemoSurferVisual[] = [];
   private readonly npcPool: Group[] = [];
 
   constructor() {
-    this.root.add(this.ridingBoard, this.dockBoard, this.player, this.wake);
-    for (const posed of [this.ridingBoard, this.player]) {
-      posed.rotation.order = 'YXZ';
-    }
+    this.root.add(this.playerParts.rig, this.playerParts.wake, this.dockBoard, this.player);
   }
 
   sync(snapshot: DisplaySimulationSnapshot, map: WorldMap): void {
@@ -251,7 +272,7 @@ export class EntityLayer {
     const rotationY = beached ? 0 : headingToRotationY(snapshot.surfboard.currentHeading);
     const boardY = riderPose.boardY;
 
-    this.ridingBoard.visible = snapshot.boardMounted;
+    this.playerParts.rig.visible = snapshot.boardMounted;
     this.dockBoard.visible = !snapshot.boardMounted;
     this.player.visible = true;
     this.syncNpcs(snapshot, map);
@@ -277,26 +298,32 @@ export class EntityLayer {
       this.dockBoard.position.set(dockPos.x, dockY, dockPos.z);
       this.dockBoard.rotation.set(0, 0, 0);
 
+      if (this.player.parent !== this.root) {
+        this.root.add(this.player);
+      }
       this.player.position.set(walkPos.x, walkY, walkPos.z);
       this.player.rotation.set(0, headingToRotationY(snapshot.surfboard.currentHeading), 0);
-      this.ridingBoard.position.set(0, -100, 0);
+      this.player.scale.y = 1;
+      this.playerParts.wake.visible = false;
       return;
     }
 
-    applyBoardRiderPose(this.ridingBoard, this.player, riderPose);
-
-    this.dockBoard.position.set(0, -100, 0);
+    if (this.player.parent !== this.playerParts.riderAnchor) {
+      this.playerParts.riderAnchor.add(this.player);
+      this.player.rotation.set(0, 0, 0);
+    }
+    applySurferPose(this.playerParts, this.player, riderPose);
 
     const showWake = snapshot.surfboard.speedState === 'riding' && snapshot.trickAnimation === null;
-    this.wake.visible = showWake;
+    this.playerParts.wake.visible = showWake;
     if (showWake) {
       const behind = headingRad + Math.PI;
-      this.wake.position.set(
+      this.playerParts.wake.position.set(
         riderPose.worldX + Math.cos(behind) * 0.85,
         boardY + 0.02,
         riderPose.worldZ + Math.sin(behind) * 0.85,
       );
-      this.wake.rotation.set(0, rotationY, 0);
+      this.playerParts.wake.rotation.set(0, rotationY, 0);
     }
   }
 
@@ -305,16 +332,15 @@ export class EntityLayer {
       const style = DEMO_SURFER_STYLES[this.demoSurferPool.length % DEMO_SURFER_STYLES.length];
       const visual = makeDemoSurferVisual(style);
       this.demoSurferPool.push(visual);
-      this.root.add(visual.board, visual.rider, visual.wake);
+      this.root.add(visual.parts.rig, visual.parts.wake);
     }
 
     for (let i = 0; i < this.demoSurferPool.length; i += 1) {
       const visual = this.demoSurferPool[i];
       const demo = snapshot.demoSurfers[i];
       if (!demo) {
-        visual.board.visible = false;
-        visual.rider.visible = false;
-        visual.wake.visible = false;
+        visual.parts.rig.visible = false;
+        visual.parts.wake.visible = false;
         continue;
       }
 
@@ -328,22 +354,21 @@ export class EntityLayer {
       );
       const headingRad = (headingToDegrees(demo.surfboard.currentHeading) * Math.PI) / 180;
 
-      visual.board.visible = true;
-      visual.rider.visible = true;
-      applyBoardRiderPose(visual.board, visual.rider, riderPose);
+      visual.parts.rig.visible = true;
+      applySurferPose(visual.parts, visual.rider, riderPose);
 
       const showWake =
         demo.trickAnimation === null &&
         (demo.surfboard.speedState === 'riding' || demo.tideSpinProgress !== null);
-      visual.wake.visible = showWake;
+      visual.parts.wake.visible = showWake;
       if (showWake) {
         const behind = headingRad + Math.PI;
-        visual.wake.position.set(
+        visual.parts.wake.position.set(
           riderPose.worldX + Math.cos(behind) * 0.85,
           riderPose.boardY + 0.02,
           riderPose.worldZ + Math.sin(behind) * 0.85,
         );
-        visual.wake.rotation.set(0, riderPose.rotationY, 0);
+        visual.parts.wake.rotation.set(0, riderPose.rotationY, 0);
       }
     }
   }

@@ -222,6 +222,12 @@ export class ThreeRenderer implements IRenderer {
     this.overlays?.setTrueTileVisible(visible);
   }
 
+  setVillageVisible(visible: boolean): void {
+    if (this.village) {
+      this.village.visible = visible;
+    }
+  }
+
   showXpDrop(text: string, worldX: number, worldY: number): void {
     if (!this.xpContainer) {
       return;

@@ -20,7 +20,10 @@ export interface TrickBoardPose {
   travelYawRadians: number | null;
   offsetX: number;
   offsetY: number;
+  /** Rider pitch relative to the deck — the rider inherits board attitude from the rig. */
   riderLean: number;
+  /** 0–1 squash of the rider for ducking/tucking poses. */
+  riderCrouch: number;
 }
 
 type TrickPoseOffsets = Omit<TrickBoardPose, 'travelYawRadians'>;
@@ -113,6 +116,7 @@ function railPose(animation: DisplayTrickAnimation, progress: number): TrickPose
     offsetX: 0,
     offsetY: 0,
     riderLean: -slide * 0.1,
+    riderCrouch: slide * 0.2,
   };
 }
 
@@ -142,22 +146,24 @@ function brainCoralPose(animation: DisplayTrickAnimation, progress: number): Tri
     yawOffset: 0,
     offsetX: 0,
     offsetY: 0,
-    riderLean: climb * 0.4,
+    riderLean: climb * 0.15,
+    riderCrouch: 0,
   };
 }
 
 function tunnelPose(animation: DisplayTrickAnimation, progress: number): TrickPoseOffsets {
-  const radius = animation.zoneRadius;
+  void animation;
   const duck = Math.sin(progress * Math.PI);
 
   return {
-    liftY: -duck * radius * 0.1,
-    pitch: -duck * 0.08,
+    liftY: 0,
+    pitch: 0,
     roll: 0,
     yawOffset: 0,
     offsetX: 0,
     offsetY: 0,
-    riderLean: -duck * 0.5,
+    riderLean: -duck * 0.35,
+    riderCrouch: duck * 0.45,
   };
 }
 
@@ -179,6 +185,7 @@ function wallRidePose(animation: DisplayTrickAnimation, progress: number): Trick
     offsetX: normal.x * side * lateral * arc,
     offsetY: normal.y * side * lateral * arc,
     riderLean: -arc * 0.12,
+    riderCrouch: arc * 0.15,
   };
 }
 
@@ -190,6 +197,7 @@ function jumpPose(animation: DisplayTrickAnimation, progress: number): TrickPose
 
   let lift: number;
   let pitch: number;
+  let crouch = 0;
   if (progress < align) {
     // Carve from open water onto the lower ramp face.
     const t = progress / align;
@@ -206,6 +214,8 @@ function jumpPose(animation: DisplayTrickAnimation, progress: number): TrickPose
     lift = peak * (1 - easeInOutSine(t)) + radius * JUMP_AIR_ARC_FACTOR * Math.sin(Math.PI * t);
     const flip = easeInOutSine(t / 0.92);
     pitch = JUMP_CLIMB_PITCH - flip * (Math.PI * 2 + JUMP_CLIMB_PITCH);
+    // Tuck mid-flip, stretch back out for the landing.
+    crouch = Math.sin(Math.PI * t) * 0.5;
   }
 
   return {
@@ -215,7 +225,8 @@ function jumpPose(animation: DisplayTrickAnimation, progress: number): TrickPose
     yawOffset: 0,
     offsetX: 0,
     offsetY: 0,
-    riderLean: pitch * 0.9,
+    riderLean: 0,
+    riderCrouch: crouch,
   };
 }
 
@@ -229,7 +240,8 @@ export function tideSpinBoardPose(progress: number): TrickBoardPose {
     travelYawRadians: null,
     offsetX: 0,
     offsetY: 0,
-    riderLean: Math.cos(spin) * 0.18,
+    riderLean: Math.cos(spin) * 0.12,
+    riderCrouch: 0.2,
   };
 }
 
@@ -257,6 +269,7 @@ export function trickBoardPose(animation: DisplayTrickAnimation): TrickBoardPose
           offsetX: 0,
           offsetY: 0,
           riderLean: 0,
+          riderCrouch: 0,
         };
     }
   })();
