@@ -97,10 +97,12 @@ export class TideEdgeLayer {
     this.washBody = new InstancedMesh(new BoxGeometry(1, 1, 1), breakerMaterial, this.washCapacity);
     this.washCrest = new InstancedMesh(new BoxGeometry(1, 1, 1), crestMaterial, this.washCapacity);
 
-    this.leading.visible = false;
-    this.trailing.visible = false;
-    this.washBody.visible = false;
-    this.washCrest.visible = false;
+    for (const mesh of [this.leading, this.trailing, this.washBody, this.washCrest]) {
+      mesh.visible = false;
+      // Instances follow the tide around the island; the bounding sphere three.js
+      // computes on first render goes stale and culls them once the camera turns.
+      mesh.frustumCulled = false;
+    }
     this.root.add(this.leading, this.trailing, this.washBody, this.washCrest);
   }
 
