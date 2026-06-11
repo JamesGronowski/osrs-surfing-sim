@@ -20,7 +20,7 @@ Reference for the **Coral Park** arena in the simulator (`createCoralParkSlice`)
 | `jump`        | High (`3`)   | 2    |
 
 - Yellow chevrons show ride direction (clockwise reef tangent; ~20% counter-ride).
-- Prime **1–4 ticks** before hitting the feature with the matching stance.
+- Prime **1–5 ticks** before hitting the feature with the matching stance.
 - Approach heading must be within `TRICK_APPROACH_TOLERANCE_DEG` (70°) of the feature rotation.
 - Features under the tide sweep are **not interactable** (`isTrickZoneSubmerged`).
 

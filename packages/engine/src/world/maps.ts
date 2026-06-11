@@ -246,7 +246,7 @@ export function createCoralParkSlice(): GameArena {
           'Ride the wide reef loop around the island.',
           'Yellow chevrons show which way to ride through each feature.',
           'Grind the rails and brain coral, Tuck through tunnels and wall rides, catch Air off jumps.',
-          'Prime the matching stance 1–4 ticks before you hit the feature.',
+          'Prime the matching stance 1–5 ticks before you hit the feature.',
           "Tai'ura's tide submerges features — they fade underwater, then fresh coral rises as the swell passes.",
           'Watch Nalu and her friends ride the reef — they time the swell to hit features in the dry zone.',
         ],

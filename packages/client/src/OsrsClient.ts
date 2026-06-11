@@ -29,7 +29,7 @@ import { applyDisplayScale } from './ui/scaleLayout.js';
 const HELP_LINES = [
   'Click the ground to walk. Click Kaulu to talk.',
   'Click your surfboard on the sand ring to paddle out.',
-  'Prime Grind, Tuck, or Air stance 1–4 ticks before you hit the matching coral feature.',
+  'Prime Grind, Tuck, or Air stance 1–5 ticks before you hit the matching coral feature.',
 ];
 
 export class OsrsClient {

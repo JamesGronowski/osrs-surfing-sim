@@ -25,6 +25,9 @@ export const TUNNEL_TORUS_CLEARANCE_ABOVE_ARCH = 0.06;
 /** Padding around the oriented AABB that wraps the scaled half-torus. */
 const TUNNEL_HITBOX_MARGIN = 0.04;
 
+/** Extra reach beyond wall mesh bounds so glancing slide-ups still register (world tiles). */
+export const WALL_RIDE_HITBOX_PAD_TILES = 0.5;
+
 /**
  * Oriented hitbox half-extents as multiples of zone.radius.
  * Matches client mesh bounds in trickFeatureMeshes.ts (ride axis = local +X).
@@ -36,11 +39,8 @@ export const TRICK_HITBOX_HALF_ALONG_RIDE: Record<Exclude<TrickFeatureType, 'tun
   wall_ride: 0.675,
 };
 
-/** Max distance from the rail ride segment to register a trick entry (× zone.radius). */
-export const RAIL_TRICK_PROXIMITY_FACTOR = 0.45;
-
 export const TRICK_HITBOX_HALF_LATERAL: Record<Exclude<TrickFeatureType, 'tunnel'>, number> = {
-  rail: 0.16,
+  rail: 0.45,
   jump: JUMP_RAMP_WIDTH / 2,
   brain_coral: 0.8,
   wall_ride: 0.17,
@@ -100,9 +100,21 @@ export function trickZoneHitboxExtents(type: TrickFeatureType, radius: number): 
     };
   }
 
+  const halfAlongRide = radius * TRICK_HITBOX_HALF_ALONG_RIDE[type];
+  const halfLateral = radius * TRICK_HITBOX_HALF_LATERAL[type];
+
+  if (type === 'wall_ride') {
+    return {
+      halfAlongRide: halfAlongRide + WALL_RIDE_HITBOX_PAD_TILES,
+      halfLateral: halfLateral + WALL_RIDE_HITBOX_PAD_TILES,
+      height: radius * TRICK_HITBOX_HEIGHT[type],
+      centerY: radius * TRICK_HITBOX_CENTER_Y[type],
+    };
+  }
+
   return {
-    halfAlongRide: radius * TRICK_HITBOX_HALF_ALONG_RIDE[type],
-    halfLateral: radius * TRICK_HITBOX_HALF_LATERAL[type],
+    halfAlongRide,
+    halfLateral,
     height: radius * TRICK_HITBOX_HEIGHT[type],
     centerY: radius * TRICK_HITBOX_CENTER_Y[type],
   };
@@ -111,9 +123,6 @@ export function trickZoneHitboxExtents(type: TrickFeatureType, radius: number): 
 /** Conservative outer reach for distance-based steering and approach checks. */
 export function trickZoneHitboxReach(zone: Pick<TrickZone, 'type' | 'radius'>): number {
   const extents = trickZoneHitboxExtents(zone.type, zone.radius);
-  if (zone.type === 'rail') {
-    return Math.max(extents.halfAlongRide, railTrickProximityDistance(zone.radius));
-  }
   return Math.max(extents.halfAlongRide, extents.halfLateral);
 }
 
@@ -131,30 +140,7 @@ export function trickZoneLocalOffset(
   };
 }
 
-export function railTrickProximityDistance(radius: number): number {
-  return radius * RAIL_TRICK_PROXIMITY_FACTOR;
-}
-
-function distanceToRideSegment(
-  zone: Pick<TrickZone, 'center' | 'rotationRadians'>,
-  pos: WorldPos,
-  halfAlongRide: number,
-): number {
-  const local = trickZoneLocalOffset(zone, pos);
-  const clampedAlong = Math.max(-halfAlongRide, Math.min(halfAlongRide, local.alongRide));
-  return Math.hypot(local.alongRide - clampedAlong, local.lateral);
-}
-
-function isPointNearRailRideSegment(zone: TrickZone, pos: WorldPos): boolean {
-  const { halfAlongRide } = trickZoneHitboxExtents('rail', zone.radius);
-  return distanceToRideSegment(zone, pos, halfAlongRide) <= railTrickProximityDistance(zone.radius);
-}
-
 export function isPointInTrickZoneHitbox(zone: TrickZone, pos: WorldPos): boolean {
-  if (zone.type === 'rail') {
-    return isPointNearRailRideSegment(zone, pos);
-  }
-
   const { halfAlongRide, halfLateral } = trickZoneHitboxExtents(zone.type, zone.radius);
   const local = trickZoneLocalOffset(zone, pos);
   return Math.abs(local.alongRide) <= halfAlongRide && Math.abs(local.lateral) <= halfLateral;

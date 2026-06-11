@@ -14,7 +14,7 @@ const HEADING_EAST = 0;
 const BRAIN_CORAL = ARENA.trickZones.find((zone) => zone.id === 'anim-brain_coral')!;
 const COUNTER_RAIL = ARENA.trickZones.find((zone) => zone.id === 'anim-rail-counter')!;
 
-/** Rail/wall hitboxes are only ~±0.64 tiles laterally — stay on the row before priming. */
+/** Stay aligned with the feature row before priming — rail is ~±1.8 tiles laterally. */
 const LATERAL_ALIGN_TOLERANCE = 0.6;
 
 async function openAnimationScene(page: Page): Promise<void> {

@@ -26,7 +26,12 @@ import {
   isNearNpc,
   type NpcDefinition,
 } from '../world/npc.js';
-import { trickStanceName, type TrickPrepareSlot } from '../constants/tricks.js';
+import {
+  TRICK_PREPARE_MAX_TICKS,
+  TRICK_PREPARE_MIN_TICKS,
+  trickStanceName,
+  type TrickPrepareSlot,
+} from '../constants/tricks.js';
 import {
   advanceTrickPrepare,
   advanceTrickZoneTideVisuals,
@@ -422,7 +427,7 @@ export class GameSimulation {
   }
 
   prepareTrick(slot: TrickPrepareSlot): void {
-    if (!this.boardMounted || this.surfboard.speedState === 'seated' || this.trickAnimation) {
+    if (!this.boardMounted || this.surfboard.speedState !== 'riding' || this.trickAnimation) {
       return;
     }
     this.trickPrepare = { slot, ticksSincePrepare: 0 };
@@ -480,7 +485,7 @@ export class GameSimulation {
     };
     this.pendingDialogue.push(
       reason ??
-        `Bailed on the ${zone.type}! Prime ${trickStanceName(zone.prepareSlot)} 1–4 ticks before you hit it.`,
+        `Bailed on the ${zone.type}! Prime ${trickStanceName(zone.prepareSlot)} ${TRICK_PREPARE_MIN_TICKS}–${TRICK_PREPARE_MAX_TICKS} ticks before you hit it.`,
     );
   }
 
@@ -560,6 +565,9 @@ export class GameSimulation {
       } else {
         const result = tickSurfboard(this.surfboard, this.arena.map, this.pendingInput, this.stats);
         this.surfboard = result.state;
+        if (this.surfboard.speedState !== 'riding' && this.trickPrepare) {
+          this.clearTrickPrepare();
+        }
       }
     } else if (this.walk) {
       const result = tickOnFootPath(

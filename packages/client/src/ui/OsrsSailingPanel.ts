@@ -1,6 +1,8 @@
 import {
   comboTierName,
   comboTierProgress,
+  TRICK_PREPARE_MAX_TICKS,
+  TRICK_PREPARE_MIN_TICKS,
   trickStanceName,
   type SimulationSnapshot,
   type SpeedState,
@@ -196,12 +198,18 @@ export class OsrsSailingPanel {
     this.setText('#stats-tokens', String(snapshot.progression.coralTokens));
     this.syncTokenDisplay(snapshot.progression.coralTokens);
 
+    const canPrime =
+      snapshot.boardMounted &&
+      snapshot.surfboard.speedState === 'riding' &&
+      snapshot.trickAnimation === null;
+
     this.root.querySelectorAll<HTMLButtonElement>('[data-prepare-slot]').forEach((btn) => {
       const slot = Number(btn.dataset.prepareSlot) as TrickPrepareSlot;
       const primed =
         snapshot.trickPrepare !== null &&
         snapshot.trickPrepare.slot === slot &&
         snapshot.trickPrepare.ticksSincePrepare > 0;
+      btn.disabled = !canPrime;
       btn.classList.toggle('primed', primed);
       const tickLabel = btn.querySelector('.osrs-stance-ticks');
       if (tickLabel) {
@@ -211,6 +219,13 @@ export class OsrsSailingPanel {
             : '';
       }
     });
+
+    const stanceFootnote = this.root.querySelector('#stance-footnote');
+    if (stanceFootnote) {
+      stanceFootnote.textContent = canPrime
+        ? `Prime ${TRICK_PREPARE_MIN_TICKS}–${TRICK_PREPARE_MAX_TICKS} ticks before the feature`
+        : 'Reach full speed to prime stances';
+    }
   }
 
   setVisible(visible: boolean): void {
@@ -261,7 +276,7 @@ export class OsrsSailingPanel {
           <div class="osrs-stance-row">
             ${STANCE_BUTTONS.map((stance) => this.renderStanceButton(stance)).join('')}
           </div>
-          <p class="osrs-panel-footnote">Prime 1–4 ticks before the feature</p>
+          <p class="osrs-panel-footnote" id="stance-footnote">Reach full speed to prime stances</p>
           <label class="osrs-check-row" title="Highlight the tile your character is actually on">
             <input type="checkbox" id="true-tile-toggle" />
             <span>True tile marker</span>
@@ -324,6 +339,9 @@ export class OsrsSailingPanel {
 
     this.root.querySelectorAll<HTMLButtonElement>('[data-prepare-slot]').forEach((btn) => {
       btn.addEventListener('click', () => {
+        if (btn.disabled) {
+          return;
+        }
         const slot = Number(btn.dataset.prepareSlot) as TrickPrepareSlot;
         this.callbacks.onPrepareTrick(slot);
       });

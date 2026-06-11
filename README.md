@@ -14,7 +14,7 @@ A 3D web simulator for the **Ura Ura Swell** surfing minigame concept, built on 
 | Stand / ride swell | Sailing panel **Ride** / set sails — Tai'ura swell, full speed                                                 |
 | Stop               | Unset sails (fast) or chevron down — seated on board                                                           |
 | Lie down           | Reverse icon — drop from riding to paddling                                                                    |
-| Prime trick        | **Low** / **Medium** / **High** stance buttons (or keys `1`–`3`) — 1–4 ticks before hitting the matching coral |
+| Prime trick        | **Low** / **Medium** / **High** stance buttons (or keys `1`–`3`) — 1–5 ticks before hitting the matching coral |
 | Land trick         | Ride through the primed feature while the timing window is active                                              |
 | Bail               | Wrong button, no prime, or prime too early/late — you stop on the reef                                         |
 | Debug tuning       | `1`/`!` turn rate, `2`/`@` paddle speed, `3`/`#` ride speed                                                    |

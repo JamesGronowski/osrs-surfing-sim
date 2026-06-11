@@ -3,9 +3,11 @@ import { describe, expect, it } from 'vitest';
 import type { TrickZone } from './features.js';
 import {
   isPointInTrickZoneHitbox,
-  railTrickProximityDistance,
+  TRICK_HITBOX_HALF_ALONG_RIDE,
+  TRICK_HITBOX_HALF_LATERAL,
   trickZoneHitboxExtents,
   tunnelTrickHitboxFactors,
+  WALL_RIDE_HITBOX_PAD_TILES,
 } from './trickHitbox.js';
 
 function railZone(rotationRadians = 0): TrickZone {
@@ -21,25 +23,32 @@ function railZone(rotationRadians = 0): TrickZone {
 }
 
 describe('trickZoneHitbox', () => {
-  it('uses ride-segment proximity for rails instead of the full zone circle', () => {
+  it('uses a ride-oriented AABB for rails spanning the full bar', () => {
     const zone = railZone();
     const { halfAlongRide, halfLateral } = trickZoneHitboxExtents('rail', zone.radius);
-    const proximity = railTrickProximityDistance(zone.radius);
 
     expect(halfAlongRide).toBeCloseTo(4.6);
-    expect(halfLateral).toBeCloseTo(0.64);
-    expect(proximity).toBeCloseTo(1.8);
+    expect(halfLateral).toBeCloseTo(1.8);
+    expect(isPointInTrickZoneHitbox(zone, { x: 10, y: 10 })).toBe(true);
     expect(isPointInTrickZoneHitbox(zone, { x: 10 + halfAlongRide - 0.1, y: 10 })).toBe(true);
-    expect(isPointInTrickZoneHitbox(zone, { x: 10, y: 10 + proximity - 0.1 })).toBe(true);
-    expect(isPointInTrickZoneHitbox(zone, { x: 10, y: 10 + proximity + 0.2 })).toBe(false);
+    expect(isPointInTrickZoneHitbox(zone, { x: 10, y: 10 + halfLateral - 0.1 })).toBe(true);
+    expect(isPointInTrickZoneHitbox(zone, { x: 10, y: 10 + halfLateral + 0.2 })).toBe(false);
     expect(isPointInTrickZoneHitbox(zone, { x: 10, y: 10 + zone.radius })).toBe(false);
-    // Near the bar end, offset laterally — still within proximity of the endpoint.
+    // Midway between posts (±0.85×radius) on the ride axis.
+    expect(isPointInTrickZoneHitbox(zone, { x: 10, y: 10 })).toBe(true);
+    expect(
+      isPointInTrickZoneHitbox(zone, {
+        x: 10,
+        y: 10 + halfLateral * 0.9,
+      }),
+    ).toBe(true);
+    // Beyond bar ends is outside the AABB.
     expect(
       isPointInTrickZoneHitbox(zone, {
         x: 10 + halfAlongRide + 0.3,
-        y: 10 + proximity * 0.5,
+        y: 10 + halfLateral * 0.5,
       }),
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it('rotates the hitbox with the feature ride axis', () => {
@@ -48,6 +57,28 @@ describe('trickZoneHitbox', () => {
 
     expect(isPointInTrickZoneHitbox(zone, { x: 10, y: 10 + halfAlongRide - 0.1 })).toBe(true);
     expect(isPointInTrickZoneHitbox(zone, { x: 10 + halfAlongRide - 0.1, y: 10 })).toBe(false);
+  });
+
+  it('pads wall ride hitboxes for glancing slide-up approaches', () => {
+    const zone: TrickZone = {
+      id: 'wall',
+      type: 'wall_ride',
+      prepareSlot: 1,
+      center: { x: 0, y: 0 },
+      radius: 4,
+      rotationRadians: 0,
+      tricked: false,
+    };
+    const { halfAlongRide, halfLateral } = trickZoneHitboxExtents('wall_ride', zone.radius);
+    const baseHalfAlong = zone.radius * TRICK_HITBOX_HALF_ALONG_RIDE.wall_ride;
+    const baseHalfLateral = zone.radius * TRICK_HITBOX_HALF_LATERAL.wall_ride;
+
+    expect(halfAlongRide).toBeCloseTo(baseHalfAlong + WALL_RIDE_HITBOX_PAD_TILES);
+    expect(halfLateral).toBeCloseTo(baseHalfLateral + WALL_RIDE_HITBOX_PAD_TILES);
+    expect(isPointInTrickZoneHitbox(zone, { x: baseHalfAlong + 0.4, y: 0 })).toBe(true);
+    expect(isPointInTrickZoneHitbox(zone, { x: baseHalfAlong + 0.6, y: 0 })).toBe(false);
+    expect(isPointInTrickZoneHitbox(zone, { x: 0, y: baseHalfLateral + 0.4 })).toBe(true);
+    expect(isPointInTrickZoneHitbox(zone, { x: 0, y: baseHalfLateral + 0.6 })).toBe(false);
   });
 
   it('wraps the scaled tunnel half-torus in ride-oriented space', () => {

@@ -21,9 +21,9 @@ const PLAYTHROUGH_SNAPSHOT_RATIO = 0.12;
 const TRICK_PRIME_APPROACH_MARGIN = 4;
 /** Stay at least this far outside the zone hitbox until after prepare. */
 const TRICK_PRIME_MIN_OUTSIDE = 0.5;
-/** Ticks to wait after prepare before entering bail scenarios (valid window is 1–4). */
+/** Ticks to wait after prepare before entering bail scenarios (valid window is 1–5). */
 const TRICK_BAIL_PRIME_TICKS_BEFORE_ENTRY = 1;
-/** Ticks to wait after prepare so timing is expired before entry (max window is 4). */
+/** Ticks to wait after prepare so timing is expired before entry (max window is 5). */
 const TRICK_EXPIRED_PREPARE_WAIT_TICKS = 7;
 
 export interface PlaytestOptions {
