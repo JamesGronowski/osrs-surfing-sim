@@ -1,11 +1,14 @@
 import { comboAfterBail, comboXpMultiplier } from './combo.js';
+import { levelForXp } from './experience.js';
 import type { ProgressionState, UnlockDefinition, UnlockId } from './types.js';
 import { UNLOCK_REGISTRY } from './types.js';
 
 export * from './combo.js';
+export * from './experience.js';
 
-export const TRICK_XP_AGILITY = 45;
-export const TRICK_XP_SAILING = 35;
+/** Keeps the original 45:35 agility/sailing split. */
+export const TRICK_XP_AGILITY = 16;
+export const TRICK_XP_SAILING = 12;
 
 export const CORAL_TOKEN_DROP_CHANCE = 1 / 4;
 export const CORAL_TOKEN_MIN = 6;
@@ -95,11 +98,11 @@ export function deserializeProgressionState(data: unknown): ProgressionState | n
 }
 
 export function agilityLevel(xp: number): number {
-  return Math.floor(Math.sqrt(xp / 100)) + 1;
+  return levelForXp(xp);
 }
 
 export function sailingLevel(xp: number): number {
-  return Math.floor(Math.sqrt(xp / 120)) + 1;
+  return levelForXp(xp);
 }
 
 export function canPurchaseUnlock(

@@ -1,4 +1,9 @@
-import { agilityLevel, sailingLevel, type SimulationSnapshot } from '@osrs-surfing/engine';
+import {
+  agilityLevel,
+  sailingLevel,
+  skillXpProgress,
+  type SimulationSnapshot,
+} from '@osrs-surfing/engine';
 
 import { OSRS_ASSETS } from './osrsAssets.js';
 
@@ -14,8 +19,8 @@ export class OsrsSkillsPanel {
   update(snapshot: SimulationSnapshot): void {
     const agility = snapshot.progression.xp.agility;
     const sailing = snapshot.progression.xp.sailing;
-    this.updateSkillRow('agility', agilityLevel(agility), agility % 1000, 1000);
-    this.updateSkillRow('sailing', sailingLevel(sailing), sailing % 1200, 1200);
+    this.updateSkillRow('agility', agilityLevel(agility), skillXpProgress(agility).percent);
+    this.updateSkillRow('sailing', sailingLevel(sailing), skillXpProgress(sailing).percent);
 
     const tricksEl = this.root.querySelector('#tricks-landed');
     if (tricksEl) {
@@ -61,19 +66,14 @@ export class OsrsSkillsPanel {
     `;
   }
 
-  private updateSkillRow(
-    skill: 'agility' | 'sailing',
-    level: number,
-    current: number,
-    max: number,
-  ): void {
+  private updateSkillRow(skill: 'agility' | 'sailing', level: number, percent: number): void {
     const label = this.root.querySelector(`#${skill}-label`);
     const fill = this.root.querySelector(`#${skill}-fill`) as HTMLElement;
     if (label) {
       label.textContent = `${skill === 'agility' ? 'Agility' : 'Sailing'} ${level}`;
     }
     if (fill) {
-      fill.style.width = `${Math.min(100, (current / max) * 100)}%`;
+      fill.style.width = `${percent}%`;
     }
   }
 }

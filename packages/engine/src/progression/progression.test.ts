@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
+import { HULL_SPEED_CAMPHOR_TILES_PER_TICK, TICK_MS } from '../constants/movement.js';
+import {
+  TRICK_SPEED_BOOST_DURATION_FACTOR,
+  TRICK_SPEED_BOOST_MULTIPLIER,
+} from '../constants/tricks.js';
+import { CORAL_PARK_REEF_INNER_MEAN, CORAL_PARK_REEF_OUTER_MEAN } from '../world/coralParkCoast.js';
 import {
   COMBO_TIERS,
   COMBO_TIER_SIZE,
@@ -8,7 +14,10 @@ import {
   comboTierProgress,
   comboXpMultiplier,
 } from './combo.js';
+import { xpForLevel } from './experience.js';
 import {
+  TRICK_XP_AGILITY,
+  TRICK_XP_SAILING,
   awardTrick,
   canPurchaseUnlock,
   createProgressionState,
@@ -27,14 +36,14 @@ describe('progression', () => {
     for (let i = 1; i <= 9; i += 1) {
       const result = awardTrick(state, () => 1);
       state = result.state;
-      expect(result.xpGained.agility).toBe(45);
-      expect(result.xpGained.sailing).toBe(35);
+      expect(result.xpGained.agility).toBe(16);
+      expect(result.xpGained.sailing).toBe(12);
       expect(result.state.session.combo).toBe(i);
     }
 
     const atTen = awardTrick(state, () => 1);
-    expect(atTen.xpGained.agility).toBe(90);
-    expect(atTen.xpGained.sailing).toBe(70);
+    expect(atTen.xpGained.agility).toBe(32);
+    expect(atTen.xpGained.sailing).toBe(24);
     expect(atTen.state.session.combo).toBe(10);
   });
 
@@ -46,8 +55,23 @@ describe('progression', () => {
     const dragon = awardTrick(state, () => 1);
     expect(dragon.state.session.combo).toBe(70);
     expect(comboXpMultiplier(70)).toBe(7);
-    expect(dragon.xpGained.agility).toBe(45 * 7);
+    expect(dragon.xpGained.agility).toBe(16 * 7);
     expect(comboTierName(70)).toBe('Dragon');
+  });
+
+  it('targets ~95k combined xp/h at dragon combo when chaining adjacent reef tricks', () => {
+    const meanReefRadius = (CORAL_PARK_REEF_INNER_MEAN + CORAL_PARK_REEF_OUTER_MEAN) / 2;
+    const adjacentSlotArcTiles = meanReefRadius * ((Math.PI * 2) / 14);
+    const ticksPerTrick =
+      adjacentSlotArcTiles / (HULL_SPEED_CAMPHOR_TILES_PER_TICK * TRICK_SPEED_BOOST_MULTIPLIER);
+    const tricksPerHour = 3_600_000 / TICK_MS / ticksPerTrick;
+    const dragonMultiplier = comboXpMultiplier(60);
+    const xpPerTrick = (TRICK_XP_AGILITY + TRICK_XP_SAILING) * dragonMultiplier;
+    const combinedXpPerHour = tricksPerHour * xpPerTrick;
+
+    expect(TRICK_SPEED_BOOST_DURATION_FACTOR).toBeGreaterThan(1);
+    expect(combinedXpPerHour).toBeGreaterThan(180_000);
+    expect(combinedXpPerHour).toBeLessThan(200_000);
   });
 
   it('awards coral tokens on a 1/4 roll only', () => {
@@ -144,12 +168,13 @@ describe('progression', () => {
   });
 
   it('purchases unlock when requirements met', () => {
-    const state = {
-      ...createProgressionState(),
-      coralTokens: 1,
-    };
     const unlock = UNLOCK_REGISTRY.find((entry) => entry.id === 'surf_guru_board');
     expect(unlock).toBeDefined();
+    const state = {
+      ...createProgressionState(),
+      coralTokens: unlock!.tokenCost ?? 0,
+      xp: { agility: xpForLevel(30), sailing: 0 },
+    };
     expect(canPurchaseUnlock(state, unlock!).ok).toBe(true);
 
     const result = purchaseUnlock(state, 'surf_guru_board');
@@ -180,9 +205,11 @@ describe('progression', () => {
   });
 
   it('purchases rosewood board when ironwood is owned and requirements met', () => {
+    const unlock = UNLOCK_REGISTRY.find((entry) => entry.id === 'rosewood_board');
+    expect(unlock).toBeDefined();
     const state = {
       ...createProgressionState(),
-      coralTokens: 1,
+      coralTokens: unlock!.tokenCost ?? 0,
       unlocked: new Set(['surf_guru_board' as const]),
     };
     const result = purchaseUnlock(state, 'rosewood_board');

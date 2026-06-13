@@ -24,6 +24,8 @@ import { OsrsSailingPanel } from './ui/OsrsSailingPanel.js';
 import { OsrsShopPanel } from './ui/OsrsShopPanel.js';
 import { OsrsSkillsPanel } from './ui/OsrsSkillsPanel.js';
 import { OsrsTabStrip, type ControlPanelTabId } from './ui/OsrsTabStrip.js';
+import { OsrsViewportXpHud } from './ui/OsrsViewportXpHud.js';
+import { XpRateTracker } from './ui/XpRateTracker.js';
 import { applyDisplayScale } from './ui/scaleLayout.js';
 
 const HELP_LINES = [
@@ -38,6 +40,8 @@ export class OsrsClient {
   private chatbox: OsrsChatbox;
   private sailingPanel: OsrsSailingPanel;
   private skillsPanel: OsrsSkillsPanel;
+  private viewportXpHud: OsrsViewportXpHud;
+  private xpRateTracker = new XpRateTracker();
   private tabStrip: OsrsTabStrip;
   private shopPanel: OsrsShopPanel;
   private debugPanel: DebugPanel;
@@ -60,6 +64,7 @@ export class OsrsClient {
     chatbox: OsrsChatbox,
     sailingPanel: OsrsSailingPanel,
     skillsPanel: OsrsSkillsPanel,
+    viewportXpHud: OsrsViewportXpHud,
     tabStrip: OsrsTabStrip,
     shopPanel: OsrsShopPanel,
     debugPanel: DebugPanel,
@@ -70,6 +75,7 @@ export class OsrsClient {
     this.chatbox = chatbox;
     this.sailingPanel = sailingPanel;
     this.skillsPanel = skillsPanel;
+    this.viewportXpHud = viewportXpHud;
     this.tabStrip = tabStrip;
     this.shopPanel = shopPanel;
     this.debugPanel = debugPanel;
@@ -93,6 +99,7 @@ export class OsrsClient {
     });
 
     const gameRoot = document.getElementById('game-root');
+    const viewportXpHudRoot = document.getElementById('viewport-xp-hud');
     const sailingPanelRoot = document.getElementById('sailing-panel');
     const skillsPanelRoot = document.getElementById('skills-panel');
     const shopPanelRoot = document.getElementById('shop-panel');
@@ -106,6 +113,7 @@ export class OsrsClient {
 
     if (
       !gameRoot ||
+      !viewportXpHudRoot ||
       !sailingPanelRoot ||
       !skillsPanelRoot ||
       !shopPanelRoot ||
@@ -169,6 +177,7 @@ export class OsrsClient {
     });
 
     const skillsPanel = new OsrsSkillsPanel(skillsPanelRoot);
+    const viewportXpHud = new OsrsViewportXpHud(viewportXpHudRoot);
     panelRefs.skills = skillsPanel;
     const sailingPanel = new OsrsSailingPanel(sailingPanelRoot, {
       onSpeedState: (state) => simulation.setSpeedState(state),
@@ -202,6 +211,7 @@ export class OsrsClient {
       chatbox,
       sailingPanel,
       skillsPanel,
+      viewportXpHud,
       tabStrip,
       shopPanel,
       debugPanel,
@@ -311,6 +321,7 @@ export class OsrsClient {
     this.renderer.syncMapAfterTick(snapshot, map);
     this.sailingPanel.update(snapshot);
     this.skillsPanel.update(snapshot);
+    this.viewportXpHud.update(snapshot, this.xpRateTracker);
     if (this.shopPanel.isVisible()) {
       this.shopPanel.update(snapshot.progression);
     }
@@ -322,6 +333,7 @@ export class OsrsClient {
     }
 
     for (const drop of this.simulation.consumeXpDrops()) {
+      this.xpRateTracker.record(drop.agility, drop.sailing);
       const tokenPart = drop.tokens > 0 ? ` +${drop.tokens} Tokens` : '';
       this.renderer.showXpDrop(
         `+${drop.agility} Agil +${drop.sailing} Sail${tokenPart}`,
@@ -370,6 +382,7 @@ export class OsrsClient {
     this.lastDisplayPosition = { ...displaySnapshot.surfboard.position };
     this.lastTickBlend = tickBlend;
     this.renderer.render(displaySnapshot, map, visualTimeMs, tickBlend);
+    this.viewportXpHud.update(snapshot, this.xpRateTracker);
     this.minimap.update(displaySnapshot, map);
     this.minimap.setCompassRotation(this.renderer.getCompassRotationRadians());
   }
