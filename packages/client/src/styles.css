@@ -315,6 +315,7 @@ body,
   height: auto;
   max-height: 33px;
   image-rendering: pixelated;
+  pointer-events: none;
 }
 
 .osrs-interface-panel {
@@ -453,6 +454,7 @@ body,
 
 .osrs-stone-tab img {
   image-rendering: pixelated;
+  pointer-events: none;
 }
 
 .osrs-tab-body {
@@ -585,6 +587,11 @@ body,
 
 .osrs-stone-sprite-btn img {
   image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.osrs-stone-sprite-btn span {
+  pointer-events: none;
 }
 
 .osrs-steering-row {

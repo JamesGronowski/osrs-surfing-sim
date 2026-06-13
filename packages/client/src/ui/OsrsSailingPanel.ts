@@ -9,6 +9,7 @@ import {
   type SpeedState,
 } from '@osrs-surfing/engine';
 
+import { bindUiPress } from './bindUiPress.js';
 import { OSRS_ASSETS } from './osrsAssets.js';
 
 import type { ComboTierName, TrickPrepareSlot } from '@osrs-surfing/engine';
@@ -332,7 +333,7 @@ export class OsrsSailingPanel {
 
   private bindEvents(): void {
     for (const tab of this.root.querySelectorAll<HTMLButtonElement>('.osrs-stone-tab')) {
-      tab.addEventListener('click', () => {
+      bindUiPress(tab, () => {
         const id = tab.dataset.tab as PanelTab;
         this.activeTab = id;
         this.root
@@ -346,7 +347,7 @@ export class OsrsSailingPanel {
     }
 
     this.root.querySelectorAll<HTMLButtonElement>('[data-nav-btn]').forEach((btn) => {
-      btn.addEventListener('click', () => {
+      bindUiPress(btn, () => {
         if (btn.disabled) {
           return;
         }
@@ -359,7 +360,7 @@ export class OsrsSailingPanel {
     });
 
     this.root.querySelectorAll<HTMLButtonElement>('[data-prepare-slot]').forEach((btn) => {
-      btn.addEventListener('click', () => {
+      bindUiPress(btn, () => {
         if (btn.disabled) {
           return;
         }
@@ -367,9 +368,12 @@ export class OsrsSailingPanel {
         this.callbacks.onPrepareTrick(slot);
       });
     });
-    this.root.querySelector('#shop-btn')?.addEventListener('click', () => {
-      this.callbacks.onOpenShop();
-    });
+    const shopBtn = this.root.querySelector('#shop-btn');
+    if (shopBtn instanceof HTMLElement) {
+      bindUiPress(shopBtn, () => {
+        this.callbacks.onOpenShop();
+      });
+    }
     this.root.querySelector('#true-tile-toggle')?.addEventListener('change', (event) => {
       this.callbacks.onToggleTrueTile((event.target as HTMLInputElement).checked);
     });

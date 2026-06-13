@@ -231,7 +231,7 @@ export function createCoralParkSlice(): GameArena {
       sweepRadians: Math.PI / 1.35,
       // Angular speed scales inversely with reef radius so the wave's linear
       // pace stays just under board ride speed; retune if the island resizes.
-      advancePerTick: 0.044,
+      advancePerTick: 0.055,
     },
     npcs: [
       {

@@ -1,3 +1,4 @@
+import { bindUiPress } from './bindUiPress.js';
 import { OSRS_ASSETS } from './osrsAssets.js';
 
 /** Top-row control panel tabs (combat slot shows sailing options while on board). */
@@ -66,7 +67,7 @@ export class OsrsTabStrip {
       if (id !== 'combat' && id !== 'stats') {
         continue;
       }
-      btn.addEventListener('click', () => {
+      bindUiPress(btn, () => {
         this.activeTab = id;
         this.syncActiveState();
         this.onTabChange(id);

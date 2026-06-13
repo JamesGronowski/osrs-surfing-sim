@@ -7,6 +7,7 @@ import {
 } from '@osrs-surfing/engine';
 
 import { renderVariantColor, resolveRenderTileVariant } from '../render/tileAppearance.js';
+import { bindUiPress } from './bindUiPress.js';
 import { MINIMAP_MAP_SIZE } from './minimapLayout.js';
 import { OSRS_ASSETS } from './osrsAssets.js';
 
@@ -62,7 +63,7 @@ export class OsrsMinimap {
     this.compassNeedle.src = OSRS_ASSETS.fixed.compassDial;
     this.compassNeedle.alt = 'Compass';
 
-    compassButton.addEventListener('click', onCompassClick);
+    bindUiPress(compassButton, onCompassClick);
   }
 
   setCompassRotation(radians: number): void {

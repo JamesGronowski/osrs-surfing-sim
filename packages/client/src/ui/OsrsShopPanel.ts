@@ -5,6 +5,7 @@ import {
   type UnlockId,
 } from '@osrs-surfing/engine';
 
+import { bindUiPress } from './bindUiPress.js';
 import { OSRS_ASSETS } from './osrsAssets.js';
 
 export class OsrsShopPanel {
@@ -49,7 +50,7 @@ export class OsrsShopPanel {
       if (!button || unlock.earnOnly) {
         continue;
       }
-      button.addEventListener('click', () => this.onPurchase(unlock.id));
+      bindUiPress(button, () => this.onPurchase(unlock.id));
     }
   }
 
