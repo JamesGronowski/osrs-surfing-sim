@@ -332,6 +332,17 @@ function makeNpcMesh(): Group {
   return makeHumanoidMesh({ shirt: NPC_SHIRT, pants: PLAYER_PANTS, hair: NPC_HAIR }, 1.1);
 }
 
+/** Guru NPC holding an ironwood demo board nose-up. */
+function makeGuruNpcMesh(): Group {
+  const root = new Group();
+  const body = makeHumanoidMesh({ shirt: NPC_SHIRT, pants: PLAYER_PANTS, hair: NPC_HAIR }, 1.1);
+  const { group: board } = makeSurfboardMesh(BOARD_WOOD_IRONWOOD, BOARD_STRIPE_IRONWOOD);
+  board.rotation.set(0.15, 0, -Math.PI / 2.15);
+  board.position.set(0.1, 0.45, -0.4);
+  root.add(body, board);
+  return root;
+}
+
 export class EntityLayer {
   readonly root = new Group();
   private readonly playerParts = makeSurferRig(
@@ -516,7 +527,8 @@ export class EntityLayer {
 
   private syncNpcs(snapshot: DisplaySimulationSnapshot, map: WorldMap): void {
     while (this.npcPool.length < snapshot.npcs.length) {
-      const npc = makeNpcMesh();
+      const npcDef = snapshot.npcs[this.npcPool.length];
+      const npc = npcDef.id === 'guru' ? makeGuruNpcMesh() : makeNpcMesh();
       this.npcPool.push(npc);
       this.root.add(npc);
     }
@@ -536,6 +548,9 @@ export class EntityLayer {
           ? coralParkLandSurfaceY(npc.x, npc.y, npcTile)
           : coralParkLandSurfaceY(npc.x, npc.y, 'sand');
       mesh.position.set(npcPos.x, npcY, npcPos.z);
+      mesh.rotation.y = radiansToRotationY(
+        Math.atan2(snapshot.boardDockY - npc.y, snapshot.boardDockX - npc.x),
+      );
     }
   }
 

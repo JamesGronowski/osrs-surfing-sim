@@ -208,8 +208,9 @@ export function createCoralParkSlice(): GameArena {
   const southSandR = coralParkSandRadius(southAngle);
   const boardDockX = CORAL_PARK_ISLAND_CX;
   const boardDockY = CORAL_PARK_ISLAND_CY + southSandR - 1.5;
-  const spawnX = boardDockX - 1.2;
-  const spawnY = boardDockY - 1.8;
+  const playerSpawnInlandTiles = 4;
+  const spawnX = boardDockX;
+  const spawnY = boardDockY - playerSpawnInlandTiles;
   const guruX = boardDockX + 1.2;
   const guruY = boardDockY - 1.5;
 

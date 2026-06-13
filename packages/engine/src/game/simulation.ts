@@ -136,6 +136,7 @@ export class GameSimulation {
   private walkClickMarker: { tx: number; ty: number; valid: boolean } | null = null;
   private pendingNpcTalk: NpcDefinition | null = null;
   private pendingBoardMount = false;
+  private pendingIntroSurf = false;
   private trickZoneTideSync: TrickZoneTideSyncState;
   private trickPrepare: TrickPrepareState | null = null;
   private activeTrickZoneId: string | null = null;
@@ -248,6 +249,15 @@ export class GameSimulation {
     return lines;
   }
 
+  /** Walk to the beach board and, if uninterrupted, paddle out toward the reef. */
+  queueIntroSurf(): void {
+    if (this.boardMounted || !this.arena.requiresBoardMount) {
+      return;
+    }
+    this.pendingIntroSurf = true;
+    this.handleBoardClick();
+  }
+
   clickWorld(worldX: number, worldY: number): void {
     const tileX = Math.floor(worldX);
     const tileY = Math.floor(worldY);
@@ -267,6 +277,7 @@ export class GameSimulation {
     if (!this.boardMounted) {
       this.pendingNpcTalk = null;
       this.pendingBoardMount = false;
+      this.pendingIntroSurf = false;
       this.clickToWalk(worldX, worldY);
       return;
     }
@@ -282,6 +293,7 @@ export class GameSimulation {
 
     this.pendingNpcTalk = npc;
     this.pendingBoardMount = false;
+    this.pendingIntroSurf = false;
     this.clickToWalk(npc.x, npc.y);
   }
 
@@ -366,7 +378,20 @@ export class GameSimulation {
       isRotating: false,
     };
     this.pendingDialogue.push('You climb onto your surfboard.');
+    if (this.pendingIntroSurf) {
+      this.beginIntroRide();
+    }
     return true;
+  }
+
+  private beginIntroRide(): void {
+    this.pendingIntroSurf = false;
+    if (!this.boardMounted) {
+      return;
+    }
+    const rideTowardY = this.boardDockY + 10;
+    this.clickOcean(this.boardDockX, rideTowardY);
+    this.setSpeedState('riding');
   }
 
   tryDismountBoard(): string | null {

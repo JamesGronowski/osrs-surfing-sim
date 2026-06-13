@@ -218,6 +218,10 @@ export class OsrsClient {
     client.wireViewport();
     client.startTickLoop();
 
+    if (!animTestArena) {
+      simulation.queueIntroSurf();
+    }
+
     installSurfTestBridge(simulation, {
       pause: () => client.setPaused(true),
       resume: () => client.setPaused(false),
