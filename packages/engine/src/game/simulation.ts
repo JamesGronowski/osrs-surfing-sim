@@ -466,7 +466,7 @@ export class GameSimulation {
     this.progression = result.state;
     if (result.unlockGained === 'teeny_tai') {
       this.pendingDialogue.push(
-        'A tiny jellyfish spirit appears in a shimmering bubble — Teeny Tai joins you!',
+        "You have a funny feeling like you're being followed.",
       );
     }
     this.trickZones = markZoneTricked(this.trickZones, zone.id);

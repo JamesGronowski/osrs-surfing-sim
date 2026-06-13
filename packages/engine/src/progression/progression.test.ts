@@ -50,7 +50,7 @@ describe('progression', () => {
     expect(comboTierName(70)).toBe('Dragon');
   });
 
-  it('awards coral tokens on a 1/10 roll only', () => {
+  it('awards coral tokens on a 1/4 roll only', () => {
     const state = createProgressionState();
     const miss = awardTrick(state, () => 0.5);
     expect(miss.tokensGained).toBe(0);
@@ -62,8 +62,27 @@ describe('progression', () => {
 
   it('rolls coral tokens in the 6–10 range when drop succeeds', () => {
     expect(rollCoralTokenDrop(() => 0)).toBe(6);
-    expect(rollCoralTokenDrop(() => 0.09)).toBe(10);
-    expect(rollCoralTokenDrop(() => 0.1)).toBe(0);
+    let call = 0;
+    expect(
+      rollCoralTokenDrop(() => {
+        call += 1;
+        return call === 1 ? 0 : 0.99;
+      }),
+    ).toBe(10);
+    expect(rollCoralTokenDrop(() => 0.25)).toBe(0);
+  });
+
+  it('drops coral tokens at roughly the configured rate', () => {
+    let drops = 0;
+    const trials = 20_000;
+    for (let i = 0; i < trials; i += 1) {
+      if (rollCoralTokenDrop(Math.random) > 0) {
+        drops += 1;
+      }
+    }
+    const rate = drops / trials;
+    expect(rate).toBeGreaterThan(0.23);
+    expect(rate).toBeLessThan(0.27);
   });
 
   it('tracks combo tier progress within each decade', () => {
@@ -160,16 +179,29 @@ describe('progression', () => {
     }
   });
 
-  it('purchases rosewood board when requirements met', () => {
+  it('purchases rosewood board when ironwood is owned and requirements met', () => {
     const state = {
       ...createProgressionState(),
-      coralTokens: 500,
-      xp: { agility: 250_000, sailing: 0 },
+      coralTokens: 250,
+      unlocked: new Set(['surf_guru_board' as const]),
     };
     const result = purchaseUnlock(state, 'rosewood_board');
     expect(result.success).toBe(true);
     expect(result.state.unlocked.has('rosewood_board')).toBe(true);
     expect(result.state.coralTokens).toBe(0);
+  });
+
+  it('blocks rosewood board until ironwood is owned', () => {
+    const state = {
+      ...createProgressionState(),
+      coralTokens: 250,
+    };
+    const check = canPurchaseUnlock(
+      state,
+      UNLOCK_REGISTRY.find((entry) => entry.id === 'rosewood_board')!,
+    );
+    expect(check.ok).toBe(false);
+    expect(check.reason).toBe('Requires Ironwood Board');
   });
 
   it('drops Teeny Tai on a 1/500 trick roll', () => {

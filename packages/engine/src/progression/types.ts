@@ -27,6 +27,7 @@ export interface UnlockDefinition {
   minSailingLevel?: number;
   earnOnly?: boolean;
   demoDisabled?: boolean;
+  requiresUnlock?: UnlockId;
 }
 
 export interface ProgressionState {
@@ -77,14 +78,14 @@ export const UNLOCK_REGISTRY: UnlockDefinition[] = [
     id: 'surf_guru_board',
     name: 'Ironwood Board',
     description: 'Ironwood hull — faster ride speed and darker deck.',
-    tokenCost: 300,
+    tokenCost: 250,
     minAgilityLevel: 30,
   },
   {
     id: 'rosewood_board',
     name: 'Rosewood Board',
     description: 'Rosewood hull — fastest ride speed and rich deck finish.',
-    tokenCost: 500,
-    minAgilityLevel: 45,
+    tokenCost: 250,
+    requiresUnlock: 'surf_guru_board',
   },
 ];

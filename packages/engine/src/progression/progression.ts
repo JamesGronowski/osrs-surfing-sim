@@ -7,7 +7,7 @@ export * from './combo.js';
 export const TRICK_XP_AGILITY = 45;
 export const TRICK_XP_SAILING = 35;
 
-export const CORAL_TOKEN_DROP_CHANCE = 1 / 10;
+export const CORAL_TOKEN_DROP_CHANCE = 1 / 4;
 export const CORAL_TOKEN_MIN = 6;
 export const CORAL_TOKEN_MAX = 10;
 export const TEENY_TAI_DROP_CHANCE = 1 / 500;
@@ -115,6 +115,10 @@ export function canPurchaseUnlock(
   if (state.unlocked.has(unlock.id)) {
     return { ok: false, reason: 'Already unlocked' };
   }
+  if (unlock.requiresUnlock && !state.unlocked.has(unlock.requiresUnlock)) {
+    const required = UNLOCK_REGISTRY.find((entry) => entry.id === unlock.requiresUnlock);
+    return { ok: false, reason: `Requires ${required?.name ?? unlock.requiresUnlock}` };
+  }
   if (unlock.tokenCost !== null && state.coralTokens < unlock.tokenCost) {
     return { ok: false, reason: 'Not enough Coral Tokens' };
   }
@@ -159,13 +163,12 @@ export interface TrickResult {
 }
 
 export function rollCoralTokenDrop(random: () => number = Math.random): number {
-  const roll = random();
-  if (roll >= CORAL_TOKEN_DROP_CHANCE) {
+  if (random() >= CORAL_TOKEN_DROP_CHANCE) {
     return 0;
   }
   const span = CORAL_TOKEN_MAX - CORAL_TOKEN_MIN + 1;
-  const amountIndex = Math.floor((roll / CORAL_TOKEN_DROP_CHANCE) * span);
-  return CORAL_TOKEN_MIN + Math.min(span - 1, amountIndex);
+  const amountIndex = Math.floor(random() * span);
+  return CORAL_TOKEN_MIN + amountIndex;
 }
 
 export function awardTrick(
