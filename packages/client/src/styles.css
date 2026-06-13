@@ -199,6 +199,34 @@ body,
   margin: 0;
 }
 
+.osrs-demo-notice-main-wrap {
+  position: relative;
+  padding-right: 12px;
+}
+
+.osrs-demo-notice-main-wrap.hidden {
+  display: none;
+}
+
+.osrs-demo-notice-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0 2px;
+  border: none;
+  background: transparent;
+  color: rgba(232, 212, 168, 0.9);
+  font: inherit;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.osrs-demo-notice-close:hover {
+  color: #ffff00;
+}
+
 .osrs-demo-notice-attr {
   margin-top: 1px;
   font-size: 9px;

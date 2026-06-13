@@ -1,0 +1,91 @@
+- generic [ref=e7]:
+  - generic [ref=e8]:
+    - generic:
+      - generic:
+        - generic:
+          - generic: Agility 1
+          - generic: 0/h
+        - generic:
+          - generic: Sailing 1
+          - generic: 0/h
+        - generic: Total 0/h
+  - generic [ref=e11]:
+    - note:
+      - generic:
+        - paragraph: Concept demo. Gameplay, XP rates, and rewards are not tuned or final and we're originally designed back in Dec 25 as a part of my Island Submission so may be outdated. Please consider the vision of this project only.
+        - button "Dismiss notice" [ref=e12] [cursor=pointer]: ×
+      - paragraph: OSRS UI © Jagex Ltd.; sprites via melkypie/resource-packs. Unofficial fan project.
+    - generic [ref=e14]:
+      - text: Welcome to Ura Ura Swell.
+      - text: Click the ground to walk. Click Kaulu to talk.
+      - text: Click your surfboard on the sand ring to paddle out.
+      - text: Prime Grind, Tuck, or Air stance 1–5 ticks before you hit the matching coral feature.
+  - complementary [ref=e16]:
+    - button "Compass" [ref=e20] [cursor=pointer]:
+      - img "Compass"
+    - generic [ref=e21]:
+      - generic [ref=e23]:
+        - button "Sailing Options" [ref=e24] [cursor=pointer]:
+          - img "Sailing Options"
+        - button "Skills" [ref=e25] [cursor=pointer]:
+          - img "Skills"
+        - button "Quest List" [disabled] [ref=e26]:
+          - img "Quest List"
+        - button "Inventory" [disabled] [ref=e27]:
+          - img "Inventory"
+        - button "Worn Equipment" [disabled] [ref=e28]:
+          - img "Worn Equipment"
+        - button "Prayer" [disabled] [ref=e29]:
+          - img "Prayer"
+        - button "Magic" [disabled] [ref=e30]:
+          - img "Magic"
+      - generic [ref=e35]:
+        - generic [ref=e37]: Camphor Board
+        - generic [ref=e40]: Ready
+        - generic [ref=e41]:
+          - button "Surfboard" [ref=e42] [cursor=pointer]:
+            - img "Surfboard"
+          - button "Session stats" [ref=e43] [cursor=pointer]:
+            - img "Session stats"
+          - button "Coral rewards" [ref=e44] [cursor=pointer]:
+            - img "Coral rewards"
+        - generic [ref=e45]:
+          - paragraph [ref=e46]: Board your surfboard on the beach shore to begin.
+          - generic [ref=e47]:
+            - paragraph [ref=e48]: Surfboard
+            - generic [ref=e49]:
+              - button "Full speed ahead" [ref=e50] [cursor=pointer]
+              - button "Slow down" [ref=e51] [cursor=pointer]
+              - button "Increase speed" [ref=e52] [cursor=pointer]
+            - generic [ref=e54]: Drifting
+            - paragraph [ref=e55]: Stance
+            - generic [ref=e56]:
+              - button "Grind Rail · Coral" [ref=e57] [cursor=pointer]:
+                - generic: Grind
+                - generic: Rail · Coral
+              - button "Tuck Tunnel · Wall" [ref=e58] [cursor=pointer]:
+                - generic: Tuck
+                - generic: Tunnel · Wall
+              - button "Air Jump" [ref=e59] [cursor=pointer]:
+                - generic: Air
+                - generic: Jump
+            - paragraph [ref=e60]: Reach full speed to prime stances
+            - button "Leave board on sand" [disabled] [ref=e61]
+            - generic "Highlight the tile your character is actually on" [ref=e62] [cursor=pointer]:
+              - checkbox "True tile marker" [ref=e63]
+              - generic [ref=e64]: True tile marker
+      - generic [ref=e67]:
+        - button "Friends List" [disabled] [ref=e68]:
+          - img "Friends List"
+        - button "Ignore List" [disabled] [ref=e69]:
+          - img "Ignore List"
+        - button "Chat-channel" [disabled] [ref=e70]:
+          - img "Chat-channel"
+        - button "Account Management" [disabled] [ref=e71]:
+          - img "Account Management"
+        - button "Logout" [disabled] [ref=e72]:
+          - img "Logout"
+        - button "Settings" [disabled] [ref=e73]:
+          - img "Settings"
+        - button "Emotes" [disabled] [ref=e74]:
+          - img "Emotes"
