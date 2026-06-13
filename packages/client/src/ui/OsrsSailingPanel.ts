@@ -196,7 +196,8 @@ export class OsrsSailingPanel {
       comboFill.style.width = combo > 0 ? `${(progress / 10) * 100}%` : '100%';
       comboFill.style.background =
         combo > 0 ? COMBO_TIER_BAR_COLORS[comboTierName(combo)] : COMBO_BAR_IDLE_COLOR;
-      comboLabel.textContent = combo > 0 ? `${comboTierName(combo)} · ${combo}` : 'Ready';
+      comboLabel.textContent =
+        combo > 0 ? `${combo}x · ${comboTierName(combo)} combo` : 'Ready';
     }
 
     const boostBar = this.root.querySelector('#surf-boost-bar') as HTMLElement;
