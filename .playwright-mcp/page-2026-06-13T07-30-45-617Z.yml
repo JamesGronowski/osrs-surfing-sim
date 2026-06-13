@@ -1,0 +1,64 @@
+- generic [ref=e7]:
+  - generic [ref=e8]:
+    - generic:
+      - generic:
+        - generic:
+          - generic: Agility 1
+          - generic: 0/h
+        - generic:
+          - generic: Sailing 1
+          - generic: 0/h
+        - generic: Total 0/h
+  - generic [ref=e11]:
+    - note: Concept demo — gameplay, XP rates, and rewards are not tuned for balance or fun.
+    - generic [ref=e13]:
+      - text: Welcome to Ura Ura Swell.
+      - text: Click the ground to walk. Click Kaulu to talk.
+      - text: Click your surfboard on the sand ring to paddle out.
+      - text: Prime Grind, Tuck, or Air stance 1–5 ticks before you hit the matching coral feature.
+      - text: "Kaulu the Surf Guru: Welcome to Coral Park, surfer!"
+  - complementary [ref=e15]:
+    - button "Compass" [ref=e19] [cursor=pointer]:
+      - img "Compass"
+    - generic [ref=e20]:
+      - generic [ref=e22]:
+        - button "Sailing Options" [ref=e23] [cursor=pointer]:
+          - img "Sailing Options"
+        - button "Skills" [ref=e24] [cursor=pointer]:
+          - img "Skills"
+        - button "Quest List" [disabled] [ref=e25]:
+          - img "Quest List"
+        - button "Inventory" [disabled] [ref=e26]:
+          - img "Inventory"
+        - button "Worn Equipment" [disabled] [ref=e27]:
+          - img "Worn Equipment"
+        - button "Prayer" [disabled] [ref=e28]:
+          - img "Prayer"
+        - button "Magic" [disabled] [ref=e29]:
+          - img "Magic"
+      - generic [ref=e34]:
+        - generic [ref=e36]: Camphor Board
+        - generic [ref=e39]: Ready
+        - generic [ref=e40]:
+          - button "Surfboard" [ref=e41] [cursor=pointer]:
+            - img "Surfboard"
+          - button "Session stats" [ref=e42] [cursor=pointer]:
+            - img "Session stats"
+          - button "Coral rewards" [ref=e43] [cursor=pointer]:
+            - img "Coral rewards"
+        - paragraph [ref=e45]: Board your surfboard on the beach shore to begin.
+      - generic [ref=e48]:
+        - button "Friends List" [disabled] [ref=e49]:
+          - img "Friends List"
+        - button "Ignore List" [disabled] [ref=e50]:
+          - img "Ignore List"
+        - button "Chat-channel" [disabled] [ref=e51]:
+          - img "Chat-channel"
+        - button "Account Management" [disabled] [ref=e52]:
+          - img "Account Management"
+        - button "Logout" [disabled] [ref=e53]:
+          - img "Logout"
+        - button "Settings" [disabled] [ref=e54]:
+          - img "Settings"
+        - button "Emotes" [disabled] [ref=e55]:
+          - img "Emotes"

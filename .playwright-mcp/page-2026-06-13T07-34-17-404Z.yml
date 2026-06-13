@@ -1,0 +1,89 @@
+- generic [ref=e7]:
+  - generic [ref=e8]:
+    - generic:
+      - generic:
+        - generic:
+          - generic: Agility 1
+          - generic: 0/h
+        - generic:
+          - generic: Sailing 1
+          - generic: 0/h
+        - generic: Total 0/h
+  - generic [ref=e11]:
+    - note:
+      - paragraph: Concept demo. Gameplay, XP rates, and rewards are not tuned. Please consider the vision of this project only.
+      - paragraph: OSRS UI © Jagex Ltd.; sprites via melkypie/resource-packs. Unofficial fan project.
+    - generic [ref=e13]:
+      - text: Welcome to Ura Ura Swell.
+      - text: Click the ground to walk. Click Kaulu to talk.
+      - text: Click your surfboard on the sand ring to paddle out.
+      - text: Prime Grind, Tuck, or Air stance 1–5 ticks before you hit the matching coral feature.
+  - complementary [ref=e15]:
+    - button "Compass" [ref=e19] [cursor=pointer]:
+      - img "Compass"
+    - generic [ref=e20]:
+      - generic [ref=e22]:
+        - button "Sailing Options" [ref=e23] [cursor=pointer]:
+          - img "Sailing Options"
+        - button "Skills" [ref=e24] [cursor=pointer]:
+          - img "Skills"
+        - button "Quest List" [disabled] [ref=e25]:
+          - img "Quest List"
+        - button "Inventory" [disabled] [ref=e26]:
+          - img "Inventory"
+        - button "Worn Equipment" [disabled] [ref=e27]:
+          - img "Worn Equipment"
+        - button "Prayer" [disabled] [ref=e28]:
+          - img "Prayer"
+        - button "Magic" [disabled] [ref=e29]:
+          - img "Magic"
+      - generic [ref=e34]:
+        - generic [ref=e36]: Camphor Board
+        - generic [ref=e39]: Ready
+        - generic [ref=e40]:
+          - button "Surfboard" [ref=e41] [cursor=pointer]:
+            - img "Surfboard"
+          - button "Session stats" [ref=e42] [cursor=pointer]:
+            - img "Session stats"
+          - button "Coral rewards" [ref=e43] [cursor=pointer]:
+            - img "Coral rewards"
+        - generic [ref=e44]:
+          - paragraph [ref=e45]: Board your surfboard on the beach shore to begin.
+          - generic [ref=e46]:
+            - paragraph [ref=e47]: Surfboard
+            - generic [ref=e48]:
+              - button "Full speed ahead" [ref=e49] [cursor=pointer]
+              - button "Slow down" [ref=e50] [cursor=pointer]
+              - button "Increase speed" [ref=e51] [cursor=pointer]
+            - generic [ref=e53]: Drifting
+            - paragraph [ref=e54]: Stance
+            - generic [ref=e55]:
+              - button "Grind Rail · Coral" [ref=e56] [cursor=pointer]:
+                - generic: Grind
+                - generic: Rail · Coral
+              - button "Tuck Tunnel · Wall" [ref=e57] [cursor=pointer]:
+                - generic: Tuck
+                - generic: Tunnel · Wall
+              - button "Air Jump" [ref=e58] [cursor=pointer]:
+                - generic: Air
+                - generic: Jump
+            - paragraph [ref=e59]: Reach full speed to prime stances
+            - button "Leave board on sand" [disabled] [ref=e60]
+            - generic "Highlight the tile your character is actually on" [ref=e61] [cursor=pointer]:
+              - checkbox "True tile marker" [ref=e62]
+              - generic [ref=e63]: True tile marker
+      - generic [ref=e66]:
+        - button "Friends List" [disabled] [ref=e67]:
+          - img "Friends List"
+        - button "Ignore List" [disabled] [ref=e68]:
+          - img "Ignore List"
+        - button "Chat-channel" [disabled] [ref=e69]:
+          - img "Chat-channel"
+        - button "Account Management" [disabled] [ref=e70]:
+          - img "Account Management"
+        - button "Logout" [disabled] [ref=e71]:
+          - img "Logout"
+        - button "Settings" [disabled] [ref=e72]:
+          - img "Settings"
+        - button "Emotes" [disabled] [ref=e73]:
+          - img "Emotes"
