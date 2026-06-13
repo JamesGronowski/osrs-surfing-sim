@@ -5,11 +5,12 @@ import {
   type UnlockId,
 } from '@osrs-surfing/engine';
 
-import { bindUiPress } from './bindUiPress.js';
+import { bindDelegatedUiPress, bindUiPress } from './bindUiPress.js';
 import { OSRS_ASSETS } from './osrsAssets.js';
 
 export class OsrsShopPanel {
   private root: HTMLElement;
+  private body: HTMLElement;
   private onPurchase: (id: UnlockId) => void;
   private visible = false;
 
@@ -17,6 +18,36 @@ export class OsrsShopPanel {
     this.root = root;
     this.onPurchase = onPurchase;
     this.root.className = 'osrs-shop-panel hidden';
+    this.root.innerHTML = `
+      <div class="osrs-shop-header osrs-panel-header">
+        <img src="${OSRS_ASSETS.sailing.tabCrew}" alt="" width="20" height="20" />
+        <span class="osrs-panel-title">Coral Rewards</span>
+        <button type="button" class="osrs-shop-close" aria-label="Close reward shop">×</button>
+      </div>
+      <div class="osrs-shop-body"></div>
+    `;
+
+    const body = this.root.querySelector('.osrs-shop-body');
+    if (!(body instanceof HTMLElement)) {
+      throw new Error('Shop panel body element missing');
+    }
+    this.body = body;
+
+    const closeBtn = this.root.querySelector('.osrs-shop-close');
+    if (closeBtn instanceof HTMLElement) {
+      bindUiPress(closeBtn, () => this.hide());
+    }
+
+    bindDelegatedUiPress(this.body, '[data-unlock]', (target) => {
+      const unlockId = target.getAttribute('data-unlock') as UnlockId | null;
+      if (unlockId) {
+        this.onPurchase(unlockId);
+      }
+    });
+  }
+
+  isVisible(): boolean {
+    return this.visible;
   }
 
   toggle(): void {
@@ -30,28 +61,12 @@ export class OsrsShopPanel {
   }
 
   update(progression: ProgressionState): void {
-    this.root.innerHTML = `
-      <div class="osrs-shop-chrome">
-        <div class="osrs-panel-header">
-          <img src="${OSRS_ASSETS.sailing.tabCrew}" alt="" width="20" height="20" />
-          <span class="osrs-panel-title">Coral Rewards</span>
-        </div>
-        <p class="osrs-stat-line">Coral Tokens: <strong>${progression.coralTokens}</strong></p>
-        <div class="osrs-shop-list">
-          ${UNLOCK_REGISTRY.map((unlock) => this.renderUnlock(unlock, progression)).join('')}
-        </div>
+    this.body.innerHTML = `
+      <p class="osrs-stat-line">Coral Tokens: <strong>${progression.coralTokens}</strong></p>
+      <div class="osrs-shop-list">
+        ${UNLOCK_REGISTRY.map((unlock) => this.renderUnlock(unlock, progression)).join('')}
       </div>
     `;
-
-    for (const unlock of UNLOCK_REGISTRY) {
-      const button = this.root.querySelector(
-        `[data-unlock="${unlock.id}"]`,
-      ) as HTMLButtonElement | null;
-      if (!button || unlock.earnOnly || unlock.demoDisabled) {
-        continue;
-      }
-      bindUiPress(button, () => this.onPurchase(unlock.id));
-    }
   }
 
   private renderUnlock(
@@ -67,7 +82,7 @@ export class OsrsShopPanel {
     } else if (unlock.demoDisabled) {
       status = 'Disabled for this demo';
     } else if (unlock.earnOnly) {
-      status = 'Earn only';
+      status = 'Earn only 1/500 from successful tricks';
     } else if (check.ok) {
       status = 'Purchase';
     } else {

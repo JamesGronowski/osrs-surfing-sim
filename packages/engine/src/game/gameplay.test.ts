@@ -107,4 +107,28 @@ describe('Coral Park gameplay flow', () => {
 
     expect(sim.getSnapshot().progression.session.combo).toBe(4);
   });
+
+  it('dismounts on sand and leaves the board at that spot', () => {
+    const arena = createCoralParkSlice();
+    const sim = new GameSimulation({ arena });
+
+    sim.clickWorld(arena.boardDockX, arena.boardDockY);
+    for (let i = 0; i < 100; i += 1) {
+      sim.tick();
+      if (sim.getSnapshot().boardMounted) {
+        break;
+      }
+    }
+    expect(sim.getSnapshot().boardMounted).toBe(true);
+    expect(sim.getSnapshot().canDismountBoard).toBe(true);
+
+    const boardX = sim.getSnapshot().surfboard.position.x;
+    const boardY = sim.getSnapshot().surfboard.position.y;
+    expect(sim.tryDismountBoard()).toBeNull();
+    const after = sim.getSnapshot();
+    expect(after.boardMounted).toBe(false);
+    expect(after.boardDockX).toBeCloseTo(boardX);
+    expect(after.boardDockY).toBeCloseTo(boardY);
+    expect(sim.consumeDialogue().some((line) => line.includes('leave your surfboard'))).toBe(true);
+  });
 });

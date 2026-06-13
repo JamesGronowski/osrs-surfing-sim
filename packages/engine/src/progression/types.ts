@@ -51,6 +51,7 @@ export const UNLOCK_REGISTRY: UnlockDefinition[] = [
     description: 'Coral blessing for ship combat ammo recovery.',
     tokenCost: 500,
     minSailingLevel: 40,
+    demoDisabled: true,
   },
   {
     id: 'ebb_and_flow',

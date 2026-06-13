@@ -10,7 +10,7 @@ import { surfboardStatsForUnlocks } from '../progression/surfboardUnlocks.js';
 import type { ProgressionState, UnlockId } from '../progression/types.js';
 import { type OnFootWalkState, planWalkPath, tickOnFootPath } from '../movement/onFoot.js';
 import { headingFromClick } from '../movement/surfboard.js';
-import { headingToDegrees } from '../movement/heading.js';
+import { headingToDegrees, headingToUnitVector } from '../movement/heading.js';
 import {
   createSurfboard,
   tickSurfboard,
@@ -25,7 +25,7 @@ import {
   refreshTrickSpeedBoost,
   type TrickSpeedBoostState,
 } from '../movement/trickSpeedBoost.js';
-import { isWorldPointNavigable, isWorldPointSailingTarget } from '../world/collision.js';
+import { getTile, isWorldPointNavigable, isWorldPointSailingTarget } from '../world/collision.js';
 import {
   findNpcAt,
   findNpcNear,
@@ -86,6 +86,7 @@ export interface SimulationSnapshot {
   boardDockX: number;
   boardDockY: number;
   boardMounted: boolean;
+  canDismountBoard: boolean;
   tide: TideState | null;
   cursorWorldX: number | null;
   cursorWorldY: number | null;
@@ -129,6 +130,8 @@ export class GameSimulation {
   private proximityGreeted = new Set<string>();
   private pendingDialogue: string[] = [];
   private boardMounted: boolean;
+  private boardDockX: number;
+  private boardDockY: number;
   private walk: OnFootWalkState | null = null;
   private walkClickMarker: { tx: number; ty: number; valid: boolean } | null = null;
   private pendingNpcTalk: NpcDefinition | null = null;
@@ -147,6 +150,8 @@ export class GameSimulation {
   constructor(config: SimulationConfig) {
     this.arena = config.arena;
     this.boardMounted = !config.arena.requiresBoardMount;
+    this.boardDockX = config.arena.boardDockX;
+    this.boardDockY = config.arena.boardDockY;
     this.stats = config.stats ?? { ...DEFAULT_SURFBOARD_STATS };
     this.tickMs = config.tickMs ?? TICK_MS;
     this.surfboard = createSurfboard(
@@ -179,9 +184,10 @@ export class GameSimulation {
       },
       trickZones: this.trickZones.map((zone) => ({ ...zone, center: { ...zone.center } })),
       npcs: this.arena.npcs.map((npc) => ({ ...npc, dialogue: [...npc.dialogue] })),
-      boardDockX: this.arena.boardDockX,
-      boardDockY: this.arena.boardDockY,
+      boardDockX: this.boardDockX,
+      boardDockY: this.boardDockY,
       boardMounted: this.boardMounted,
+      canDismountBoard: this.canDismountBoard(),
       tide: this.tide ? { ...this.tide } : null,
       cursorWorldX: this.cursorWorldX,
       cursorWorldY: this.cursorWorldY,
@@ -287,24 +293,42 @@ export class GameSimulation {
 
     this.pendingBoardMount = true;
     this.pendingNpcTalk = null;
-    this.clickToWalk(this.arena.boardDockX, this.arena.boardDockY);
+    this.clickToWalk(this.boardDockX, this.boardDockY);
   }
 
   private isBoardClick(tileX: number, tileY: number, worldX: number, worldY: number): boolean {
-    const dockTx = Math.floor(this.arena.boardDockX);
-    const dockTy = Math.floor(this.arena.boardDockY);
+    const dockTx = Math.floor(this.boardDockX);
+    const dockTy = Math.floor(this.boardDockY);
     if (tileX === dockTx && tileY === dockTy) {
       return true;
     }
-    const dx = worldX - this.arena.boardDockX;
-    const dy = worldY - this.arena.boardDockY;
+    const dx = worldX - this.boardDockX;
+    const dy = worldY - this.boardDockY;
     return Math.hypot(dx, dy) <= this.boardInteractRadius;
   }
 
   private isNearBoard(): boolean {
-    const dx = this.surfboard.position.x - this.arena.boardDockX;
-    const dy = this.surfboard.position.y - this.arena.boardDockY;
+    const dx = this.surfboard.position.x - this.boardDockX;
+    const dy = this.surfboard.position.y - this.boardDockY;
     return Math.hypot(dx, dy) <= this.boardInteractRadius;
+  }
+
+  private isRiderOnSand(): boolean {
+    const tile = getTile(
+      this.arena.map,
+      Math.floor(this.surfboard.position.x),
+      Math.floor(this.surfboard.position.y),
+    );
+    return tile === 'sand';
+  }
+
+  private canDismountBoard(): boolean {
+    return (
+      this.boardMounted &&
+      this.surfboard.speedState === 'seated' &&
+      this.trickAnimation === null &&
+      this.isRiderOnSand()
+    );
   }
 
   private clickToWalk(worldX: number, worldY: number): void {
@@ -336,13 +360,60 @@ export class GameSimulation {
     this.pendingBoardMount = false;
     this.surfboard = {
       ...this.surfboard,
-      position: { x: this.arena.boardDockX, y: this.arena.boardDockY },
+      position: { x: this.boardDockX, y: this.boardDockY },
       currentHeading: this.arena.spawnHeading,
       intendedHeading: this.arena.spawnHeading,
       isRotating: false,
     };
     this.pendingDialogue.push('You climb onto your surfboard.');
     return true;
+  }
+
+  tryDismountBoard(): string | null {
+    if (!this.boardMounted) {
+      return 'You are not on your surfboard.';
+    }
+    if (this.surfboard.speedState !== 'seated') {
+      return 'Stop moving before leaving your board.';
+    }
+    if (this.trickAnimation) {
+      return 'Finish your trick before leaving your board.';
+    }
+    if (!this.isRiderOnSand()) {
+      return 'You can only leave your board on the sand.';
+    }
+
+    const boardX = this.surfboard.position.x;
+    const boardY = this.surfboard.position.y;
+    const riderHeading = Number.isFinite(this.surfboard.currentHeading)
+      ? this.surfboard.currentHeading
+      : this.arena.spawnHeading;
+
+    this.boardDockX = boardX;
+    this.boardDockY = boardY;
+    this.boardMounted = false;
+    this.trickPrepare = null;
+    this.trickSpeedBoost = null;
+    this.pendingInput = {};
+
+    const { x: dx, y: dy } = headingToUnitVector(riderHeading);
+    const stepOffX = boardX - dx * 0.9;
+    const stepOffY = boardY - dy * 0.9;
+    let playerPosition = { x: boardX, y: boardY };
+    if (Number.isFinite(stepOffX) && Number.isFinite(stepOffY)) {
+      const stepOffTile = getTile(this.arena.map, Math.floor(stepOffX), Math.floor(stepOffY));
+      if (stepOffTile === 'sand' || stepOffTile === 'grass') {
+        playerPosition = { x: stepOffX, y: stepOffY };
+      }
+    }
+    this.surfboard = {
+      ...this.surfboard,
+      position: playerPosition,
+      speedState: 'seated',
+      isRotating: false,
+    };
+    this.pendingDialogue.push('You leave your surfboard on the sand.');
+    return null;
   }
 
   clickOcean(worldX: number, worldY: number): void {
@@ -465,9 +536,7 @@ export class GameSimulation {
     const result = awardTrick(this.progression);
     this.progression = result.state;
     if (result.unlockGained === 'teeny_tai') {
-      this.pendingDialogue.push(
-        "You have a funny feeling like you're being followed.",
-      );
+      this.pendingDialogue.push("You have a funny feeling like you're being followed.");
     }
     this.trickZones = markZoneTricked(this.trickZones, zone.id);
     this.trickSpeedBoost = refreshTrickSpeedBoost();

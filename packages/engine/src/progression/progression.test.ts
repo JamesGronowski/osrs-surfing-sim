@@ -146,16 +146,16 @@ describe('progression', () => {
   it('purchases unlock when requirements met', () => {
     const state = {
       ...createProgressionState(),
-      coralTokens: 500,
-      xp: { agility: 0, sailing: 200_000 },
+      coralTokens: 1,
     };
-    const unlock = UNLOCK_REGISTRY.find((entry) => entry.id === 'taiura_blessing');
+    const unlock = UNLOCK_REGISTRY.find((entry) => entry.id === 'surf_guru_board');
     expect(unlock).toBeDefined();
     expect(canPurchaseUnlock(state, unlock!).ok).toBe(true);
 
-    const result = purchaseUnlock(state, 'taiura_blessing');
+    const result = purchaseUnlock(state, 'surf_guru_board');
     expect(result.success).toBe(true);
-    expect(result.state.unlocked.has('taiura_blessing')).toBe(true);
+    expect(result.state.unlocked.has('surf_guru_board')).toBe(true);
+    expect(result.state.coralTokens).toBe(0);
   });
 
   it('blocks earn-only unlock purchases', () => {
@@ -170,7 +170,7 @@ describe('progression', () => {
       coralTokens: 9999,
       xp: { agility: 1_000_000, sailing: 1_000_000 },
     };
-    for (const id of ['ebb_and_flow', 'living_coral'] as const) {
+    for (const id of ['taiura_blessing', 'ebb_and_flow', 'living_coral'] as const) {
       const unlock = UNLOCK_REGISTRY.find((entry) => entry.id === id);
       expect(unlock).toBeDefined();
       const check = canPurchaseUnlock(state, unlock!);
@@ -182,7 +182,7 @@ describe('progression', () => {
   it('purchases rosewood board when ironwood is owned and requirements met', () => {
     const state = {
       ...createProgressionState(),
-      coralTokens: 250,
+      coralTokens: 1,
       unlocked: new Set(['surf_guru_board' as const]),
     };
     const result = purchaseUnlock(state, 'rosewood_board');

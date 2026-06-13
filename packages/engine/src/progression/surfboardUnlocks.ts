@@ -21,3 +21,13 @@ export function surfboardStatsForUnlocks(unlocked: Set<UnlockId>): SurfboardStat
     speedRide,
   };
 }
+
+export function surfboardTierNameForUnlocks(unlocked: Set<UnlockId>): string {
+  if (unlocked.has('rosewood_board')) {
+    return 'Rosewood Board';
+  }
+  if (unlocked.has('surf_guru_board')) {
+    return 'Ironwood Board';
+  }
+  return 'Camphor Board';
+}

@@ -178,6 +178,12 @@ export class OsrsClient {
       },
       onPrepareTrick: (slot) => simulation.prepareTrick(slot),
       onToggleTrueTile: (enabled) => renderer.setTrueTileVisible(enabled),
+      onDismountBoard: () => {
+        const error = simulation.tryDismountBoard();
+        if (error) {
+          chatbox.push(error, 'system');
+        }
+      },
     });
     panelRefs.sailing = sailingPanel;
 
@@ -301,7 +307,9 @@ export class OsrsClient {
     this.renderer.syncMapAfterTick(snapshot, map);
     this.sailingPanel.update(snapshot);
     this.skillsPanel.update(snapshot);
-    this.shopPanel.update(snapshot.progression);
+    if (this.shopPanel.isVisible()) {
+      this.shopPanel.update(snapshot.progression);
+    }
     this.persistProgressionIfChanged(snapshot.progression);
     this.debugPanel.update(snapshot);
 

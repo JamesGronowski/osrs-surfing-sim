@@ -1,6 +1,7 @@
 import {
   comboTierName,
   comboTierProgress,
+  surfboardTierNameForUnlocks,
   TRICK_PREPARE_MAX_TICKS,
   TRICK_PREPARE_MIN_TICKS,
   TRICK_SPEED_BOOST_DURATION_TICKS,
@@ -71,6 +72,7 @@ export interface OsrsSailingPanelCallbacks {
   onOpenShop: () => void;
   onPrepareTrick: (slot: TrickPrepareSlot) => void;
   onToggleTrueTile: (enabled: boolean) => void;
+  onDismountBoard: () => void;
 }
 
 type PanelTab = 'board' | 'stats' | 'rewards';
@@ -181,6 +183,11 @@ export class OsrsSailingPanel {
 
     this.updateNavButtons(snapshot.surfboard.speedState);
 
+    const boardTierTitle = this.root.querySelector('#board-tier-title');
+    if (boardTierTitle) {
+      boardTierTitle.textContent = surfboardTierNameForUnlocks(snapshot.progression.unlocked);
+    }
+
     const comboFill = this.root.querySelector('#combo-bar-fill') as HTMLElement;
     const comboLabel = this.root.querySelector('#combo-label');
     if (comboFill && comboLabel) {
@@ -244,6 +251,21 @@ export class OsrsSailingPanel {
         ? `Prime ${TRICK_PREPARE_MIN_TICKS}–${TRICK_PREPARE_MAX_TICKS} ticks before the feature`
         : 'Reach full speed to prime stances';
     }
+
+    const boardGuidance = this.root.querySelector('#board-guidance');
+    if (boardGuidance) {
+      boardGuidance.classList.toggle('hidden', snapshot.boardMounted);
+    }
+
+    const boardMountedControls = this.root.querySelector('#board-mounted-controls');
+    if (boardMountedControls) {
+      boardMountedControls.classList.toggle('hidden', !snapshot.boardMounted);
+    }
+
+    const dismountBtn = this.root.querySelector('#dismount-btn') as HTMLButtonElement | null;
+    if (dismountBtn) {
+      dismountBtn.disabled = !snapshot.canDismountBoard;
+    }
   }
 
   setVisible(visible: boolean): void {
@@ -256,7 +278,7 @@ export class OsrsSailingPanel {
       <div class="osrs-panel-chrome">
         <div class="osrs-panel-header">
           <img src="${a.surf.boardUpright}" alt="" class="osrs-panel-icon" width="18" height="18" />
-          <span class="osrs-panel-title">Ura Ura Board</span>
+          <span class="osrs-panel-title" id="board-tier-title">Camphor Board</span>
         </div>
         <div class="osrs-status-bar">
           <div class="osrs-status-bar-fill" id="combo-bar-fill" style="width: 100%; background: ${COMBO_BAR_IDLE_COLOR}"></div>
@@ -278,31 +300,35 @@ export class OsrsSailingPanel {
           </button>
         </div>
         <div class="osrs-tab-body active" data-panel="board">
-          <p class="osrs-panel-section-title">Surfboard</p>
-          <div class="osrs-nav-row">
-            <button type="button" class="osrs-stone-sprite-btn" data-nav-btn="toggle-full" title="Full speed ahead">
-              <img src="${a.surf.ride}" alt="" width="26" height="26" />
-            </button>
-            <button type="button" class="osrs-stone-sprite-btn" data-nav-btn="speed-down" title="Slow down">
-              <img src="${a.chevron.down}" alt="" width="20" height="20" />
-            </button>
-            <button type="button" class="osrs-stone-sprite-btn" data-nav-btn="speed-up" title="Increase speed">
-              <img src="${a.chevron.up}" alt="" width="20" height="20" />
-            </button>
+          <p class="osrs-panel-footnote" id="board-guidance">Board your surfboard on the beach shore to begin.</p>
+          <div id="board-mounted-controls">
+            <p class="osrs-panel-section-title">Surfboard</p>
+            <div class="osrs-nav-row">
+              <button type="button" class="osrs-stone-sprite-btn" data-nav-btn="toggle-full" title="Full speed ahead">
+                <img src="${a.surf.ride}" alt="" width="26" height="26" />
+              </button>
+              <button type="button" class="osrs-stone-sprite-btn" data-nav-btn="speed-down" title="Slow down">
+                <img src="${a.chevron.down}" alt="" width="20" height="20" />
+              </button>
+              <button type="button" class="osrs-stone-sprite-btn" data-nav-btn="speed-up" title="Increase speed">
+                <img src="${a.chevron.up}" alt="" width="20" height="20" />
+              </button>
+            </div>
+            <div class="osrs-steering-row">
+              <img src="${a.sailing.notSteering}" alt="" id="steering-icon" width="20" height="20" />
+              <span id="steering-label">Drifting</span>
+            </div>
+            <p class="osrs-panel-section-title">Stance</p>
+            <div class="osrs-stance-row">
+              ${STANCE_BUTTONS.map((stance) => this.renderStanceButton(stance)).join('')}
+            </div>
+            <p class="osrs-panel-footnote" id="stance-footnote">Reach full speed to prime stances</p>
+            <button type="button" class="osrs-stone-btn" id="dismount-btn" disabled>Leave board on sand</button>
+            <label class="osrs-check-row" title="Highlight the tile your character is actually on">
+              <input type="checkbox" id="true-tile-toggle" />
+              <span>True tile marker</span>
+            </label>
           </div>
-          <div class="osrs-steering-row">
-            <img src="${a.sailing.notSteering}" alt="" id="steering-icon" width="20" height="20" />
-            <span id="steering-label">Drifting</span>
-          </div>
-          <p class="osrs-panel-section-title">Stance</p>
-          <div class="osrs-stance-row">
-            ${STANCE_BUTTONS.map((stance) => this.renderStanceButton(stance)).join('')}
-          </div>
-          <p class="osrs-panel-footnote" id="stance-footnote">Reach full speed to prime stances</p>
-          <label class="osrs-check-row" title="Highlight the tile your character is actually on">
-            <input type="checkbox" id="true-tile-toggle" />
-            <span>True tile marker</span>
-          </label>
         </div>
         <div class="osrs-tab-body" data-panel="stats">
           <p class="osrs-panel-section-title">Session</p>
@@ -372,6 +398,15 @@ export class OsrsSailingPanel {
     if (shopBtn instanceof HTMLElement) {
       bindUiPress(shopBtn, () => {
         this.callbacks.onOpenShop();
+      });
+    }
+    const dismountBtn = this.root.querySelector('#dismount-btn');
+    if (dismountBtn instanceof HTMLElement) {
+      bindUiPress(dismountBtn, () => {
+        if (dismountBtn instanceof HTMLButtonElement && dismountBtn.disabled) {
+          return;
+        }
+        this.callbacks.onDismountBoard();
       });
     }
     this.root.querySelector('#true-tile-toggle')?.addEventListener('change', (event) => {

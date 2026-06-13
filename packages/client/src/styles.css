@@ -2,6 +2,10 @@
   box-sizing: border-box;
 }
 
+.hidden {
+  display: none;
+}
+
 html,
 body,
 #app {
@@ -340,18 +344,18 @@ body,
 }
 
 .osrs-control-panel::-webkit-scrollbar,
-.osrs-shop-panel::-webkit-scrollbar {
+.osrs-shop-body::-webkit-scrollbar {
   width: 11px;
 }
 
 .osrs-control-panel::-webkit-scrollbar-track,
-.osrs-shop-panel::-webkit-scrollbar-track {
+.osrs-shop-body::-webkit-scrollbar-track {
   background: #2b2620;
   border: 1px solid #1a1611;
 }
 
 .osrs-control-panel::-webkit-scrollbar-thumb,
-.osrs-shop-panel::-webkit-scrollbar-thumb {
+.osrs-shop-body::-webkit-scrollbar-thumb {
   background: linear-gradient(90deg, #6b5f4b 0%, #4d4334 100%);
   border: 1px solid #1a1611;
 }
@@ -641,9 +645,11 @@ body,
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
   width: 280px;
   max-height: 380px;
-  overflow-y: auto;
+  overflow: hidden;
   z-index: 20;
   background:
     var(--osrs-url-minimap-left) repeat-y left,
@@ -653,7 +659,6 @@ body,
     8px auto,
     8px auto,
     auto;
-  padding: 8px;
   border: 2px solid #544834;
 }
 
@@ -661,10 +666,46 @@ body,
   display: none;
 }
 
-.osrs-shop-chrome {
+.osrs-shop-header {
+  flex-shrink: 0;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+}
+
+.osrs-shop-header .osrs-panel-title {
+  padding-right: 0;
+}
+
+.osrs-shop-close {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid #15110c;
+  background: linear-gradient(180deg, #4a4034 0%, #2b2620 100%);
+  color: #ff981f;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.osrs-shop-close:hover {
+  background: linear-gradient(180deg, #5e5444 0%, #383127 100%);
+  color: #ffff00;
+}
+
+.osrs-shop-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  padding: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: #5e5444 #2b2620;
 }
 
 .osrs-shop-list {

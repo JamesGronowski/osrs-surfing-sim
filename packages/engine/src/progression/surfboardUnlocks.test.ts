@@ -6,7 +6,7 @@ import {
   SPEED_RIDE_IRONWOOD,
   SPEED_RIDE_ROSEWOOD,
 } from '../constants/movement.js';
-import { surfboardStatsForUnlocks } from './surfboardUnlocks.js';
+import { surfboardStatsForUnlocks, surfboardTierNameForUnlocks } from './surfboardUnlocks.js';
 import type { UnlockId } from './types.js';
 
 describe('surfboardStatsForUnlocks', () => {
@@ -32,5 +32,29 @@ describe('surfboardStatsForUnlocks', () => {
       new Set<UnlockId>(['surf_guru_board', 'rosewood_board']),
     );
     expect(stats.speedRide).toBe(SPEED_RIDE_ROSEWOOD);
+  });
+});
+
+describe('surfboardTierNameForUnlocks', () => {
+  it('uses camphor by default', () => {
+    expect(surfboardTierNameForUnlocks(new Set())).toBe('Camphor Board');
+  });
+
+  it('uses ironwood when ironwood board is unlocked', () => {
+    expect(surfboardTierNameForUnlocks(new Set<UnlockId>(['surf_guru_board']))).toBe(
+      'Ironwood Board',
+    );
+  });
+
+  it('uses rosewood when rosewood board is unlocked', () => {
+    expect(surfboardTierNameForUnlocks(new Set<UnlockId>(['rosewood_board']))).toBe(
+      'Rosewood Board',
+    );
+  });
+
+  it('prefers rosewood over ironwood when both are unlocked', () => {
+    expect(
+      surfboardTierNameForUnlocks(new Set<UnlockId>(['surf_guru_board', 'rosewood_board'])),
+    ).toBe('Rosewood Board');
   });
 });

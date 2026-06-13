@@ -110,7 +110,7 @@ export function canPurchaseUnlock(
     return { ok: false, reason: 'Disabled for this demo' };
   }
   if (unlock.earnOnly) {
-    return { ok: false, reason: 'Earned through gameplay only' };
+    return { ok: false, reason: 'Earned through gameplay only (1/500 from successful tricks)' };
   }
   if (state.unlocked.has(unlock.id)) {
     return { ok: false, reason: 'Already unlocked' };
